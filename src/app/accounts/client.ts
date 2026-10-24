@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { accountSchema, type Account, type AccountInput, type AccountUpdate } from '../../domain/accounts/account.ts'
 import { api } from '../http/http.ts'
 
@@ -15,4 +16,10 @@ export async function updateAccount(id: string, input: AccountUpdate): Promise<A
 
 export async function deleteAccount(id: string): Promise<void> {
   await api.delete(`accounts/${encodeURIComponent(id)}`)
+}
+
+const kisTokenSchema = z.object({ issued: z.boolean(), expiresAt: z.number() })
+
+export async function requestKisToken(id: string): Promise<{ issued: boolean; expiresAt: number }> {
+  return kisTokenSchema.parse(await api.post(`accounts/${encodeURIComponent(id)}/kis-token`).json())
 }
