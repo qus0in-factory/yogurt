@@ -8,7 +8,10 @@
       "workers_dev": true,
       "vars": {
         "ENVIRONMENT": "dev"
-      }
+      },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "yogurt-dev", "database_id": "6844c20d-9a49-4253-ab56-e75d2850dc59", "migrations_dir": "migrations" }
+      ]
     },
     "production": {
       "name": "yogurt",
@@ -16,7 +19,10 @@
       "routes": [{ "pattern": "yogurt.qus0in.dev", "custom_domain": true }],
       "vars": {
         "ENVIRONMENT": "production"
-      }
+      },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "yogurt", "database_id": "31842219-25db-4206-8306-1551f1870c79", "migrations_dir": "migrations" }
+      ]
     }
   },
   "observability": {
