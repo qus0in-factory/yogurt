@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
-import { login } from '../../app/auth/client'
 import { Button } from '../components/Button'
+import { useLogin } from './useSession'
 
 interface LoginFormProps {
   onLoginSuccess: () => void
@@ -9,23 +9,20 @@ interface LoginFormProps {
 export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const loginMutation = useLogin()
+  const loading = loginMutation.isPending
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (loading) return
     setError(null)
-    setLoading(true)
-    try {
-      const ok = await login(password)
-      if (ok) {
-        onLoginSuccess()
-      } else {
-        setError('비밀번호가 올바르지 않습니다.')
-      }
-    } finally {
-      setLoading(false)
-    }
+    loginMutation.mutate(password, {
+      onSuccess: (ok) => {
+        if (ok) onLoginSuccess()
+        else setError('비밀번호가 올바르지 않습니다.')
+      },
+      onError: () => setError('로그인에 실패했습니다.'),
+    })
   }
 
   return (
