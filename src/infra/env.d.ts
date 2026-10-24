@@ -3,6 +3,7 @@ interface Env {
   LOGIN_PASSWORD?: string;
   SESSION_SECRET?: string;
   DB?: D1Database;
+  SESSIONS?: KVNamespace;
   ACCOUNT_ENCRYPTION_KEY?: string;
   ASSETS: Fetcher;
 }

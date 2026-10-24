@@ -2,10 +2,12 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { generateSessionSecret } from '../../src/infra/secrets/session-key.ts'
 import app from '../../src/infra/worker.ts'
+import { createFakeKv } from './fakes/kv.ts'
 
 let sessionSecret = ''
+const fakeSessions = createFakeKv()
 const makeEnv = (password?: string, secret?: string) =>
-  ({ ENVIRONMENT: 'test', LOGIN_PASSWORD: password, SESSION_SECRET: secret, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
+  ({ ENVIRONMENT: 'test', LOGIN_PASSWORD: password, SESSION_SECRET: secret, SESSIONS: fakeSessions, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
 const callLogin = (body: string, env = makeEnv('secret', sessionSecret), origin = 'https://example.com') => app.fetch(new Request(`${origin}/api/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }), env)
 const login = (password: string, env?: Env) => callLogin(JSON.stringify({ password }), env)
 
@@ -38,5 +40,6 @@ describe('login', () => {
     expect((await login('secret', makeEnv('secret', undefined))).status).toBe(503)
     expect((await login('secret', makeEnv(undefined, sessionSecret))).status).toBe(503)
     expect((await login('secret', makeEnv('secret', 'invalid'))).status).toBe(503)
+    expect((await login('secret', { ENVIRONMENT: 'test', LOGIN_PASSWORD: 'secret', SESSION_SECRET: sessionSecret, ASSETS: { fetch: async () => new Response('asset') } } as unknown as Env)).status).toBe(503)
   })
 })

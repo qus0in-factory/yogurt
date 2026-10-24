@@ -1,3 +1,4 @@
+import { SESSION_TTL_SECONDS } from './session-store.ts'
 import { getCookie, setCookie } from 'hono/cookie'
 import type { Context } from 'hono'
 
@@ -11,7 +12,7 @@ export function setSessionCookie(c: Context, token: string): void {
     secure: isHttps(c),
     sameSite: 'Strict',
     path: '/',
-    maxAge: 7 * 24 * 60 * 60,
+    maxAge: SESSION_TTL_SECONDS,
   })
 }
 

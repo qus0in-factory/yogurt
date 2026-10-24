@@ -2,9 +2,11 @@
 import { describe, expect, it } from 'vitest'
 import app from '../../src/infra/worker.ts'
 import packageJson from '../../package.json'
+import { createFakeKv } from './fakes/kv.ts'
 
+const fakeSessions = createFakeKv()
 const makeEnv = (password?: string) =>
-  ({ ENVIRONMENT: 'test', LOGIN_PASSWORD: password, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
+  ({ ENVIRONMENT: 'test', LOGIN_PASSWORD: password, SESSIONS: fakeSessions, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
 
 describe('health', () => {
   it('/health는 인증 없이 패키지 버전과 200을 반환한다', async () => {
