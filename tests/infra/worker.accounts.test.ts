@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { beforeAll, describe, expect, it } from 'vitest'
 import { createSessionToken } from '../../src/infra/auth/crypto.ts'
+import { saveSession } from '../../src/infra/auth/session-store.ts'
 import { generateSessionSecret } from '../../src/infra/secrets/session-key.ts'
 import { SESSION_COOKIE } from '../../src/infra/auth/cookies.ts'
 import app from '../../src/infra/worker.ts'
@@ -9,11 +10,12 @@ const key = btoa(String.fromCharCode(...new Uint8Array(32).fill(5)))
 let sessionSecret = ''
 let token = ''
 const fakeDb = (rows: unknown[] = []) => ({ prepare: () => ({ all: async () => ({ results: rows }), bind: (..._args: unknown[]) => ({ run: async () => ({ success: true }) }) }) }) as unknown as D1Database
-const env = (DB?: D1Database, ACCOUNT_ENCRYPTION_KEY?: string) => ({ ENVIRONMENT: 'test', SESSION_SECRET: sessionSecret, DB, ACCOUNT_ENCRYPTION_KEY, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
+const fakeSessions = (() => { const store = new Map<string,string>(); return { get: async (k:string) => store.get(k) ?? null, put: async (k:string,v:string) => { store.set(k,v) }, delete: async (k:string) => { store.delete(k) }, list: async () => ({ keys: [] }), getWithMetadata: async (k:string) => ({ value: store.get(k) ?? null, metadata: null }) } })() as unknown as KVNamespace
+const env = (DB?: D1Database, ACCOUNT_ENCRYPTION_KEY?: string) => ({ ENVIRONMENT: 'test', SESSION_SECRET: sessionSecret, SESSIONS: fakeSessions, DB, ACCOUNT_ENCRYPTION_KEY, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
 const call = (method: string, body: unknown, binding: Env, auth = true) => app.fetch(new Request('https://example.com/api/accounts', { method, headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(auth ? { Cookie: `${SESSION_COOKIE}=${token}` } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) }), binding)
 const input = { alias: 'Primary', owner: '홍길동', accountNumber: '12345678', accessKey: 'AK_plain_1234', secretKey: 'SK_plain_secret' }
 
-beforeAll(async () => { sessionSecret = await generateSessionSecret(); token = await createSessionToken(sessionSecret) })
+beforeAll(async () => { sessionSecret = await generateSessionSecret(); token = await createSessionToken(sessionSecret); await saveSession(fakeSessions, token) })
 
 describe('account routes', () => {
   it('POST 입력 검증 실패는 400이다', async () => {

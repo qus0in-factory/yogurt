@@ -3,7 +3,7 @@ import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { HTTPException } from 'hono/http-exception'
 import { createMiddleware } from 'hono/factory'
-import { loginHandler, logoutHandler, readSessionCookie, sessionHandler, verifySessionToken } from './auth/auth.ts'
+import { isSessionValid, loginHandler, logoutHandler, readSessionCookie, sessionHandler } from './auth/auth.ts'
 import { loginRequestSchema } from '../domain/auth/auth-schema.ts'
 import { accountInputSchema, accountUpdateSchema } from '../domain/accounts/account.ts'
 import { createAccount, listAccounts, updateAccount, deleteAccount } from './accounts/accounts.ts'
@@ -14,7 +14,7 @@ const authMiddleware = createMiddleware(async (c, next) => {
   const path = new URL(c.req.url).pathname
   if (path === '/api/login' || path === '/api/health' || path === '/api/logout') return next()
   const token = readSessionCookie(c)
-  if (!token || !(await verifySessionToken(token, c.env.SESSION_SECRET ?? ''))) {
+  if (!token || !(await isSessionValid(c.env, token))) {
     return c.json({ error: 'unauthorized' }, 401)
   }
   await next()
