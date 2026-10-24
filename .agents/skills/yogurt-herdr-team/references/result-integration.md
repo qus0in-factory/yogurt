@@ -1,6 +1,6 @@
 # 결과 취합 절차
 
-조정자가 Herdr 에이전트(beam, glm, claude, agy)의 작업 결과를 취합하고 검증하는 절차다.
+조정자가 Herdr 에이전트(beam, glm, claude, agy, ds, codex)의 작업 결과를 취합하고 검증하는 절차다.
 
 ## 1. 기본 원칙 및 시간 제한
 

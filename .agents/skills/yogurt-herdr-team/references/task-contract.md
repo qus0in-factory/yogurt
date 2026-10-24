@@ -51,7 +51,7 @@
   - 위 허용 파일 외 전부. 특히 SKILL.md, roles.md, task-contract.md, AGENTS.md, CLAUDE.md, README.md
   - git checkout/commit/push/merge, 배포, GitHub 이슈·PR 변경
   - 코드·실행 스크립트 추가, 필요 이상의 도구·빌드 실행
-  - 다른 에이전트(beam/glm/claude/agy) 호출 및 추가 지시
+  - 다른 에이전트(beam/glm/claude/agy/ds/codex) 호출 및 추가 지시
 완료 조건: |
   - examples.md에 예시 1개가 추가되고 기존 내용은 수정·삭제하지 않음
   - 아래 형식의 완료 보고를 제출함
