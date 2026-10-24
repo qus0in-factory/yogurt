@@ -51,6 +51,17 @@ pnpm-workspace.yaml에서 esbuild·workerd의 설치 스크립트를 허용한�
 - **로컬 개발 환경**:
   - `infra/.dev.vars` 파일에 `LOGIN_PASSWORD`와 `SESSION_SECRET`을 설정한다 (`infra/.dev.vars`는 `.gitignore`로 제외됨).
   - `SESSION_SECRET` 생성: `pnpm run keygen:session` 명령을 실행하여 출력된 세션 서명 키를 복사하여 설정한다.
+
+환경별 secret을 한 번에 등록하려면 다음 명령을 사용한다.
+
+```sh
+LOGIN_PASSWORD='<비밀번호>' pnpm run secret:setup -- dev
+LOGIN_PASSWORD='<비밀번호>' pnpm run secret:setup -- main
+```
+
+- `dev`는 dev 환경, `main`은 production 환경에 등록한다.
+- `SESSION_SECRET`은 매 실행마다 새로 생성되며, 기존 세션이 무효화된다.
+
 - **원격 환경 (Cloudflare)**:
   - `wrangler secret put` 명령을 통해 각 환경의 Worker에 비밀 값을 등록한다.
   - dev 환경:
@@ -72,4 +83,3 @@ Cloudflare Vite 플러그인은 빌드 시 워커 배포 설정을 Vite root 기
   - 실행 내용: `pnpm run build:main && wrangler deploy --config src/ui/dist/yogurt/wrangler.json`
 - **Cloudflare 대시보드 Workers Builds 일치**:
   - Cloudflare Workers Builds의 대시보드 설정에서 Deploy command는 위 스크립트(`pnpm run deploy:dev`, `pnpm run deploy:main`)와 반드시 일치해야 산출물 설정이 올바르게 배포된다.
-

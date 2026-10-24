@@ -12,7 +12,8 @@
     "secret:dev": "wrangler secret put --config infra/wrangler.jsonc --env dev",
     "secret:main": "wrangler secret put --config infra/wrangler.jsonc --env production",
     "keygen:session": "node src/infra/keygen.ts",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "secret:setup": "node src/infra/secret-setup-cli.ts"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.64.0",
