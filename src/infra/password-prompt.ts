@@ -14,6 +14,7 @@ function readHidden(input: NodeJS.ReadStream, output: NodeJS.WriteStream, label:
     const finish = (error?: Error) => {
       input.off('data', onData)
       input.setRawMode(false)
+      input.pause()
       output.write('\n')
       if (error) reject(error)
       else resolve(Buffer.from(bytes).toString('utf8'))
