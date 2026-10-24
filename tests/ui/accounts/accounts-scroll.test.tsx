@@ -6,10 +6,10 @@ import * as client from '../../../src/app/accounts/client'
 import { useUiStore } from '../../../src/ui/state/ui-store'
 import { AccountsPage } from '../../../src/ui/accounts/AccountsPage'
 
-vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn() }))
+vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn() }))
 
 const listAccounts = vi.mocked(client.listAccounts)
-const account = { id: 'a1', alias: '주계좌', accountNumber: '123-456-789', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '123-456-789', createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })

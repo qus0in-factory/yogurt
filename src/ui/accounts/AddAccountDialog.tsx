@@ -16,17 +16,17 @@ const DRAFT_KEY = 'yogurt:account-draft'
 
 export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
   const createAccount = useCreateAccount()
-  const draft = readSessionJson<{ alias: string; accountNumber: string }>(DRAFT_KEY)
+  const draft = readSessionJson<{ alias: string; owner: string; accountNumber: string }>(DRAFT_KEY)
   const { control, handleSubmit, reset, watch } = useForm<AccountInput>({
-    defaultValues: { alias: draft?.alias ?? '', accountNumber: draft?.accountNumber ?? '', accessKey: '', secretKey: '' },
+    defaultValues: { alias: draft?.alias ?? '', owner: draft?.owner ?? '', accountNumber: draft?.accountNumber ?? '', accessKey: '', secretKey: '' },
     resolver: zodResolver(accountInputSchema),
   })
 
   useEffect(() => {
-    const sub = watch(({ alias, accountNumber }) => {
-      if (typeof alias !== 'string' || typeof accountNumber !== 'string') return
-      if (alias === '' && accountNumber === '') removeSession(DRAFT_KEY)
-      else writeSessionJson(DRAFT_KEY, { alias, accountNumber })
+    const sub = watch(({ alias, owner, accountNumber }) => {
+      if (typeof alias !== 'string' || typeof owner !== 'string' || typeof accountNumber !== 'string') return
+      if (alias === '' && owner === '' && accountNumber === '') removeSession(DRAFT_KEY)
+      else writeSessionJson(DRAFT_KEY, { alias, owner, accountNumber })
     })
     return () => sub.unsubscribe()
   }, [watch])
@@ -45,7 +45,7 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
     createAccount.mutate(values, {
       onSuccess: () => {
         removeSession(DRAFT_KEY)
-        reset({ alias: '', accountNumber: '', accessKey: '', secretKey: '' })
+        reset({ alias: '', owner: '', accountNumber: '', accessKey: '', secretKey: '' })
         onClose()
         toast(accountsText.added)
       },
@@ -60,6 +60,7 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
     <Dialog open={open} onClose={onClose} title={accountsText.addTitle}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         {field(accountsText.alias, 'alias')}
+        {field(accountsText.owner, 'owner')}
         {field(accountsText.accountNumber, 'accountNumber')}
         {field(accountsText.accessKey, 'accessKey')}
         {field(accountsText.secretKey, 'secretKey', 'password')}

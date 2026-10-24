@@ -1,9 +1,12 @@
 import { Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import type { Account } from '../../domain/accounts/account'
 import { Button } from '../components/Button'
 import { readSessionJson, writeSessionJson } from '../lib/session-draft'
 import { useUiStore } from '../state/ui-store'
+import { AccountCard } from './AccountCard'
 import { AddAccountDialog } from './AddAccountDialog'
+import { EditAccountDialog } from './EditAccountDialog'
 import { useAccounts } from './useAccounts'
 import { accountsText } from '../glossary/accounts'
 
@@ -11,6 +14,7 @@ const SCROLL_KEY = 'yogurt:accounts-scroll'
 
 export function AccountsPage() {
   const [addOpen, setAddOpen] = useState(false)
+  const [editing, setEditing] = useState<Account | null>(null)
   const { data, isPending, isError, refetch } = useAccounts()
   const accounts = data ?? []
   const selectAccount = useUiStore((s) => s.selectAccount)
@@ -57,23 +61,17 @@ export function AccountsPage() {
       ) : (
         <div ref={listRef} tabIndex={0} aria-label={accountsText.listLabel} className="mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto">
           {accounts.map((account) => (
-            <div
+            <AccountCard
               key={account.id}
-              role="group"
-              tabIndex={0}
-              aria-roledescription={accountsText.card}
-              aria-label={account.alias}
-              onClick={() => selectAccount(account.id)}
-              onFocus={() => selectAccount(account.id)}
-              className="w-full shrink-0 snap-center rounded-lg border border-primary-200 bg-white p-6 shadow-sm"
-            >
-              <p className="text-lg font-semibold text-stone-900">{account.alias}</p>
-              <p className="mt-1 text-sm text-stone-600">{account.accountNumber}</p>
-            </div>
+              account={account}
+              onSelect={() => selectAccount(account.id)}
+              onEdit={() => setEditing(account)}
+            />
           ))}
         </div>
       )}
       <AddAccountDialog open={addOpen} onClose={() => setAddOpen(false)} />
+      {editing ? <EditAccountDialog account={editing} onClose={() => setEditing(null)} /> : null}
     </section>
   )
 }
