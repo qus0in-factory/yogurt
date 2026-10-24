@@ -1,24 +1,29 @@
 import { describe, expect, it } from 'vitest'
-import { accountInputSchema, accountSchema, maskKey } from './account'
+import { accountInputSchema, accountSchema } from './account'
+
+const valid = { alias: '주식', accountNumber: '12345678-01', accessKey: 'ak', secretKey: 'sk' }
 
 describe('account schemas', () => {
-  it('계좌 입력은 별칭·access key·secret key를 요구하고 공백을 정리한다', () => {
-    const parsed = accountInputSchema.parse({ alias: ' 주식 ', accessKey: ' ak ', secretKey: ' sk ' })
-    expect(parsed).toEqual({ alias: '주식', accessKey: 'ak', secretKey: 'sk' })
-    expect(accountInputSchema.safeParse({ alias: '', accessKey: 'ak', secretKey: 'sk' }).success).toBe(false)
-    expect(accountInputSchema.safeParse({ alias: 'a', accessKey: '', secretKey: 'sk' }).success).toBe(false)
-    expect(accountInputSchema.safeParse({ alias: 'a', accessKey: 'ak', secretKey: ' ' }).success).toBe(false)
-    expect(accountInputSchema.safeParse({ alias: 'a'.repeat(31), accessKey: 'ak', secretKey: 'sk' }).success).toBe(false)
+  it('계좌 입력은 별칭·계좌번호·access key·secret key를 요구하고 공백을 정리한다', () => {
+    const parsed = accountInputSchema.parse({ alias: ' 주식 ', accountNumber: ' 12345678-01 ', accessKey: ' ak ', secretKey: ' sk ' })
+    expect(parsed).toEqual(valid)
+    expect(accountInputSchema.safeParse({ ...valid, alias: '' }).success).toBe(false)
+    expect(accountInputSchema.safeParse({ ...valid, alias: 'a'.repeat(31) }).success).toBe(false)
+    expect(accountInputSchema.safeParse({ ...valid, accessKey: '' }).success).toBe(false)
+    expect(accountInputSchema.safeParse({ ...valid, secretKey: ' ' }).success).toBe(false)
   })
 
-  it('계좌 응답은 secret key 없이 마스킹된 access key만 담는다', () => {
-    const account = { id: 'id-1', alias: '주식', accessKeyMasked: '••••abcd', createdAt: '2026-10-24T09:00:00.000Z' }
+  it('계좌번호는 숫자와 하이픈 4~30자만 허용한다', () => {
+    expect(accountInputSchema.safeParse({ ...valid, accountNumber: '1234' }).success).toBe(true)
+    expect(accountInputSchema.safeParse({ ...valid, accountNumber: '123' }).success).toBe(false)
+    expect(accountInputSchema.safeParse({ ...valid, accountNumber: '1234-ab' }).success).toBe(false)
+  })
+
+  it('계좌 응답은 별칭·계좌번호만 평문으로 담고 키는 담지 않는다', () => {
+    const account = { id: 'id-1', alias: '주식', accountNumber: '12345678-01', createdAt: '2026-10-24T09:00:00.000Z' }
     expect(accountSchema.parse(account)).toEqual(account)
-    expect(accountSchema.parse({ ...account, secretKey: 'sk' })).not.toHaveProperty('secretKey')
-  })
-
-  it('키는 끝 4자리만 남기고 가린다', () => {
-    expect(maskKey('PSabcd1234')).toBe('••••1234')
-    expect(maskKey('abc')).toBe('••••')
+    const parsed = accountSchema.parse({ ...account, accessKey: 'ak', secretKey: 'sk' })
+    expect(parsed).not.toHaveProperty('accessKey')
+    expect(parsed).not.toHaveProperty('secretKey')
   })
 })
