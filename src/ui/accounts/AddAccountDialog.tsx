@@ -64,7 +64,7 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
         {field(accountsText.accountNumber, 'accountNumber')}
         {field(accountsText.accessKey, 'accessKey')}
         {field(accountsText.secretKey, 'secretKey', 'password')}
-        <div className="flex justify-end gap-2">
+        <div className="sticky bottom-0 flex justify-end gap-2 bg-white">
           <Button type="button" variant="ghost" onClick={onClose}>{accountsText.cancel}</Button>
           <Button type="submit" disabled={createAccount.isPending}>{accountsText.save}</Button>
         </div>

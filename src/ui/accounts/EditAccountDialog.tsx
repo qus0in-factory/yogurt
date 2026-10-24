@@ -49,7 +49,7 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
         <p className="text-sm text-stone-600">
           {accountsText.accountNumber}: <span>{account.accountNumber}</span>
         </p>
-        <div className="flex justify-end gap-2">
+        <div className="sticky bottom-0 flex justify-end gap-2 bg-white">
           <Button type="button" variant="ghost" onClick={onClose}>{accountsText.cancel}</Button>
           <Button type="submit" disabled={updateAccount.isPending}>{accountsText.save}</Button>
         </div>
