@@ -1,5 +1,6 @@
 import { useRef, useId } from 'react'
 import { useFocusTrap } from '../lib/useFocusTrap'
+import { useBodyScrollLock } from '../lib/useBodyScrollLock'
 import { cn } from '../lib/cn'
 
 type DialogProps = {
@@ -14,13 +15,14 @@ export function Dialog({ open, onClose, title, children, className }: DialogProp
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
   useFocusTrap(dialogRef, open, onClose)
+  useBodyScrollLock(open)
 
   if (!open) return null
 
   return (
     <div
       data-testid="dialog-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4"
       onClick={onClose}
     >
       <div
@@ -29,13 +31,18 @@ export function Dialog({ open, onClose, title, children, className }: DialogProp
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={cn('w-full max-w-md rounded-lg bg-white p-4 shadow-xl outline-none', className)}
+        className={cn(
+          'flex max-h-[90dvh] w-full flex-col rounded-t-2xl rounded-b-none bg-white px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl outline-none md:max-h-[calc(100dvh-2rem)] md:max-w-md md:rounded-lg md:p-4',
+          className,
+        )}
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id={titleId} className="text-lg font-semibold">
+        <h2 id={titleId} className="shrink-0 text-lg font-semibold">
           {title}
         </h2>
-        <div className="mt-3">{children}</div>
+        <div data-testid="dialog-body" className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </div>
       </div>
     </div>
   )

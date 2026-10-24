@@ -1,10 +1,16 @@
+import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { checkSession, login, logout } from '../../app/auth/client'
+import { clearClientStorage } from '../state/clear-client-storage'
 
 const SESSION_KEY = ['session']
 
 export function useSession() {
-  return useQuery({ queryKey: SESSION_KEY, queryFn: checkSession })
+  const session = useQuery({ queryKey: SESSION_KEY, queryFn: checkSession })
+  useEffect(() => {
+    if (session.data === false) void clearClientStorage()
+  }, [session.data])
+  return session
 }
 
 export function useLogin() {
@@ -21,6 +27,9 @@ export function useLogout() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: logout,
-    onSuccess: () => client.setQueryData(SESSION_KEY, false),
+    onSuccess: async () => {
+      await clearClientStorage()
+      client.setQueryData(SESSION_KEY, false)
+    },
   })
 }

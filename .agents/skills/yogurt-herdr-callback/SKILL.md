@@ -7,7 +7,7 @@ description: Send a worker's done, failed, or blocked result directly to the coo
 
 ## 작업자 사용법
 
-작업자는 완료, 실패, 차단 시마다 콜백 스크립트를 반드시 한 번 실행한다. `--status`는 `done`, `failed`, `blocked` 중 하나이며, 요약은 한 줄로 적는다. 결과 파일이 있으면 `--report`로 경로를 전달한다.
+작업자는 완료, 실패, 차단 시마다 콜백 스크립트를 반드시 한 번 실행한다. `--status`는 `done`, `failed`, `blocked` 중 하나이며, 요약은 한 줄로 적는다. 요약이 길면 자동으로 잘린다. 긴 보고는 `--report` 파일로 전달한다.
 
 ```sh
 python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to claude --from ds --status done --summary "검증을 마쳤습니다" --report /tmp/result.md

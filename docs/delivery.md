@@ -44,6 +44,14 @@ Workers & Pages → Create application → Import a repository에서 GitHub와 `
 
 pnpm-workspace.yaml에서 esbuild·workerd의 설치 스크립트를 허용한다. 선택적 fsevents의 빌드는 사용하지 않는다. 기존 npm node_modules는 다시 사용하지 않고 pnpm으로 새로 설치한다. 의존성 변경 시 pnpm-lock.yaml도 함께 반영한다.
 
+## 버전 관리
+
+애플리케이션 semver의 단일 출처는 `package.json`의 `version`이다. 마일스톤 시작 시 `pnpm run version:minor`, 작은 수정은 `pnpm run version:patch`로 버전을 올린다. 두 명령은 파일의 버전만 변경하며 Git 태그나 커밋은 만들지 않는다.
+
+main 병합 시 조정자가 해당 버전의 `vX.Y.Z` 태그를 만든다. 배포 후 `/health` 또는 `/api/health` 응답의 `version`으로 실제 배포 버전을 확인한다.
+
+Vite는 같은 버전을 `import.meta.env.VITE_APP_VERSION`에 주입한다. 이 값은 쿼리 캐시 buster로 사용되므로 버전 변경 후 기존 IndexedDB 쿼리 캐시는 폐기된다.
+
 ## Secret 설정
 
 인증 비밀 값(`LOGIN_PASSWORD`, `SESSION_SECRET`)은 코드나 Git 저장소에 커밋하지 않는다.
@@ -75,6 +83,20 @@ pnpm run secret:setup -- main
   - dev 환경: `pnpm run secret:dev -- LOGIN_PASSWORD`, `pnpm run secret:dev -- SESSION_SECRET`
   - 운영(main) 환경: `pnpm run secret:main -- LOGIN_PASSWORD`, `pnpm run secret:main -- SESSION_SECRET`
   - 각 명령을 실행한 후 터미널 안내에 따라 실제 비밀 값을 입력한다.
+
+## 계좌 저장소(D1)와 암호화 키
+
+- 계좌 데이터는 D1에 저장한다. `infra/wrangler.jsonc`에서 `env.dev`는 D1 데이터베이스 `yogurt-dev`, `env.production`은 `yogurt`에 binding `DB`로 연결하며, 마이그레이션 디렉터리는 `migrations`(저장소 경로 `infra/migrations`)다. 마이그레이션 SQL 파일은 `infra/migrations`에 번호 순으로 둔다.
+
+| 명령 | 용도 |
+| --- | --- |
+| `pnpm run db:migrate:local` | 로컬 D1에 마이그레이션 적용(`--local`, dev 환경 구성 기준) |
+| `pnpm run db:migrate:dev` | dev(`yogurt-dev`) 원격 D1에 마이그레이션 적용 |
+| `pnpm run db:migrate:main` | 운영(`yogurt`) 원격 D1에 마이그레이션 적용 |
+
+- 계좌 암호화 키 `ACCOUNT_ENCRYPTION_KEY`는 AES-256용 32바이트 무작위 값의 base64 문자열이며, Worker secret으로 관리한다. 실제 키 값은 코드나 문서에 쓰지 않는다.
+- 키 생성은 `pnpm run keygen:account`(stdout에 키 한 줄, stderr에 백업 안내). 로컬 개발은 `infra/.dev.vars`에 `ACCOUNT_ENCRYPTION_KEY`로 둔다(`infra/.dev.vars`는 `.gitignore`로 제외됨). 원격 환경에서는 Worker secret으로 등록하라는 프롬프트가 표시되며, 이 절 안내는 등록 실행 자체를 대신하지 않는다.
+- 이 키를 분실하면 저장된 계좌 키를 복구할 수 없다. 사용자는 이 분실 리스크를 감수하기로 하였으며, 키를 재발급하면 기존 계좌 키는 다시 등록해야 한다.
 
 ## 배포 명령
 

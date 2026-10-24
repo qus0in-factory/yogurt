@@ -7,6 +7,8 @@ description: yogurt의 프로그래밍 모듈을 수정한 후 또는 AGENTS.md 
 
 저장소 루트에서 실행한다. Python 3와 Git이 필요하며 추가 패키지는 사용하지 않는다.
 
+`pnpm run verify`는 커밋 전 필수 3종 일괄 검증 명령이다. 단위 테스트, 타입 검사, 모듈 검사를 순서대로 실행하고 실패하면 중단한다.
+
 ```sh
 PYTHONDONTWRITEBYTECODE=1 python3 .agents/skills/yogurt-module-check/scripts/app/check.py --root .
 ```
@@ -15,17 +17,17 @@ PYTHONDONTWRITEBYTECODE=1 python3 .agents/skills/yogurt-module-check/scripts/app
 - [소스 확장자 목록](scripts/infra/files.py)에 해당하는 프로그램·테스트·설정·스타일·SQL 모듈을 검사한다. 새 언어를 도입하면 이 목록과 테스트를 함께 보완한다.
 - 빈 줄과 주석을 포함한 물리적 줄 수가 80을 넘으면 실패한다. 마지막 개행 없는 줄도 센다.
 - 파일의 상위 디렉터리 중 ui, app, domain, infra 중 하나가 없으면 실패한다. 파일명만 domain.ts인 경우에는 인정하지 않는다.
+- `src/` 아래 `*.test.ts`와 `*.test.tsx`는 위반이며 루트 `tests/`로 옮긴다. `tests/`의 테스트에도 같은 레이어 디렉터리 규칙을 적용한다.
 - 성공은 종료 코드 0, 규칙 위반은 1, 실행·입력 오류는 2다. 실패한 파일과 이유를 출력한다.
 - Git ignore된 모듈은 검사되지 않는다. 준수 회피를 위해 ignore를 추가하지 않는다. 이 검사는 의존 방향·테스트 유무·TDD 과정·YAGNI/KISS/SOLID/DRY를 판정하지 않는다.
 
 ## 검증기 자체 테스트
 
-각 명령을 저장소 루트에서 실행한다.
+검증기 스크립트 디렉터리에서 전체 테스트를 발견해 실행한다.
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.agents/skills/yogurt-module-check/scripts python3 -m unittest discover -s .agents/skills/yogurt-module-check/scripts/domain -p 'test_*.py'
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.agents/skills/yogurt-module-check/scripts python3 -m unittest discover -s .agents/skills/yogurt-module-check/scripts/infra -p 'test_*.py'
-PYTHONDONTWRITEBYTECODE=1 python3 .agents/skills/yogurt-module-check/scripts/app/test_check.py
+cd .agents/skills/yogurt-module-check/scripts
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -p 'test_*.py'
 ```
 
 ## 결정론적 작업의 재현

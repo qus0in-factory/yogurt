@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import { useFocusTrap } from '../lib/useFocusTrap'
 import { Button } from '../components/Button'
 import { MENU_ITEMS, type ScreenId } from './menu'
+import { layoutText } from '../glossary/layout'
 
 type MenuDrawerProps = {
   open: boolean
@@ -25,20 +26,20 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
         role="dialog"
         tabIndex={-1}
         aria-modal="true"
-        aria-label="메뉴"
+        aria-label={layoutText.menu}
         className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2 text-lg font-semibold">
             <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 rounded" />
-            <span>YOGURT</span>
+            <span>{layoutText.appName}</span>
           </div>
-          <Button variant="ghost" size="icon" aria-label="메뉴 닫기" onClick={onClose}>
+          <Button variant="ghost" size="icon" aria-label={layoutText.closeMenu} onClick={onClose}>
             <X aria-hidden="true" className="h-5 w-5" />
           </Button>
         </div>
-        <nav aria-label="주 메뉴" className="flex flex-col gap-1 p-2">
+        <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-2 p-2">
           {MENU_ITEMS.map((item) => (
             <Button
               key={item.id}

@@ -1,6 +1,7 @@
 import { Button } from '../components/Button'
 import { cn } from '../lib/cn'
 import { MENU_ITEMS, type ScreenId } from './menu'
+import { layoutText } from '../glossary/layout'
 
 type SidebarProps = {
   current?: ScreenId
@@ -14,15 +15,15 @@ type SidebarProps = {
 }
 
 export function Sidebar(props: SidebarProps) {
-  const current = props.current ?? props.active ?? props.activeId ?? props.selected ?? 'dashboard'
+  const current = props.current ?? props.active ?? props.activeId ?? props.selected ?? 'accounts'
   const onNavigate = props.onNavigate ?? props.onSelect ?? props.onChange ?? (() => {})
   return (
     <aside className={cn('hidden md:flex md:w-60 md:flex-col border-r border-stone-200 bg-white', props.className)}>
       <div className="flex items-center gap-2 p-4 text-lg font-semibold">
         <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 shrink-0 rounded" />
-        <span>YOGURT</span>
+        <span>{layoutText.appName}</span>
       </div>
-      <nav aria-label="주 메뉴" className="flex flex-col gap-1 p-2">
+      <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-2 p-2">
         {MENU_ITEMS.map((item) => (
           <Button
             key={item.id}

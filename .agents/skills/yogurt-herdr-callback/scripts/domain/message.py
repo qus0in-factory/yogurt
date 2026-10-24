@@ -3,7 +3,15 @@ import re
 STATUSES = ('done', 'failed', 'blocked')
 MAX_SUMMARY_LENGTH = 500
 MAX_REPORT_LENGTH = 1024
+ELLIPSIS = '…'
 _AGENT = re.compile(r'[a-z][a-z0-9_-]{0,31}')
+
+
+def truncate_summary(summary):
+    if len(summary) <= MAX_SUMMARY_LENGTH:
+        return summary
+    head = summary[:MAX_SUMMARY_LENGTH - len(ELLIPSIS)].rstrip()
+    return head + ELLIPSIS
 
 
 def validate_agent_name(value):
@@ -16,8 +24,9 @@ def build_message(agent, status, summary, report=None):
     if status not in STATUSES:
         raise ValueError('status must be done, failed, or blocked')
     summary = ' '.join(summary.split())
-    if not summary or len(summary) > MAX_SUMMARY_LENGTH:
-        raise ValueError(f'summary must be 1 to {MAX_SUMMARY_LENGTH} characters')
+    if not summary:
+        raise ValueError('summary must not be empty')
+    summary = truncate_summary(summary)
     parts = ['[callback]', agent, f'status:{status}', summary]
     if report is not None:
         report = ' '.join(report.split())

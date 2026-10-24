@@ -1,6 +1,6 @@
 import { HTTPError } from 'ky'
-import { sessionResponseSchema } from '../../domain/auth-schema.ts'
-import { api } from '../http.ts'
+import { sessionResponseSchema } from '../../domain/auth/auth-schema.ts'
+import { api } from '../http/http.ts'
 
 export async function checkSession(): Promise<boolean> {
   try {

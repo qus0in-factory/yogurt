@@ -13,7 +13,7 @@ description: yogurt에서 프로그래밍 모듈을 추가하거나 변경할 �
 - app: 유스케이스와 실행 흐름 조정. 외부 기술은 필요한 경계로 분리한다.
 - domain: 계산·규칙·모델. UI 프레임워크나 DB 클라이언트를 참조하지 않는다.
 - infra: DB·네트워크·파일·외부 서비스 어댑터.
-- 프로그램과 테스트 모듈 모두 해당 레이어 디렉터리에 둔다. 스킬의 실행 코드는 scripts/app, scripts/domain, scripts/infra 같은 구조를 사용한다.
+- 프로그램 모듈은 src/<레이어>/<모듈>/에, 테스트는 루트 tests/에 src와 같은 경로로 둔다. 스킬의 실행 코드는 scripts/app, scripts/domain, scripts/infra 같은 구조를 사용한다.
 - 기존 구조를 먼저 확인한다. 전체 디렉터리를 요청 없이 재배치하지 않는다. 도메인에서 외부 구현을 직접 참조하지 않도록 경계를 둔다.
 
 ## Red → Green → Refactor

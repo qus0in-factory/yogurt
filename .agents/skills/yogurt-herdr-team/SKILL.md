@@ -1,6 +1,6 @@
 ---
 name: yogurt-herdr-team
-description: 사용자가 Herdr로 beam, glm, claude, agy, ds, codex에게 작업을 분배하거나 결과를 취합하도록 요청할 때 적용한다. 일반적인 단독 작업에서 자동으로 다른 에이전트를 시작하지 않는다.
+description: 사용자가 Herdr로 현재 Herdr 탭 이름과 같은 에이전트에게 작업을 분배하거나 결과를 취합하도록 요청할 때 적용한다. 일반적인 단독 작업에서 자동으로 다른 에이전트를 시작하지 않는다.
 ---
 
 # Herdr 팀 작업 분배
@@ -10,7 +10,7 @@ description: 사용자가 Herdr로 beam, glm, claude, agy, ds, codex에게 작�
 ## 현재 세션 확인
 
 1. 설치된 herdr 스킬을 읽고 `herdr --help`, `herdr agent`, `herdr agent list`로 현재 CLI와 대상 상태를 확인한다. bare `herdr`는 실행하지 않는다.
-2. 이름이 없으면 명시적 pane ID로 `herdr agent read <target> --source recent-unwrapped --lines 50`을 실행한다. 화면의 모델·cwd를 확인해 beam, glm, claude, agy, ds, codex를 식별한다. pane 순서·ID·모델을 추측하지 않는다.
+2. 이름이 없으면 명시적 pane ID로 `herdr agent read <target> --source recent-unwrapped --lines 50`을 실행한다. 화면의 모델·cwd를 확인해 현재 Herdr 탭 이름과 같은 에이전트를 식별한다. pane 순서·ID·모델을 추측하지 않는다.
 3. 실제 모델 종류와 사용자가 부른 이름은 다를 수 있다. Beam/GLM이 OpenCode 안에서 실행되는 경우 kind는 opencode다. 실행 중 모델·effort는 변경하지 않는다.
 4. 확인된 idle/done 대상만 사용한다. 이름이 없으면 `herdr agent rename <pane-id> <탭 이름>`으로 탭 라벨과 같은 이름을 붙인다. working에는 중복 작업을 투입하지 않는다. blocked/unknown은 get/read로 확인하고 승인·질문 UI에 임의로 답하지 않는다.
 5. 없는 에이전트를 임의의 대체 모델로 실행하지 않는다. 새 pane·실행이 필요한 경우 herdr 스킬의 현재 디렉터리·동일 탭·no-focus 규칙을 따른다. 사용 가능한 kind로 사용자가 지정한 모델을 보존할 수 없으면 필요한 정보를 묻는다.
