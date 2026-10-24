@@ -1,34 +1,28 @@
 import { useState } from 'react'
 import { Button } from '../components/Button'
-import { cn } from '../lib/cn'
-import { MENU_ITEMS, type ScreenId } from './menu'
+import type { ScreenId } from './menu'
+import { MenuDrawer } from './MenuDrawer'
 
 type MobileMenuProps = {
   open?: boolean
-  expanded?: boolean
-  isOpen?: boolean
   onToggle?: () => void
-  onOpenChange?: (open: boolean) => void
   current?: ScreenId
-  active?: ScreenId
   onNavigate?: (id: ScreenId) => void
-  onSelect?: (id: ScreenId) => void
-  className?: string
 }
 
 export function MobileMenu(props: MobileMenuProps) {
-  const controlled = props.open ?? props.expanded ?? props.isOpen
   const [internal, setInternal] = useState(false)
-  const open = controlled ?? internal
+  const open = props.open ?? internal
   const toggle = () => {
-    if (controlled === undefined) setInternal((value) => !value)
+    if (props.open === undefined) setInternal((value) => !value)
     props.onToggle?.()
-    props.onOpenChange?.(!open)
   }
-  const current = props.current ?? props.active ?? 'dashboard'
-  const onNavigate = props.onNavigate ?? props.onSelect ?? (() => {})
+  const close = () => {
+    if (open) toggle()
+  }
+
   return (
-    <div className={cn('md:hidden', props.className)}>
+    <div className="md:hidden">
       <Button
         variant="outline"
         size="icon"
@@ -37,26 +31,13 @@ export function MobileMenu(props: MobileMenuProps) {
         aria-controls="mobile-menu"
         onClick={toggle}
       >
-        메뉴
+        <span aria-hidden="true" className="flex flex-col gap-1">
+          <span className="block h-0.5 w-5 bg-current" />
+          <span className="block h-0.5 w-5 bg-current" />
+          <span className="block h-0.5 w-5 bg-current" />
+        </span>
       </Button>
-      {open ? (
-        <nav id="mobile-menu" aria-label="주 메뉴" className="flex flex-col gap-1 bg-white p-2">
-          {MENU_ITEMS.map((item) => (
-            <Button
-              key={item.id}
-              variant={current === item.id ? 'default' : 'ghost'}
-              className="w-full justify-start"
-              aria-current={current === item.id ? 'page' : undefined}
-              onClick={() => {
-                onNavigate(item.id)
-                if (controlled === undefined) setInternal(false)
-              }}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </nav>
-      ) : null}
+      <MenuDrawer open={open} current={props.current ?? 'dashboard'} onNavigate={props.onNavigate ?? (() => {})} onClose={close} />
     </div>
   )
 }

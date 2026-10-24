@@ -1,0 +1,62 @@
+import { useEffect } from 'react'
+import { Button } from '../components/Button'
+import { MENU_ITEMS, type ScreenId } from './menu'
+
+type MenuDrawerProps = {
+  open: boolean
+  current: ScreenId
+  onNavigate: (id: ScreenId) => void
+  onClose: () => void
+}
+
+export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerProps) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  if (!open) return null
+
+  return (
+    <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose}>
+      <div
+        id="mobile-menu"
+        role="dialog"
+        aria-modal="true"
+        aria-label="메뉴"
+        className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-2 text-lg font-semibold">
+            <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 rounded" />
+            <span>YOGURT</span>
+          </div>
+          <Button variant="ghost" size="icon" aria-label="메뉴 닫기" onClick={onClose}>
+            ×
+          </Button>
+        </div>
+        <nav aria-label="주 메뉴" className="flex flex-col gap-1 p-2">
+          {MENU_ITEMS.map((item) => (
+            <Button
+              key={item.id}
+              variant={current === item.id ? 'default' : 'ghost'}
+              className="w-full justify-start"
+              aria-current={current === item.id ? 'page' : undefined}
+              onClick={() => {
+                onNavigate(item.id)
+                onClose()
+              }}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  )
+}
