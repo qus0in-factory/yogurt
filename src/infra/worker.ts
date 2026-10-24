@@ -5,8 +5,8 @@ import { HTTPException } from 'hono/http-exception'
 import { createMiddleware } from 'hono/factory'
 import { loginHandler, logoutHandler, readSessionCookie, sessionHandler, verifySessionToken } from './auth/auth.ts'
 import { loginRequestSchema } from '../domain/auth/auth-schema.ts'
-import { accountInputSchema } from '../domain/accounts/account.ts'
-import { createAccount, listAccounts } from './accounts/accounts.ts'
+import { accountInputSchema, accountUpdateSchema } from '../domain/accounts/account.ts'
+import { createAccount, listAccounts, updateAccount } from './accounts/accounts.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -37,6 +37,9 @@ app.get('/api/accounts', listAccounts)
 app.post('/api/accounts', zValidator('json', accountInputSchema, (result, c) => {
   if (!result.success) return c.json({ error: 'invalid request' }, 400)
 }), (c) => createAccount(c, c.req.valid('json')))
+app.patch('/api/accounts/:id', zValidator('json', accountUpdateSchema, (result, c) => {
+  if (!result.success) return c.json({ error: 'invalid request' }, 400)
+}), (c) => updateAccount(c, c.req.param('id'), c.req.valid('json')))
 app.all('/api/*', (c) => c.notFound())
 app.onError((error, c) => {
   if (error instanceof HTTPException && error.status === 400) return c.json({ error: 'invalid request' }, 400)

@@ -1,4 +1,4 @@
-import { accountSchema, type Account, type AccountInput } from '../../domain/accounts/account.ts'
+import { accountSchema, type Account, type AccountInput, type AccountUpdate } from '../../domain/accounts/account.ts'
 import { api } from '../http/http.ts'
 
 export async function listAccounts(): Promise<Account[]> {
@@ -7,4 +7,8 @@ export async function listAccounts(): Promise<Account[]> {
 
 export async function createAccount(input: AccountInput): Promise<Account> {
   return accountSchema.parse(await api.post('accounts', { json: input }).json())
+}
+
+export async function updateAccount(id: string, input: AccountUpdate): Promise<Account> {
+  return accountSchema.parse(await api.patch(`accounts/${encodeURIComponent(id)}`, { json: input }).json())
 }
