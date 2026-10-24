@@ -1,0 +1,16 @@
+{
+  "name": "yogurt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --config infra/wrangler.jsonc --env dev",
+    "test": "node --test infra/*.test.js",
+    "build:dev": "wrangler deploy --config infra/wrangler.jsonc --env dev --dry-run --outdir ../dist/dev",
+    "build:main": "wrangler deploy --config infra/wrangler.jsonc --env production --dry-run --outdir ../dist/production",
+    "deploy:dev": "wrangler deploy --config infra/wrangler.jsonc --env dev",
+    "deploy:main": "wrangler deploy --config infra/wrangler.jsonc --env production"
+  },
+  "devDependencies": {
+    "wrangler": "4.152.0"
+  }
+}
