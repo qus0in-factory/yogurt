@@ -17,6 +17,7 @@
     "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to src/ui/.wrangler/state --config infra/wrangler.jsonc --env dev",
     "db:migrate:dev": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env dev",
     "db:migrate:main": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env production",
+    "verify": "pnpm -s test && pnpm -s check && PYTHONDONTWRITEBYTECODE=1 python3 .agents/skills/yogurt-module-check/scripts/app/check.py --root .",
     "check": "tsc --noEmit",
     "secret:setup": "node src/infra/cli/secret-setup-cli.ts",
     "version:patch": "npm version patch --no-git-tag-version",
