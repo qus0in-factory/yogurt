@@ -27,3 +27,13 @@ it('쿼리와 IndexedDB 캐시 및 yogurt: 접두사 키만 정리한다', async
     expect(storage.getItem('other')).toBe('keep')
   }
 })
+
+it('clearQuery가 false이면 쿼리는 유지하고 yogurt: 키만 지운다', async () => {
+  queryClient.setQueryData(['accounts'], [{ id: '1' }])
+  localStorage.setItem('yogurt:ui', 'value')
+  localStorage.setItem('other', 'keep')
+  await clearClientStorage(false)
+  expect(queryClient.getQueryCache().getAll()).toHaveLength(1)
+  expect(localStorage.getItem('yogurt:ui')).toBeNull()
+  expect(localStorage.getItem('other')).toBe('keep')
+})

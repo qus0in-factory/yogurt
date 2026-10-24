@@ -68,12 +68,12 @@ class ReleaseCommandTest(unittest.TestCase):
         self.assertEqual(self.run_main(ops), 1)
         self.assertEqual((len(ops.polled), ops.slept), (12, [10] * 11))
 
-    def test_tag_creation_failure_stops_before_push(self):
-        broken = lambda tag, sha: (1, 'cannot tag')
-        ops = FakeOps(health={'version': '1.2.3'})
-        with contextlib.redirect_stderr(io.StringIO()):
-            self.assertEqual(self.run_main(ops, create=broken), 1)
-        self.assertEqual(ops.pushed, [])
+    def test_resolve_or_tag_failure_stops_before_push(self):
+        for overrides in ({'resolve': lambda: (1, '', 'fetch failed')}, {'create': lambda tag, sha: (1, 'cannot tag')}):
+            ops = FakeOps(health={'version': '1.2.3'})
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(self.run_main(ops, **overrides), 1)
+            self.assertEqual((ops.created, ops.pushed), ([], []))
 
 
 if __name__ == '__main__':
