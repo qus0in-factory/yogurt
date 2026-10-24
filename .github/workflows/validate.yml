@@ -1,0 +1,37 @@
+name: Validate
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require promotion from dev
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: test "$HEAD_BRANCH" = dev && test "$HEAD_REPO" = "$GITHUB_REPOSITORY"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Check module size and layers
+        run: python3 .agents/skills/yogurt-module-check/scripts/app/check.py --root .
+      - name: Test module checker
+        env:
+          PYTHONPATH: .agents/skills/yogurt-module-check/scripts
+        run: |
+          python3 -m unittest discover -s .agents/skills/yogurt-module-check/scripts/domain -p 'test_*.py'
+          python3 -m unittest discover -s .agents/skills/yogurt-module-check/scripts/infra -p 'test_*.py'
+          python3 .agents/skills/yogurt-module-check/scripts/app/test_check.py
+      - run: npm run build:dev
+      - run: npm run build:main

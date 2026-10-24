@@ -1,0 +1,17 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-24",
+  "env": {
+    "dev": {
+      "name": "yogurt-dev",
+      "workers_dev": true,
+      "vars": { "ENVIRONMENT": "dev" }
+    },
+    "production": {
+      "name": "yogurt",
+      "workers_dev": true,
+      "vars": { "ENVIRONMENT": "production" }
+    }
+  }
+}
