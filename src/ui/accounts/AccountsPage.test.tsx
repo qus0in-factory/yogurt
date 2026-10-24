@@ -1,0 +1,59 @@
+import '@testing-library/jest-dom/vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import * as client from '../../app/accounts/client'
+import { AccountsPage } from './AccountsPage'
+
+vi.mock('../../app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn() }))
+vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
+
+const listAccounts = vi.mocked(client.listAccounts)
+const createAccount = vi.mocked(client.createAccount)
+const account = { id: 'a1', alias: '주계좌', accountNumber: '123-456-789', createdAt: '2026-01-01T00:00:00.000Z' }
+
+const renderPage = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
+  return render(<QueryClientProvider client={queryClient}><AccountsPage /></QueryClientProvider>)
+}
+
+beforeEach(() => vi.clearAllMocks())
+afterEach(cleanup)
+
+describe('AccountsPage', () => {
+  it('계좌가 없으면 안내 문구를 표시한다', async () => {
+    listAccounts.mockResolvedValueOnce([])
+    renderPage()
+    expect(await screen.findByText('등록된 계좌가 없습니다')).toBeInTheDocument()
+  })
+
+  it('계좌 목록에 카드로 별칭과 계좌번호를 표시한다', async () => {
+    listAccounts.mockResolvedValueOnce([account])
+    renderPage()
+    expect(await screen.findByText('주계좌')).toBeInTheDocument()
+    expect(screen.getByText('123-456-789')).toBeInTheDocument()
+    expect(screen.getByLabelText('계좌 목록')).toBeInTheDocument()
+    const cards = screen.getAllByRole('group')
+    expect(cards).toHaveLength(1)
+    expect(cards[0]).toHaveAccessibleName('주계좌')
+  })
+
+  it('추가 버튼으로 모달을 열고 저장하면 닫히고 목록이 갱신된다', async () => {
+    const created = { ...account, id: 'a2', alias: '새 계좌' }
+    listAccounts.mockResolvedValueOnce([]).mockResolvedValueOnce([created])
+    createAccount.mockResolvedValueOnce(created)
+    renderPage()
+    await screen.findByText('등록된 계좌가 없습니다')
+    fireEvent.click(screen.getByRole('button', { name: '계좌 추가' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '새 계좌' } })
+    fireEvent.change(screen.getByLabelText('계좌번호'), { target: { value: '111-222' } })
+    fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AK' } })
+    fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
+    fireEvent.click(screen.getByRole('button', { name: '저장' }))
+    await waitFor(() => expect(createAccount).toHaveBeenCalled())
+    expect(createAccount.mock.calls[0][0]).toEqual({ alias: '새 계좌', accountNumber: '111-222', accessKey: 'AK', secretKey: 'SK' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(await screen.findByText('새 계좌')).toBeInTheDocument()
+  })
+})

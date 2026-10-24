@@ -5,6 +5,7 @@ import { LoginForm } from './auth/LoginForm'
 import { Button } from './components/Button'
 import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
+import { AccountsPage } from './accounts/AccountsPage'
 import { useUiStore } from './store/ui-store'
 
 export function App() {
@@ -61,8 +62,7 @@ export function App() {
           </div>
         </header>
         <main className="flex-1 p-6">
-          <h1 className="text-2xl font-semibold text-stone-900">계좌</h1>
-          <p className="mt-2 text-stone-600">샘플 데이터</p>
+          <AccountsPage />
         </main>
       </div>
     </div>
