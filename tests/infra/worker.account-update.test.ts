@@ -6,7 +6,7 @@ import app from '../../src/infra/worker.ts'
 
 let secret = ''
 let token = ''
-const row = { id: 'a1', alias: '수정', owner: '김철수', account_number: '123-456', created_at: '2026-01-01T00:00:00.000Z' }
+const row = { id: 'a1', alias: '수정', owner: '김철수', account_number: '12345678', created_at: '2026-01-01T00:00:00.000Z' }
 const db = (found = true) => ({ prepare: () => ({ bind: (..._args: unknown[]) => ({ first: async () => found ? row : null }) }) }) as unknown as D1Database
 const input = { alias: '수정', owner: '김철수' }
 const call = (body: unknown, DB: D1Database | undefined, authenticated = true) => app.fetch(

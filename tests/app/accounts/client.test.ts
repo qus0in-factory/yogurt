@@ -4,7 +4,7 @@ import { setupServer } from 'msw/node'
 import { createAccount, listAccounts, updateAccount } from '../../../src/app/accounts/client'
 
 const accountsUrl = `${window.location.origin}/api/accounts`
-const account = { id: 'a1', alias: '주계좌', owner: '홍길동', accountNumber: '123-456-789', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '홍길동', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
 let body: unknown
 const server = setupServer(
   http.get(accountsUrl, () => HttpResponse.json([account])),
@@ -27,7 +27,7 @@ describe('accounts client', () => {
   })
 
   it('생성 요청을 JSON으로 보내고 응답을 파싱한다', async () => {
-    const input = { alias: '새 계좌', owner: '홍길동', accountNumber: '111-222', accessKey: 'AK', secretKey: 'SK' }
+    const input = { alias: '새 계좌', owner: '홍길동', accountNumber: '11112222', accessKey: 'AK', secretKey: 'SK' }
     expect((await createAccount(input)).alias).toBe('새 계좌')
     expect(body).toEqual(input)
   })

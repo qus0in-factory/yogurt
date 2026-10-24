@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { createAccountRepository } from '../../../src/infra/accounts/account-repository.ts'
 
 const key = btoa(String.fromCharCode(...new Uint8Array(32).fill(3)))
-const input = { alias: 'Primary', owner: '홍길동', accountNumber: '1234-5678', accessKey: 'AK_plain_1234', secretKey: 'SK_plain_secret' }
-const row = { id: 'a', alias: 'Main', owner: '홍길동', account_number: '1234-5678', created_at: '2026-01-01T00:00:00.000Z' }
+const input = { alias: 'Primary', owner: '홍길동', accountNumber: '12345678', accessKey: 'AK_plain_1234', secretKey: 'SK_plain_secret' }
+const row = { id: 'a', alias: 'Main', owner: '홍길동', account_number: '12345678', created_at: '2026-01-01T00:00:00.000Z' }
 function fakeDb(rows: unknown[] = []) {
   const calls: { sql: string; args: unknown[] }[] = []
   const db = { prepare: (sql: string) => ({
@@ -21,12 +21,12 @@ describe('account repository', () => {
   it('별칭·소유자·계좌번호는 평문, access/secret key는 암호문으로 저장한다', async () => {
     const { db, calls } = fakeDb()
     const account = await createAccountRepository(db).create(input, key)
-    expect(calls[0].args.slice(1, 4)).toEqual(['Primary', '홍길동', '1234-5678'])
+    expect(calls[0].args.slice(1, 4)).toEqual(['Primary', '홍길동', '12345678'])
     expect(calls[0].args).not.toContain('AK_plain_1234')
     expect(calls[0].args).not.toContain('SK_plain_secret')
     expect(calls[0].args[4]).toMatch(/^v1:/)
     expect(calls[0].args[5]).toMatch(/^v1:/)
-    expect(account).toEqual({ id: expect.any(String), alias: 'Primary', owner: '홍길동', accountNumber: '1234-5678', createdAt: expect.any(String) })
+    expect(account).toEqual({ id: expect.any(String), alias: 'Primary', owner: '홍길동', accountNumber: '12345678', createdAt: expect.any(String) })
     expect(account).not.toHaveProperty('secretKey')
   })
 
@@ -34,7 +34,7 @@ describe('account repository', () => {
     const { db, calls } = fakeDb([row])
     const accounts = await createAccountRepository(db).list()
     expect(calls[0].sql).toContain('ORDER BY created_at ASC')
-    expect(accounts).toEqual([{ id: 'a', alias: 'Main', owner: '홍길동', accountNumber: '1234-5678', createdAt: row.created_at }])
+    expect(accounts).toEqual([{ id: 'a', alias: 'Main', owner: '홍길동', accountNumber: '12345678', createdAt: row.created_at }])
   })
 
   it('update는 별칭·소유자·id만 바인딩하고 키 컬럼을 수정하지 않는다', async () => {
