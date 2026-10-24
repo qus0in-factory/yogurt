@@ -27,6 +27,10 @@ export function createAccountRepository(db: D1Database) {
         .bind(account.id, account.alias, account.owner, account.accountNumber, accessKey, secretKey, account.createdAt).run()
       return account
     },
+    async remove(id: string): Promise<boolean> {
+      const result = await db.prepare('DELETE FROM accounts WHERE id = ?').bind(id).run()
+      return result.meta.changes > 0
+    },
     async update(id: string, input: AccountUpdate): Promise<Account | null> {
       const row = await db.prepare(`UPDATE accounts SET alias = ?, owner = ? WHERE id = ? RETURNING ${columns}`)
         .bind(input.alias, input.owner, id).first<AccountRow>()

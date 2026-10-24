@@ -38,3 +38,10 @@ export async function updateAccount(c: AppContext, id: string, input: AccountUpd
   if (!account) return c.json({ error: 'account not found' }, 404)
   return c.json(account)
 }
+
+export async function deleteAccount(c: AppContext, id: string): Promise<Response> {
+  if (!c.env.DB) return c.json(CONFIG_ERROR, 503)
+  const removed = await createAccountRepository(c.env.DB).remove(id)
+  if (!removed) return c.json({ error: 'account not found' }, 404)
+  return c.body(null, 204)
+}

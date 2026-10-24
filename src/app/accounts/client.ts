@@ -12,3 +12,7 @@ export async function createAccount(input: AccountInput): Promise<Account> {
 export async function updateAccount(id: string, input: AccountUpdate): Promise<Account> {
   return accountSchema.parse(await api.patch(`accounts/${encodeURIComponent(id)}`, { json: input }).json())
 }
+
+export async function deleteAccount(id: string): Promise<void> {
+  await api.delete(`accounts/${encodeURIComponent(id)}`)
+}
