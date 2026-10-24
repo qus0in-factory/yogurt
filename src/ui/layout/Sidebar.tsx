@@ -23,7 +23,7 @@ export function Sidebar(props: SidebarProps) {
         <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 shrink-0 rounded" />
         <span>{layoutText.appName}</span>
       </div>
-      <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-1 p-2">
+      <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-2 p-2">
         {MENU_ITEMS.map((item) => (
           <Button
             key={item.id}

@@ -19,7 +19,7 @@ export function TextField({ label, name, value, onChange, type = 'text', error, 
   const errorId = useId()
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <label htmlFor={inputId} className="text-sm font-medium">
         {label}
       </label>

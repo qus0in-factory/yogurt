@@ -39,7 +39,7 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
             <X aria-hidden="true" className="h-5 w-5" />
           </Button>
         </div>
-        <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-1 p-2">
+        <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-2 p-2">
           {MENU_ITEMS.map((item) => (
             <Button
               key={item.id}
