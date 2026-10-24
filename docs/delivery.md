@@ -76,6 +76,20 @@ pnpm run secret:setup -- main
   - 운영(main) 환경: `pnpm run secret:main -- LOGIN_PASSWORD`, `pnpm run secret:main -- SESSION_SECRET`
   - 각 명령을 실행한 후 터미널 안내에 따라 실제 비밀 값을 입력한다.
 
+## 계좌 저장소(D1)와 암호화 키
+
+- 계좌 데이터는 D1에 저장한다. `infra/wrangler.jsonc`에서 `env.dev`는 D1 데이터베이스 `yogurt-dev`, `env.production`은 `yogurt`에 binding `DB`로 연결하며, 마이그레이션 디렉터리는 `migrations`(저장소 경로 `infra/migrations`)다. 마이그레이션 SQL 파일은 `infra/migrations`에 번호 순으로 둔다.
+
+| 명령 | 용도 |
+| --- | --- |
+| `pnpm run db:migrate:local` | 로컬 D1에 마이그레이션 적용(`--local`, dev 환경 구성 기준) |
+| `pnpm run db:migrate:dev` | dev(`yogurt-dev`) 원격 D1에 마이그레이션 적용 |
+| `pnpm run db:migrate:main` | 운영(`yogurt`) 원격 D1에 마이그레이션 적용 |
+
+- 계좌 암호화 키 `ACCOUNT_ENCRYPTION_KEY`는 AES-256용 32바이트 무작위 값의 base64 문자열이며, Worker secret으로 관리한다. 실제 키 값은 코드나 문서에 쓰지 않는다.
+- 키 생성은 `pnpm run keygen:account`(stdout에 키 한 줄, stderr에 백업 안내). 로컬 개발은 `infra/.dev.vars`에 `ACCOUNT_ENCRYPTION_KEY`로 둔다(`infra/.dev.vars`는 `.gitignore`로 제외됨). 원격 환경에서는 Worker secret으로 등록하라는 프롬프트가 표시되며, 이 절 안내는 등록 실행 자체를 대신하지 않는다.
+- 이 키를 분실하면 저장된 계좌 키를 복구할 수 없다. 사용자는 이 분실 리스크를 감수하기로 하였으며, 키를 재발급하면 기존 계좌 키는 다시 등록해야 한다.
+
 ## 배포 명령
 
 Cloudflare Vite 플러그인은 빌드 시 워커 배포 설정을 Vite root 기준의 산출물 디렉터리(`src/ui/dist/<워커명>/wrangler.json`)에 생성한다.
