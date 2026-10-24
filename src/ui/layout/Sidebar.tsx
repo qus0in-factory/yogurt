@@ -1,5 +1,4 @@
 import { Button } from '../components/Button'
-import { YogurtIcon } from '../components/YogurtIcon'
 import { cn } from '../lib/cn'
 import { MENU_ITEMS, type ScreenId } from './menu'
 
@@ -20,7 +19,7 @@ export function Sidebar(props: SidebarProps) {
   return (
     <aside className={cn('hidden md:flex md:w-60 md:flex-col border-r border-stone-200 bg-white', props.className)}>
       <div className="flex items-center gap-2 p-4 text-lg font-semibold">
-        <YogurtIcon className="h-5 w-5 shrink-0" />
+        <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 shrink-0 rounded" />
         <span>YOGURT</span>
       </div>
       <nav aria-label="주 메뉴" className="flex flex-col gap-1 p-2">
