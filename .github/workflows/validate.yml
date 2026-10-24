@@ -18,12 +18,13 @@ jobs:
           HEAD_BRANCH: ${{ github.head_ref }}
           HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
         run: test "$HEAD_BRANCH" = dev && test "$HEAD_REPO" = "$GITHUB_REPOSITORY"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
-      - run: npm ci
-      - run: npm test
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
       - name: Check module size and layers
         run: python3 .agents/skills/yogurt-module-check/scripts/app/check.py --root .
       - name: Test module checker
@@ -33,5 +34,5 @@ jobs:
           python3 -m unittest discover -s .agents/skills/yogurt-module-check/scripts/domain -p 'test_*.py'
           python3 -m unittest discover -s .agents/skills/yogurt-module-check/scripts/infra -p 'test_*.py'
           python3 .agents/skills/yogurt-module-check/scripts/app/test_check.py
-      - run: npm run build:dev
-      - run: npm run build:main
+      - run: pnpm run build:dev
+      - run: pnpm run build:main

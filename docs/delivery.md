@@ -17,13 +17,13 @@ Workers & Pages → Create application → Import a repository에서 GitHub와 `
 | Worker 이름 | yogurt-dev | yogurt |
 | Production branch | dev | main |
 | Root directory | / | / |
-| Build command | npm test && npm run build:dev | npm test && npm run build:main |
-| Deploy command | npm run deploy:dev | npm run deploy:main |
+| Build command | pnpm install --frozen-lockfile && pnpm test && pnpm run build:dev | pnpm install --frozen-lockfile && pnpm test && pnpm run build:main |
+| Deploy command | pnpm run deploy:dev | pnpm run deploy:main |
 | Non-production branch builds | Disabled | Disabled |
 
-각 Worker의 Production branch는 그 Worker가 배포할 기준 브랜치를 뜻한다. 따라서 미리보기 Worker에도 dev를 Production branch로 지정한다. 자동 의존성 설치가 package-lock.json으로 npm ci를 실행한다. 필요 시 Build variables에서 NODE_VERSION=24를 지정한다.
+각 Worker의 Production branch는 그 Worker가 배포할 기준 브랜치를 뜻한다. 따라서 미리보기 Worker에도 dev를 Production branch로 지정한다. 의존성 설치는 pnpm-lock.yaml과 packageManager의 pnpm@11.24.0을 사용한다. Build variables에 NODE_VERSION=24, PNPM_VERSION=11.24.0을 지정한다. 재현 가능한 설치를 위해 Build command 앞에 pnpm install --frozen-lockfile을 추가한다.
 
-구성이 `infra/wrangler.jsonc`에 있으므로 기본 `npx wrangler deploy` 대신 위의 명령을 사용한다. 환경별 Worker 이름과 환경 변수가 해당 npm 명령에서 선택된다. Workers Builds가 배포용 인증을 관리한다.
+구성이 `infra/wrangler.jsonc`에 있으므로 기본 배포 명령 대신 위의 명령을 사용한다. 환경별 Worker 이름과 환경 변수가 해당 pnpm 명령에서 선택된다. Workers Builds가 배포용 인증을 관리한다.
 
 배포 완료 후 Worker의 workers.dev URL과 `/health` 응답을 확인한다. dev에서는 environment=dev, 운영에서는 environment=production이어야 한다. 이 초기 진입점은 배포 연결 확인용이며 대시보드는 후속 이슈에서 구현한다.
 
@@ -31,9 +31,15 @@ Workers & Pages → Create application → Import a repository에서 GitHub와 `
 
 ## 로컬 검증
 
-`npm ci`, `npm test`, `npm run build:dev`, `npm run build:main`. 로컬 실행은 `npm run dev`다. 소스 변경은 dev에 push하고 `gh pr create --base main --head dev`로 승격 PR을 만든다.
+`pnpm install --frozen-lockfile`, `pnpm test`, `pnpm run build:dev`, `pnpm run build:main`. 로컬 실행은 `pnpm run dev`다. 소스 변경은 dev에 push하고 `gh pr create --base main --head dev`로 승격 PR을 만든다.
 
 ## 참고
 
 - https://developers.cloudflare.com/workers/ci-cd/builds/advanced-setups/
 - https://developers.cloudflare.com/workers/ci-cd/builds/configuration/
+
+## 패키지 관리자 전환
+
+패키지 관리자는 pnpm@11.24.0으로 고정한다. package-lock.json은 pnpm-lock.yaml로 대체했다. npm install 대신 pnpm install --frozen-lockfile을 사용한다. Cloudflare의 기존 npm 기반 Build/Deploy command도 위 표의 pnpm 명령으로 변경한다.
+
+pnpm-workspace.yaml에서 esbuild·workerd의 설치 스크립트를 허용한다. 선택적 fsevents의 빌드는 사용하지 않는다. 기존 npm node_modules는 다시 사용하지 않고 pnpm으로 새로 설치한다. 의존성 변경 시 pnpm-lock.yaml도 함께 반영한다.
