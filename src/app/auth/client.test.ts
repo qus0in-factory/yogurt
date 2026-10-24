@@ -1,48 +1,57 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { HTTPError } from 'ky'
 import { checkSession, login, logout } from './client'
 
+const request = () => vi.mocked(fetch).mock.calls[0]?.[0] as Request
+const path = () => new URL(request().url).pathname
+
 describe('auth client', () => {
-  beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn())
+  beforeEach(() => vi.stubGlobal('fetch', vi.fn()))
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('200 세션 응답의 authenticated 값을 반환한다', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('{"authenticated":false}', { status: 200 }))
+    expect(await checkSession()).toBe(false)
+    expect(path()).toBe('/api/session')
   })
 
-  afterEach(() => {
-    vi.unstubAllGlobals()
+  it('401 세션 응답은 false, 다른 HTTP 오류는 throw한다', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('', { status: 401 }))
+    expect(await checkSession()).toBe(false)
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('', { status: 403 }))
+    await expect(checkSession()).rejects.toBeInstanceOf(HTTPError)
   })
 
-  it('세션 확인 시 200이면 true를 반환한다', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 200 }))
-    const result = await checkSession()
-    expect(result).toBe(true)
-    expect(fetch).toHaveBeenCalledWith('/api/session')
+  it('잘못된 200 세션 본문은 throw한다', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('{"authenticated":"yes"}', { status: 200 }))
+    await expect(checkSession()).rejects.toThrow()
   })
 
-  it('세션 확인 시 401이면 false를 반환한다', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 401 }))
-    const result = await checkSession()
-    expect(result).toBe(false)
-  })
-
-  it('로그인 성공(204) 시 true를 반환한다', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 204 }))
-    const ok = await login('test-pass')
-    expect(ok).toBe(true)
-    expect(fetch).toHaveBeenCalledWith('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: 'test-pass' }),
+  it('204 로그인은 true이고 요청은 JSON POST다', async () => {
+    let body: unknown
+    vi.mocked(fetch).mockImplementationOnce(async (input) => {
+      body = await (input as Request).clone().json()
+      return new Response(null, { status: 204 })
     })
+    expect(await login('secret')).toBe(true)
+    expect(path()).toBe('/api/login')
+    expect(request().method).toBe('POST')
+    expect(body).toEqual({ password: 'secret' })
   })
 
-  it('로그인 실패(401) 시 false를 반환한다', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 401 }))
-    const ok = await login('wrong-pass')
-    expect(ok).toBe(false)
+  it('401 로그인은 false, 다른 응답과 HTTP 오류는 throw한다', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('', { status: 401 }))
+    expect(await login('wrong')).toBe(false)
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('', { status: 403 }))
+    await expect(login('wrong')).rejects.toBeInstanceOf(HTTPError)
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('', { status: 200 }))
+    await expect(login('secret')).rejects.toThrow('Unexpected login response')
   })
 
-  it('로그아웃 시 /api/logout POST 요청을 보낸다', async () => {
+  it('logout은 /api/logout에 POST한다', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 204 }))
-    await logout()
-    expect(fetch).toHaveBeenCalledWith('/api/logout', { method: 'POST' })
+    await expect(logout()).resolves.toBeUndefined()
+    expect(path()).toBe('/api/logout')
+    expect(request().method).toBe('POST')
   })
 })

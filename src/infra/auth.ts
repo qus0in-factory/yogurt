@@ -1,4 +1,5 @@
 import type { Context } from 'hono'
+import { loginRequestSchema } from '../domain/auth-schema.ts'
 import { readSessionCookie, setSessionCookie, clearSessionCookie, SESSION_COOKIE } from './cookies.ts'
 import { createSessionToken, isValidSessionSecret, timingSafeEqualStrings, verifySessionToken } from './crypto.ts'
 
@@ -18,8 +19,12 @@ export async function loginHandler(c: Context): Promise<Response> {
   if (!hasLoginPassword(c.env) || !hasSessionSecret(c.env) || !(await isValidSessionSecret(c.env.SESSION_SECRET as string))) {
     return c.json({ error: 'LOGIN_PASSWORD or SESSION_SECRET is not configured' }, 503)
   }
-  const body = await c.req.json().catch(() => null) as { password?: unknown } | null
-  const password = typeof body?.password === 'string' ? body.password : ''
+  const body = await c.req.json().catch(() => null)
+  const parsed = loginRequestSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'invalid request' }, 400)
+  }
+  const password = parsed.data.password
   if (!timingSafeEqualStrings(password, c.env.LOGIN_PASSWORD as string)) {
     return c.json({ error: 'invalid credentials' }, 401)
   }

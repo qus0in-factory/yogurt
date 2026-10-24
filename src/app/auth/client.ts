@@ -1,17 +1,29 @@
+import { HTTPError } from 'ky'
+import { sessionResponseSchema } from '../../domain/auth-schema.ts'
+import { api } from '../http.ts'
+
 export async function checkSession(): Promise<boolean> {
-  const res = await fetch('/api/session')
-  return res.ok
+  try {
+    const response = await api.get('session')
+    const body = sessionResponseSchema.parse(await response.json())
+    return body.authenticated
+  } catch (error) {
+    if (error instanceof HTTPError && error.response.status === 401) return false
+    throw error
+  }
 }
 
 export async function login(password: string): Promise<boolean> {
-  const res = await fetch('/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password }),
-  })
-  return res.ok
+  try {
+    const response = await api.post('login', { json: { password } })
+    if (response.status === 204) return true
+    throw new Error('Unexpected login response')
+  } catch (error) {
+    if (error instanceof HTTPError && error.response.status === 401) return false
+    throw error
+  }
 }
 
 export async function logout(): Promise<void> {
-  await fetch('/api/logout', { method: 'POST' })
+  await api.post('logout')
 }

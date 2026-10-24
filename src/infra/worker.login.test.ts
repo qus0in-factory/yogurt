@@ -6,73 +6,31 @@ import app from './worker.ts'
 let sessionSecret = ''
 const makeEnv = (password?: string, secret?: string) =>
   ({ ENVIRONMENT: 'test', LOGIN_PASSWORD: password, SESSION_SECRET: secret, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
+const callLogin = (body: string, env = makeEnv('secret', sessionSecret)) => app.fetch(new Request('https://example.com/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body }), env)
+const login = (password: string, env?: Env) => callLogin(JSON.stringify({ password }), env)
 
-beforeAll(async () => {
-  sessionSecret = await generateSessionSecret()
-})
+beforeAll(async () => { sessionSecret = await generateSessionSecret() })
 
 describe('login', () => {
-  it('올바른 비밀번호는 204와 Set-Cookie를 반환한다', async () => {
-    const res = await app.fetch(
-      new Request('https://example.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: 'secret' }),
-      }),
-      makeEnv('secret', sessionSecret),
-    )
+  it('올바른 비밀번호는 204와 보안 쿠키를 반환한다', async () => {
+    const res = await login('secret')
     expect(res.status).toBe(204)
-    const cookie = res.headers.get('set-cookie') ?? ''
-    expect(cookie).toContain('HttpOnly')
-    expect(cookie).toContain('Secure')
-    expect(cookie).toContain('SameSite=Strict')
+    expect(res.headers.get('set-cookie')).toContain('HttpOnly')
+    expect(res.headers.get('set-cookie')).toContain('Secure')
+    expect(res.headers.get('set-cookie')).toContain('SameSite=Strict')
   })
 
-  it('틀린 비밀번호는 401이다', async () => {
-    const res = await app.fetch(
-      new Request('https://example.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: 'wrong' }),
-      }),
-      makeEnv('secret', sessionSecret),
-    )
-    expect(res.status).toBe(401)
+  it('틀린 비밀번호는 401이다', async () => expect((await login('wrong')).status).toBe(401))
+
+  it.each(['{', 'null', '{}', '{"password":""}', '{"password":5}'])('잘못된 JSON 또는 스키마는 400이다', async body => {
+    const res = await callLogin(body)
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'invalid request' })
   })
 
-  it('secret 미설정은 503으로 거부한다', async () => {
-    const res = await app.fetch(
-      new Request('https://example.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: 'secret' }),
-      }),
-      makeEnv('secret', undefined),
-    )
-    expect(res.status).toBe(503)
-  })
-
-  it('로그인 비밀번호 미설정도 503으로 거부한다', async () => {
-    const res = await app.fetch(
-      new Request('https://example.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: 'secret' }),
-      }),
-      makeEnv(undefined, sessionSecret),
-    )
-    expect(res.status).toBe(503)
-  })
-
-  it('SESSION_SECRET 형식 오류는 503으로 거부한다', async () => {
-    const res = await app.fetch(
-      new Request('https://example.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: 'secret' }),
-      }),
-      makeEnv('secret', 'not-a-paserk'),
-    )
-    expect(res.status).toBe(503)
+  it('설정 누락과 잘못된 세션 키는 503이다', async () => {
+    expect((await login('secret', makeEnv('secret', undefined))).status).toBe(503)
+    expect((await login('secret', makeEnv(undefined, sessionSecret))).status).toBe(503)
+    expect((await login('secret', makeEnv('secret', 'invalid'))).status).toBe(503)
   })
 })
