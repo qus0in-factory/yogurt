@@ -22,4 +22,10 @@ describe('Sidebar', () => {
     fireEvent.click(screen.getByRole('button', { name: '거래' }))
     expect(onNavigate).toHaveBeenCalled()
   })
+
+  it('브랜드 아이콘과 YOGURT 텍스트를 함께 표시한다', () => {
+    const { container } = render(<Sidebar current="dashboard" />)
+    expect(screen.getByText('YOGURT')).toBeInTheDocument()
+    expect(container.querySelector('svg[aria-hidden="true"]')).toBeInTheDocument()
+  })
 })

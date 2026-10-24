@@ -1,4 +1,5 @@
 import { Button } from '../components/Button'
+import { YogurtIcon } from '../components/YogurtIcon'
 import { cn } from '../lib/cn'
 import { MENU_ITEMS, type ScreenId } from './menu'
 
@@ -18,7 +19,10 @@ export function Sidebar(props: SidebarProps) {
   const onNavigate = props.onNavigate ?? props.onSelect ?? props.onChange ?? (() => {})
   return (
     <aside className={cn('hidden md:flex md:w-60 md:flex-col border-r border-stone-200 bg-white', props.className)}>
-      <div className="p-4 text-lg font-semibold">요구르트</div>
+      <div className="flex items-center gap-2 p-4 text-lg font-semibold">
+        <YogurtIcon className="h-5 w-5 shrink-0" />
+        <span>YOGURT</span>
+      </div>
       <nav aria-label="주 메뉴" className="flex flex-col gap-1 p-2">
         {MENU_ITEMS.map((item) => (
           <Button
