@@ -23,8 +23,9 @@ beforeEach(() => vi.clearAllMocks())
 afterEach(cleanup)
 
 describe('EditAccountDialog', () => {
-  it('기존 별칭·소유자를 채우고 계좌번호는 읽기 전용으로 표시한다', () => {
+  it('소유자→별칭 순서로 기존 값을 채우고 계좌번호는 읽기 전용으로 표시한다', () => {
     renderDialog()
+    expect(screen.getAllByLabelText(/소유자|별칭/).map((el) => el.getAttribute('name'))).toEqual(['owner', 'alias'])
     expect(screen.getByLabelText('별칭')).toHaveValue('주계좌')
     expect(screen.getByLabelText('소유자')).toHaveValue('김철수')
     expect(screen.getByText('123-456-789')).toBeInTheDocument()

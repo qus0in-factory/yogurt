@@ -44,8 +44,8 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
   return (
     <Dialog open onClose={onClose} title={accountsText.editTitle}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        {field(accountsText.alias, 'alias')}
         {field(accountsText.owner, 'owner')}
+        {field(accountsText.alias, 'alias')}
         <p className="text-sm text-stone-600">
           {accountsText.accountNumber}: <span>{account.accountNumber}</span>
         </p>

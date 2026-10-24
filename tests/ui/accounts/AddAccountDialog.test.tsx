@@ -14,6 +14,9 @@ const renderDialog = (onClose = vi.fn()) => {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
   return render(<QueryClientProvider client={queryClient}><AddAccountDialog open onClose={onClose} /></QueryClientProvider>)
 }
+const fill = (values: Record<string, string>) => {
+  for (const [label, value] of Object.entries(values)) fireEvent.change(screen.getByLabelText(label), { target: { value } })
+}
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -22,6 +25,12 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('AddAccountDialog', () => {
+  it('필드 순서는 소유자→별칭→계좌번호→Access Key→Secret Key다', () => {
+    renderDialog()
+    const names = screen.getAllByLabelText(/소유자|별칭|계좌번호|Access Key|Secret Key/).map((el) => el.getAttribute('name'))
+    expect(names).toEqual(['owner', 'alias', 'accountNumber', 'accessKey', 'secretKey'])
+  })
+
   it('Secret Key는 password 입력이고 빈 값이면 저장하지 않는다', async () => {
     renderDialog()
     expect(screen.getByLabelText('Secret Key')).toHaveAttribute('type', 'password')
@@ -30,49 +39,40 @@ describe('AddAccountDialog', () => {
     expect(await screen.findByText('소유자를 입력하세요')).toBeInTheDocument()
   })
 
+  it('409는 계좌번호 필드 오류로 표시하고 toast를 띄우지 않는다', async () => {
+    createAccount.mockRejectedValueOnce(Object.assign(new Error('dup'), { response: { status: 409 } }))
+    renderDialog()
+    fill({ 소유자: '김철수', 별칭: '주계좌', 계좌번호: '123-456', 'Access Key': 'AK', 'Secret Key': 'SK' })
+    fireEvent.click(screen.getByRole('button', { name: '저장' }))
+    expect(await screen.findByText('이미 등록된 계좌번호입니다')).toBeInTheDocument()
+    expect(toast.error).not.toHaveBeenCalled()
+  })
+
   it('503이면 저장소 미설정 안내 toast를 표시한다', async () => {
     createAccount.mockRejectedValueOnce(Object.assign(new Error('unavailable'), { response: { status: 503 } }))
     renderDialog()
-    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '주계좌' } })
-    fireEvent.change(screen.getByLabelText('소유자'), { target: { value: '김철수' } })
-    fireEvent.change(screen.getByLabelText('계좌번호'), { target: { value: '123-456' } })
-    fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AK' } })
-    fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
+    fill({ 소유자: '김철수', 별칭: '주계좌', 계좌번호: '123-456', 'Access Key': 'AK', 'Secret Key': 'SK' })
     fireEvent.click(screen.getByRole('button', { name: '저장' }))
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('저장소가 아직 설정되지 않았습니다'))
   })
 
-  it('별칭·소유자·계좌번호 초안을 sessionStorage에 저장하고 다시 열면 복원한다', async () => {
+  it('별칭·소유자·계좌번호 초안만 저장하고 다시 열면 복원한다', async () => {
     renderDialog()
-    for (const [label, value] of [['별칭', '초안별칭'], ['소유자', '초안소유자'], ['계좌번호', '999-000']]) {
-      fireEvent.change(screen.getByLabelText(label), { target: { value } })
-    }
+    fill({ 별칭: '초안별칭', 소유자: '초안소유자', 계좌번호: '999-000', 'Access Key': 'AKTEST', 'Secret Key': 'SKTEST' })
     await waitFor(() => expect(JSON.stringify(sessionStorage)).toContain('초안소유자'))
-    cleanup()
-    renderDialog()
-    for (const [label, value] of [['별칭', '초안별칭'], ['소유자', '초안소유자'], ['계좌번호', '999-000']]) {
-      expect(screen.getByLabelText(label)).toHaveValue(value)
-    }
-  })
-
-  it('Access Key·Secret Key는 sessionStorage 어디에도 저장하지 않는다', async () => {
-    renderDialog()
-    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: 'x' } })
-    fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AKTEST' } })
-    fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SKTEST' } })
-    await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).not.toBeNull())
     const dump = JSON.stringify(sessionStorage)
     expect(dump).not.toContain('AKTEST'); expect(dump).not.toContain('SKTEST')
+    cleanup()
+    renderDialog()
+    expect(screen.getByLabelText('별칭')).toHaveValue('초안별칭')
+    expect(screen.getByLabelText('소유자')).toHaveValue('초안소유자')
+    expect(screen.getByLabelText('계좌번호')).toHaveValue('999-000')
   })
 
   it('저장 성공 시 초안을 삭제한다', async () => {
     createAccount.mockResolvedValueOnce({ id: 'a2', alias: '새 계좌', owner: '김철수', accountNumber: '111-222', createdAt: '2026-01-01T00:00:00.000Z' })
     renderDialog()
-    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '새 계좌' } })
-    fireEvent.change(screen.getByLabelText('소유자'), { target: { value: '김철수' } })
-    fireEvent.change(screen.getByLabelText('계좌번호'), { target: { value: '111-222' } })
-    fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AK' } })
-    fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
+    fill({ 별칭: '새 계좌', 소유자: '김철수', 계좌번호: '111-222', 'Access Key': 'AK', 'Secret Key': 'SK' })
     await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).not.toBeNull())
     fireEvent.click(screen.getByRole('button', { name: '저장' }))
     await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).toBeNull())

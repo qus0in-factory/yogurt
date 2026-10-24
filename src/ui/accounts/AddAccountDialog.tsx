@@ -17,7 +17,7 @@ const DRAFT_KEY = 'yogurt:account-draft'
 export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
   const createAccount = useCreateAccount()
   const draft = readSessionJson<{ alias: string; owner: string; accountNumber: string }>(DRAFT_KEY)
-  const { control, handleSubmit, reset, watch } = useForm<AccountInput>({
+  const { control, handleSubmit, reset, setError, watch } = useForm<AccountInput>({
     defaultValues: { alias: draft?.alias ?? '', owner: draft?.owner ?? '', accountNumber: draft?.accountNumber ?? '', accessKey: '', secretKey: '' },
     resolver: zodResolver(accountInputSchema),
   })
@@ -51,6 +51,10 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
       },
       onError: (error) => {
         const status = (error as { response?: { status?: number } }).response?.status
+        if (status === 409) {
+          setError('accountNumber', { type: 'server', message: accountsText.duplicateAccountNumber })
+          return
+        }
         toast.error(status === 503 ? accountsText.storageNotConfigured : accountsText.addFailed)
       },
     })
@@ -59,8 +63,8 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} title={accountsText.addTitle}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        {field(accountsText.alias, 'alias')}
         {field(accountsText.owner, 'owner')}
+        {field(accountsText.alias, 'alias')}
         {field(accountsText.accountNumber, 'accountNumber')}
         {field(accountsText.accessKey, 'accessKey')}
         {field(accountsText.secretKey, 'secretKey', 'password')}
