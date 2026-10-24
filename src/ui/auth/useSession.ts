@@ -8,7 +8,7 @@ const SESSION_KEY = ['session']
 export function useSession() {
   const session = useQuery({ queryKey: SESSION_KEY, queryFn: checkSession })
   useEffect(() => {
-    if (session.data === false) void clearClientStorage()
+    if (session.data === false) void clearClientStorage(false)
   }, [session.data])
   return session
 }

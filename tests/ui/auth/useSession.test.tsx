@@ -41,3 +41,12 @@ it('로그아웃 실패 시 저장소를 지우지 않는다', async () => {
   await act(async () => { await expect(result.current.mutateAsync()).rejects.toThrow('network') })
   expect(clearClientStorage).not.toHaveBeenCalled()
 })
+
+
+it('미인증 후 세션 데이터가 true로 바뀌면 유지된다', async () => {
+  vi.mocked(checkSession).mockResolvedValueOnce(false)
+  const { result } = renderHook(() => useSession(), { wrapper })
+  await waitFor(() => expect(result.current.data).toBe(false))
+  act(() => { clients[0].setQueryData(['session'], true) })
+  await waitFor(() => expect(result.current.data).toBe(true))
+})
