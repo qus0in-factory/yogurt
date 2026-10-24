@@ -1,3 +1,4 @@
+import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { useLogout, useSession } from './auth/useSession'
 import { LoginForm } from './auth/LoginForm'
@@ -54,8 +55,15 @@ export function App() {
             />
           </div>
           <div className="ml-auto">
-            <Button variant="outline" size="sm" onClick={() => logoutMutation.mutate(undefined, { onSuccess: () => toast('로그아웃했습니다') })}>
-              로그아웃
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="로그아웃"
+              className="md:h-8 md:w-auto md:px-3"
+              onClick={() => logoutMutation.mutate(undefined, { onSuccess: () => toast('로그아웃했습니다') })}
+            >
+              <LogOut aria-hidden="true" className="h-5 w-5 md:hidden" />
+              <span className="hidden md:inline">로그아웃</span>
             </Button>
           </div>
         </header>
