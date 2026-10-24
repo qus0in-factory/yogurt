@@ -11,13 +11,13 @@
     "deploy:main": "pnpm run build:main && wrangler deploy --config src/ui/dist/yogurt/wrangler.json",
     "secret:dev": "wrangler secret put --config infra/wrangler.jsonc --env dev",
     "secret:main": "wrangler secret put --config infra/wrangler.jsonc --env production",
-    "keygen:session": "node src/infra/keygen.ts",
-    "keygen:account": "node src/infra/account-keygen.ts",
+    "keygen:session": "node src/infra/cli/keygen.ts",
+    "keygen:account": "node src/infra/cli/account-keygen.ts",
     "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to src/ui/.wrangler/state --config infra/wrangler.jsonc --env dev",
     "db:migrate:dev": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env dev",
     "db:migrate:main": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env production",
     "check": "tsc --noEmit",
-    "secret:setup": "node src/infra/secret-setup-cli.ts"
+    "secret:setup": "node src/infra/cli/secret-setup-cli.ts"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.64.0",

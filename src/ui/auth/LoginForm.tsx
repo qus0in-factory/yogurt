@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { loginRequestSchema } from '../../domain/auth-schema'
+import { loginRequestSchema } from '../../domain/auth/auth-schema'
 import { Button } from '../components/Button'
 import { TextField } from '../components/TextField'
 import { useLogin } from './useSession'

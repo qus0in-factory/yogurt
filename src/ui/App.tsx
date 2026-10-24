@@ -6,7 +6,7 @@ import { Button } from './components/Button'
 import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
 import { AccountsPage } from './accounts/AccountsPage'
-import { useUiStore } from './store/ui-store'
+import { useUiStore } from './state/ui-store'
 
 export function App() {
   const session = useSession()

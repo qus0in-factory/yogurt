@@ -2,10 +2,10 @@ import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { HTTPException } from 'hono/http-exception'
 import { createMiddleware } from 'hono/factory'
-import { loginHandler, logoutHandler, readSessionCookie, sessionHandler, verifySessionToken } from './auth.ts'
-import { loginRequestSchema } from '../domain/auth-schema.ts'
-import { accountInputSchema } from '../domain/account.ts'
-import { createAccount, listAccounts } from './accounts.ts'
+import { loginHandler, logoutHandler, readSessionCookie, sessionHandler, verifySessionToken } from './auth/auth.ts'
+import { loginRequestSchema } from '../domain/auth/auth-schema.ts'
+import { accountInputSchema } from '../domain/accounts/account.ts'
+import { createAccount, listAccounts } from './accounts/accounts.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 

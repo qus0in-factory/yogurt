@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { accountInputSchema, type AccountInput } from '../../domain/account'
+import { accountInputSchema, type AccountInput } from '../../domain/accounts/account'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
 import { TextField } from '../components/TextField'
