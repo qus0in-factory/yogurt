@@ -15,6 +15,12 @@
 - 결과 보고: 완료 보고 형식
 - 차단 보고: 시작 전·진행 중 막힘 보고 형식
 
+## 제출·대기 명령 형태
+
+- 제출: `herdr agent prompt <target> "$(cat 계약파일)" --wait --until working --timeout 20000`. `--until`은 `--wait` 없이 쓰지 않는다.
+- 대기: `herdr agent wait <target> --timeout 55000`(60000 이하).
+- 선행 조건(의존성 설치·런타임 버전 등)은 계약 발행 전 조정자가 실측하고, 계약에 실측 결과를 적는다.
+
 ## 공통 금지·보존 (모든 계약에 포함)
 
 - 허용 파일 목록 밖 수정 금지. AGENTS.md, CLAUDE.md, README.md는 수정 대상에 넣지 않는다.
