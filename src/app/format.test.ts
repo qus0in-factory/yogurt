@@ -23,4 +23,16 @@ describe('formatDate', () => {
   it('시각이 포함된 ISO 문자열도 날짜 부분만 표시한다', () => {
     expect(formatDate('2026-03-05T09:30:00Z')).toBe('2026.03.05')
   })
+
+  it('UTC 자정 경계를 서울 달력 일자로 변환한다', () => {
+    expect(formatDate('2026-01-04T15:30:00Z')).toBe('2026.01.05')
+  })
+
+  it('오프셋이 포함된 문자열도 서울 달력 일자로 변환한다', () => {
+    expect(formatDate('2026-01-05T09:00:00+09:00')).toBe('2026.01.05')
+  })
+
+  it('잘못된 입력은 빈 문자열을 반환한다', () => {
+    expect(formatDate('not-a-date')).toBe('')
+  })
 })
