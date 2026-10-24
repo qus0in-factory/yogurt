@@ -2,7 +2,6 @@
   "$schema": "../node_modules/wrangler/config-schema.json",
   "main": "../src/infra/worker.ts",
   "compatibility_date": "2026-10-19",
-  "previews": {},
   "env": {
     "dev": {
       "name": "yogurt-dev",
