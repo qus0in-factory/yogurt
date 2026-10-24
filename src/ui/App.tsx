@@ -27,7 +27,7 @@ export function App() {
 
   if (session.isError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-stone-50 p-6">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-primary-50 p-6">
         <p role="alert" className="text-stone-900">연결 오류</p>
         <Button variant="outline" onClick={() => void session.refetch()}>
           다시 시도
@@ -41,7 +41,7 @@ export function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
+    <div className="flex min-h-screen bg-primary-50">
       <Sidebar current={screen} onNavigate={navigate} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 bg-white p-3">

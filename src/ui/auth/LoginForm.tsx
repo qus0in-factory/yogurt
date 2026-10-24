@@ -31,7 +31,7 @@ export function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-stone-50 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-primary-50 p-4">
       <div className="w-full max-w-sm rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
         <h1 className="text-xl font-bold text-stone-900">로그인</h1>
         <p className="mt-1 text-sm text-stone-600">서비스 이용을 위해 비밀번호를 입력해 주세요.</p>

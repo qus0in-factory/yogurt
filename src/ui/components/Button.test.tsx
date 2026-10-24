@@ -26,6 +26,12 @@ describe('Button', () => {
     expect(onClick).not.toHaveBeenCalled()
   })
 
+  it('default variant는 살구톤 배경과 짙은 글자를 쓴다', () => {
+    render(<Button>저장</Button>)
+    const button = screen.getByRole('button', { name: '저장' })
+    expect(button).toHaveClass('bg-primary-300', 'text-stone-900', 'hover:bg-primary-400')
+  })
+
   it('전달한 className을 기본 스타일과 병합한다', () => {
     render(<Button className="mt-4">추가</Button>)
     expect(screen.getByRole('button', { name: '추가' })).toHaveClass('mt-4')
