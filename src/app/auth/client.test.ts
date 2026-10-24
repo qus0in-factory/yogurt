@@ -8,7 +8,7 @@ const origin = window.location.origin
 const sessionUrl = `${origin}/api/session`
 const loginUrl = `${origin}/api/login`
 const logoutUrl = `${origin}/api/logout`
-let lastRequest: Request
+let lastRequest: { url: string; method: string }
 let body: unknown
 const response = (status: number, data?: unknown) => data === undefined
   ? new HttpResponse(null, { status })
@@ -29,7 +29,7 @@ const server = setupServer(
 )
 const path = () => new URL(lastRequest.url).pathname
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
