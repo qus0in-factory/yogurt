@@ -27,12 +27,14 @@ describe('TextField', () => {
     expect(screen.getByText('필수 입력')).toHaveAttribute('id', describedBy as string)
   })
 
-  it('maxLength·inputMode·pattern·placeholder를 input에 전달한다', () => {
-    render(<TextField label="계좌번호" name="accountNumber" value="" onChange={vi.fn()} maxLength={8} inputMode="numeric" pattern="[0-9]{8}" placeholder="12345678" />)
+  it('maxLength·inputMode·pattern·placeholder·list·autoComplete를 input에 전달한다', () => {
+    render(<TextField label="계좌번호" name="accountNumber" value="" onChange={vi.fn()} maxLength={8} inputMode="numeric" pattern="[0-9]{8}" placeholder="12345678" list="owners" autoComplete="off" />)
     const input = screen.getByLabelText('계좌번호')
     expect(input).toHaveAttribute('maxLength', '8')
     expect(input).toHaveAttribute('inputmode', 'numeric')
     expect(input).toHaveAttribute('pattern', '[0-9]{8}')
     expect(input).toHaveAttribute('placeholder', '12345678')
+    expect(input).toHaveAttribute('list', 'owners')
+    expect(input).toHaveAttribute('autocomplete', 'off')
   })
 })

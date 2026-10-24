@@ -1,28 +1,30 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { ownerSuggestions } from '../../app/accounts/owner-suggestions'
 import { accountInputSchema, type AccountInput } from '../../domain/accounts/account'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
 import { TextField } from '../components/TextField'
 import { readSessionJson, removeSession, writeSessionJson } from '../lib/session-draft'
-import { useCreateAccount } from './useAccounts'
+import { useCreateAccount, useAccounts } from './useAccounts'
 import { accountsText } from '../glossary/accounts'
 
 type AddAccountDialogProps = { open: boolean; onClose: () => void }
-type FieldExtra = { type?: 'text' | 'password'; maxLength?: number; inputMode?: 'numeric'; pattern?: string; placeholder?: string }
-
+type FieldExtra = { type?: 'text' | 'password'; maxLength?: number; inputMode?: 'numeric'; pattern?: string; placeholder?: string; list?: string; autoComplete?: string }
 const DRAFT_KEY = 'yogurt:account-draft'
 
 export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
   const createAccount = useCreateAccount()
+  const ownerListId = useId()
+  const { data } = useAccounts()
+  const owners = ownerSuggestions(data ?? [])
   const draft = readSessionJson<{ alias: string; owner: string; accountNumber: string }>(DRAFT_KEY)
   const { control, handleSubmit, reset, setError, watch } = useForm<AccountInput>({
     defaultValues: { alias: draft?.alias ?? '', owner: draft?.owner ?? '', accountNumber: draft?.accountNumber ?? '', accessKey: '', secretKey: '' },
     resolver: zodResolver(accountInputSchema),
   })
-
   useEffect(() => {
     const sub = watch(({ alias, owner, accountNumber }) => {
       if (typeof alias !== 'string' || typeof owner !== 'string' || typeof accountNumber !== 'string') return
@@ -52,10 +54,7 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
       },
       onError: (error) => {
         const status = (error as { response?: { status?: number } }).response?.status
-        if (status === 409) {
-          setError('accountNumber', { type: 'server', message: accountsText.duplicateAccountNumber })
-          return
-        }
+        if (status === 409) return setError('accountNumber', { type: 'server', message: accountsText.duplicateAccountNumber })
         toast.error(status === 503 ? accountsText.storageNotConfigured : accountsText.addFailed)
       },
     })
@@ -64,7 +63,8 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} title={accountsText.addTitle}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        {field(accountsText.owner, 'owner', { maxLength: 8 })}
+        {field(accountsText.owner, 'owner', { maxLength: 8, list: ownerListId, autoComplete: 'off' })}
+        <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
         {field(accountsText.alias, 'alias', { maxLength: 8 })}
         {field(accountsText.accountNumber, 'accountNumber', { maxLength: 8, inputMode: 'numeric', pattern: '[0-9]{8}', placeholder: accountsText.accountNumberExample }, (value) => value.replace(/\D/g, ''))}
         {field(accountsText.accessKey, 'accessKey')}

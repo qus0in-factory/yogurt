@@ -12,9 +12,11 @@ type TextFieldProps = {
   inputMode?: 'numeric'
   pattern?: string
   placeholder?: string
+  list?: string
+  autoComplete?: string
 }
 
-export function TextField({ label, name, value, onChange, type = 'text', error, required, maxLength, inputMode, pattern, placeholder }: TextFieldProps) {
+export function TextField({ label, name, value, onChange, type = 'text', error, required, maxLength, inputMode, pattern, placeholder, list, autoComplete }: TextFieldProps) {
   const inputId = useId()
   const errorId = useId()
 
@@ -33,6 +35,8 @@ export function TextField({ label, name, value, onChange, type = 'text', error, 
         inputMode={inputMode}
         pattern={pattern}
         placeholder={placeholder}
+        list={list}
+        autoComplete={autoComplete}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}

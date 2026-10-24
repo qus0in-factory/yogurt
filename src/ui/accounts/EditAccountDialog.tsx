@@ -1,32 +1,36 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { ownerSuggestions } from '../../app/accounts/owner-suggestions'
 import { accountUpdateSchema, type Account, type AccountUpdate } from '../../domain/accounts/account'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
 import { TextField } from '../components/TextField'
 import { accountsText } from '../glossary/accounts'
 import { DeleteAccountDialog } from './DeleteAccountDialog'
-import { useUpdateAccount } from './useAccounts'
+import { useAccounts, useUpdateAccount } from './useAccounts'
 
 type EditAccountDialogProps = { account: Account; onClose: () => void }
 
 export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) {
   const updateAccount = useUpdateAccount()
+  const ownerListId = useId()
+  const { data } = useAccounts()
+  const owners = ownerSuggestions(data ?? [])
   const [deleteOpen, setDeleteOpen] = useState(false)
   const { control, handleSubmit } = useForm<AccountUpdate>({
     defaultValues: { alias: account.alias, owner: account.owner },
     resolver: zodResolver(accountUpdateSchema),
   })
 
-  const field = (label: string, name: keyof AccountUpdate) => (
+  const field = (label: string, name: keyof AccountUpdate, extra: { list?: string; autoComplete?: string } = {}) => (
     <Controller
       name={name}
       control={control}
       render={({ field: f, fieldState }) => (
-        <TextField label={label} name={name} maxLength={8} value={f.value} onChange={f.onChange} error={fieldState.error?.message} />
+        <TextField label={label} name={name} maxLength={8} value={f.value} onChange={f.onChange} error={fieldState.error?.message} {...extra} />
       )}
     />
   )
@@ -49,7 +53,8 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
     <>
       <Dialog open onClose={onClose} title={accountsText.editTitle}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          {field(accountsText.owner, 'owner')}
+          {field(accountsText.owner, 'owner', { list: ownerListId, autoComplete: 'off' })}
+          <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
           {field(accountsText.alias, 'alias')}
           <p className="text-sm text-stone-600">
             {accountsText.accountNumber}: <span>{account.accountNumber}</span>

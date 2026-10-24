@@ -24,7 +24,7 @@ afterEach(cleanup)
 describe('계좌 수정', () => {
   it('카드의 수정 버튼으로 별칭과 소유자를 바꾸면 목록이 갱신된다', async () => {
     const updated = { ...account, alias: '연금', owner: '이영희' }
-    listAccounts.mockResolvedValueOnce([account]).mockResolvedValueOnce([updated])
+    listAccounts.mockResolvedValueOnce([account]).mockResolvedValueOnce([updated]).mockResolvedValueOnce([updated])
     updateAccount.mockResolvedValueOnce(updated)
     renderPage()
     fireEvent.click(await screen.findByRole('button', { name: '주계좌 수정' }))
@@ -38,7 +38,7 @@ describe('계좌 수정', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(await screen.findByText('연금')).toBeInTheDocument()
     expect(screen.getByText('이영희')).toBeInTheDocument()
-    expect(listAccounts).toHaveBeenCalledTimes(2)
+    expect(listAccounts).toHaveBeenCalledTimes(3)
     expect(toast).toHaveBeenCalledWith('계좌를 수정했습니다')
   })
 })
