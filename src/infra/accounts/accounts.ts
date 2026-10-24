@@ -21,8 +21,15 @@ export async function listAccounts(c: AppContext): Promise<Response> {
 export async function createAccount(c: AppContext, input: AccountInput): Promise<Response> {
   const setup = configured(c)
   if (!setup) return c.json(CONFIG_ERROR, 503)
-  const account = await setup.repository.create(input, setup.key)
-  return c.json(account, 201)
+  try {
+    const account = await setup.repository.create(input, setup.key)
+    return c.json(account, 201)
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      return c.json({ error: 'account number already exists' }, 409)
+    }
+    throw error
+  }
 }
 
 export async function updateAccount(c: AppContext, id: string, input: AccountUpdate): Promise<Response> {

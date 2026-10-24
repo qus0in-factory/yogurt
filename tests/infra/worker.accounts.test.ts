@@ -45,4 +45,19 @@ describe('account routes', () => {
     expect(res.status).toBe(200)
     expect(await res.json()).toEqual([{ id: '1', alias: 'Main', owner: '홍길동', accountNumber: '1234-5678', createdAt: rows[0].created_at }])
   })
+
+
+describe('account number unique', () => {
+  it('중복 계좌번호는 409를 반환한다', async () => {
+    const db = { prepare: () => ({ bind: (..._args: unknown[]) => ({ run: async () => { throw new Error('D1_ERROR: UNIQUE constraint failed: accounts.account_number') } }) }) } as unknown as D1Database
+    const res = await call('POST', input, env(db, key))
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({ error: 'account number already exists' })
+  })
+
+  it('다른 오류는 전파된다', async () => {
+    const db = { prepare: () => ({ bind: (..._args: unknown[]) => ({ run: async () => { throw new Error('boom') } }) }) } as unknown as D1Database
+    await expect(call('POST', input, env(db, key))).rejects.toThrow('boom')
+  })
+})
 })
