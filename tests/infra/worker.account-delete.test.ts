@@ -4,10 +4,11 @@ import { createSessionToken } from '../../src/infra/auth/crypto'
 import { saveSession } from '../../src/infra/auth/session-store'
 import { generateSessionSecret } from '../../src/infra/secrets/session-key'
 import app from '../../src/infra/worker'
+import { createFakeKv } from './fakes/kv'
 
 let secret = ''
 let token = ''
-const fakeSessions = (() => { const store = new Map<string,string>(); return { get: async (k:string) => store.get(k) ?? null, put: async (k:string,v:string) => { store.set(k,v) }, delete: async (k:string) => { store.delete(k) }, list: async () => ({ keys: [] }), getWithMetadata: async (k:string) => ({ value: store.get(k) ?? null, metadata: null }) } })() as unknown as KVNamespace
+const fakeSessions = createFakeKv()
 function fakeDb(changes: number) {
   const prepare = vi.fn(() => ({ bind: (..._args: unknown[]) => ({ run: async () => ({ meta: { changes } }) }) }))
   return { db: { prepare } as unknown as D1Database, prepare }

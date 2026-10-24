@@ -4,10 +4,11 @@ import { createSessionToken } from '../../src/infra/auth/crypto.ts'
 import { saveSession } from '../../src/infra/auth/session-store.ts'
 import { generateSessionSecret } from '../../src/infra/secrets/session-key.ts'
 import app from '../../src/infra/worker.ts'
+import { createFakeKv } from './fakes/kv.ts'
 
 let secret = ''
 let token = ''
-const fakeSessions = (() => { const store = new Map<string,string>(); return { get: async (k:string) => store.get(k) ?? null, put: async (k:string,v:string) => { store.set(k,v) }, delete: async (k:string) => { store.delete(k) }, list: async () => ({ keys: [] }), getWithMetadata: async (k:string) => ({ value: store.get(k) ?? null, metadata: null }) } })() as unknown as KVNamespace
+const fakeSessions = createFakeKv()
 const row = { id: 'a1', alias: '수정', owner: '김철수', account_number: '12345678', created_at: '2026-01-01T00:00:00.000Z' }
 const db = (found = true) => ({ prepare: () => ({ bind: (..._args: unknown[]) => ({ first: async () => found ? row : null }) }) }) as unknown as D1Database
 const input = { alias: '수정', owner: '김철수' }

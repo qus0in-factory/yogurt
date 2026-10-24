@@ -5,9 +5,10 @@ import { PublicProtocol } from 'paseto'
 import { GetPublicKeyFactory, ImportSecretKeyFactory, SignFactory, VerifyFactory } from 'paseto/v4/public'
 import { generateSessionSecret } from '../../src/infra/secrets/session-key.ts'
 import app from '../../src/infra/worker.ts'
+import { createFakeKv } from './fakes/kv.ts'
 
 let sessionSecret = ''
-const fakeSessions = (() => { const store = new Map<string,string>(); return { get: async (k:string) => store.get(k) ?? null, put: async (k:string,v:string) => { store.set(k,v) }, delete: async (k:string) => { store.delete(k) }, list: async () => ({ keys: [] }), getWithMetadata: async (k:string) => ({ value: store.get(k) ?? null, metadata: null }) } })() as unknown as KVNamespace
+const fakeSessions = createFakeKv()
 const v4 = new PublicProtocol(GetPublicKeyFactory, ImportSecretKeyFactory, SignFactory, VerifyFactory)
 const makeEnv = (password?: string, secret?: string) =>
   ({ ENVIRONMENT: 'test', LOGIN_PASSWORD: password, SESSION_SECRET: secret, SESSIONS: fakeSessions, ASSETS: { fetch: async () => new Response('asset') } }) as unknown as Env
@@ -60,7 +61,7 @@ describe('session', () => {
 describe('session kv invalidation', () => {
   it('KV에 없는 서명 유효 토큰은 401이다', async () => {
     const token = await createSessionToken(sessionSecret)
-    const emptySessions = (() => { const store = new Map<string,string>(); return { get: async (k:string) => store.get(k) ?? null, put: async (k:string,v:string) => { store.set(k,v) }, delete: async (k:string) => { store.delete(k) }, list: async () => ({ keys: [] }), getWithMetadata: async (k:string) => ({ value: store.get(k) ?? null, metadata: null }) } })() as unknown as KVNamespace
+    const emptySessions = createFakeKv()
     const res = await app.fetch(new Request('https://example.com/api/session', { headers: { Cookie: `session=${token}` } }), { ENVIRONMENT: 'test', LOGIN_PASSWORD: 'secret', SESSION_SECRET: sessionSecret, SESSIONS: emptySessions, ASSETS: { fetch: async () => new Response('asset') } } as unknown as Env)
     expect(res.status).toBe(401)
   })
