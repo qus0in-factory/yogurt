@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/wrangler/config-schema.json",
-  "main": "worker.js",
-  "compatibility_date": "2026-10-24",
+  "main": "../src/infra/worker.ts",
+  "compatibility_date": "2026-10-19",
   "env": {
     "dev": {
       "name": "yogurt-dev",
@@ -33,5 +33,9 @@
     "issues": {
       "enabled": true
     }
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
   }
 }

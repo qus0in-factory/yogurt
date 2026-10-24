@@ -24,6 +24,7 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
       - run: pnpm test
       - name: Check module size and layers
         run: python3 .agents/skills/yogurt-module-check/scripts/app/check.py --root .
