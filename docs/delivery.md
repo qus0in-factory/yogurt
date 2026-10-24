@@ -43,3 +43,47 @@ Workers & Pages → Create application → Import a repository에서 GitHub와 `
 패키지 관리자는 pnpm@11.24.0으로 고정한다. package-lock.json은 pnpm-lock.yaml로 대체했다. npm install 대신 pnpm install --frozen-lockfile을 사용한다. Cloudflare의 기존 npm 기반 Build/Deploy command도 위 표의 pnpm 명령으로 변경한다.
 
 pnpm-workspace.yaml에서 esbuild·workerd의 설치 스크립트를 허용한다. 선택적 fsevents의 빌드는 사용하지 않는다. 기존 npm node_modules는 다시 사용하지 않고 pnpm으로 새로 설치한다. 의존성 변경 시 pnpm-lock.yaml도 함께 반영한다.
+
+## Secret 설정
+
+인증 비밀 값(`LOGIN_PASSWORD`, `SESSION_SECRET`)은 코드나 Git 저장소에 커밋하지 않는다.
+
+- **로컬 개발 환경**:
+  - `infra/.dev.vars` 파일에 `LOGIN_PASSWORD`와 `SESSION_SECRET`을 설정한다 (`infra/.dev.vars`는 `.gitignore`로 제외됨).
+  - `SESSION_SECRET` 생성: `pnpm run keygen:session` 명령을 실행한다.
+
+Cloudflare 환경의 비밀 값을 등록하려면 다음 명령을 사용한다.
+
+```sh
+pnpm run secret:setup
+```
+
+명령은 `LOGIN_PASSWORD` 환경 변수가 없으면 터미널에서 비밀번호를 두 번 숨김 입력받고 일치 여부를 확인한다. 환경 변수가 있으면 그 값을 사용한다. 인자 없이 실행하면 dev와 production 환경에 차례로 등록하고, 각 환경마다 새 `SESSION_SECRET`을 생성한다. 한 환경 등록이 실패하면 중단하며 성공 메시지에 등록한 환경이 표시된다. 빈 비밀번호·불일치·잘못된 인자는 종료 코드 2, 등록 실패는 종료 코드 1이다.
+
+한 환경만 등록하려면 다음처럼 실행한다.
+
+```sh
+pnpm run secret:setup -- dev
+pnpm run secret:setup -- main
+```
+
+- `dev`는 dev 환경, `main`은 production 환경에 등록한다.
+- `SESSION_SECRET`은 매 실행마다 새로 생성되며, 기존 세션이 무효화된다.
+
+- **원격 환경 (Cloudflare)**:
+  - 기존 개별 등록 명령을 사용할 수도 있다.
+  - dev 환경: `pnpm run secret:dev -- LOGIN_PASSWORD`, `pnpm run secret:dev -- SESSION_SECRET`
+  - 운영(main) 환경: `pnpm run secret:main -- LOGIN_PASSWORD`, `pnpm run secret:main -- SESSION_SECRET`
+  - 각 명령을 실행한 후 터미널 안내에 따라 실제 비밀 값을 입력한다.
+
+## 배포 명령
+
+Cloudflare Vite 플러그인은 빌드 시 워커 배포 설정을 Vite root 기준의 산출물 디렉터리(`src/ui/dist/<워커명>/wrangler.json`)에 생성한다.
+따라서 배포 시에는 빌드 후 해당 산출물 경로를 `--config`로 지정해야 한다.
+
+- **dev 배포**: `pnpm run deploy:dev`
+  - 실행 내용: `pnpm run build:dev && wrangler deploy --config src/ui/dist/yogurt_dev/wrangler.json`
+- **운영 배포**: `pnpm run deploy:main`
+  - 실행 내용: `pnpm run build:main && wrangler deploy --config src/ui/dist/yogurt/wrangler.json`
+- **Cloudflare 대시보드 Workers Builds 일치**:
+  - Cloudflare Workers Builds의 대시보드 설정에서 Deploy command는 위 스크립트(`pnpm run deploy:dev`, `pnpm run deploy:main`)와 반드시 일치해야 산출물 설정이 올바르게 배포된다.
