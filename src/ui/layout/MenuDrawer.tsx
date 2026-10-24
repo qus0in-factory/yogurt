@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { X } from 'lucide-react'
 import { useFocusTrap } from '../lib/useFocusTrap'
 import { Button } from '../components/Button'
 import { MENU_ITEMS, type ScreenId } from './menu'
@@ -34,7 +35,7 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
             <span>YOGURT</span>
           </div>
           <Button variant="ghost" size="icon" aria-label="메뉴 닫기" onClick={onClose}>
-            ×
+            <X aria-hidden="true" className="h-5 w-5" />
           </Button>
         </div>
         <nav aria-label="주 메뉴" className="flex flex-col gap-1 p-2">
