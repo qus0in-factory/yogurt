@@ -11,7 +11,7 @@ vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 
 const listAccounts = vi.mocked(client.listAccounts)
 const updateAccount = vi.mocked(client.updateAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '123-456-789', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -30,7 +30,7 @@ describe('계좌 수정', () => {
     fireEvent.click(await screen.findByRole('button', { name: '주계좌 수정' }))
     expect(screen.getByLabelText('별칭')).toHaveValue('주계좌')
     expect(screen.getByLabelText('소유자')).toHaveValue('김철수')
-    expect(within(screen.getByRole('dialog')).getByText('123-456-789')).toBeInTheDocument()
+    expect(within(screen.getByRole('dialog')).getByText('12345678')).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '연금' } })
     fireEvent.change(screen.getByLabelText('소유자'), { target: { value: '이영희' } })
     fireEvent.click(screen.getByRole('button', { name: '저장' }))

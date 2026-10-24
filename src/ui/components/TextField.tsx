@@ -8,9 +8,13 @@ type TextFieldProps = {
   type?: 'text' | 'password' | 'number' | 'date'
   error?: string
   required?: boolean
+  maxLength?: number
+  inputMode?: 'numeric'
+  pattern?: string
+  placeholder?: string
 }
 
-export function TextField({ label, name, value, onChange, type = 'text', error, required }: TextFieldProps) {
+export function TextField({ label, name, value, onChange, type = 'text', error, required, maxLength, inputMode, pattern, placeholder }: TextFieldProps) {
   const inputId = useId()
   const errorId = useId()
 
@@ -25,6 +29,10 @@ export function TextField({ label, name, value, onChange, type = 'text', error, 
         type={type}
         value={value}
         required={required}
+        maxLength={maxLength}
+        inputMode={inputMode}
+        pattern={pattern}
+        placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}

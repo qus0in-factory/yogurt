@@ -22,7 +22,7 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
       name={name}
       control={control}
       render={({ field: f, fieldState }) => (
-        <TextField label={label} name={name} value={f.value} onChange={f.onChange} error={fieldState.error?.message} />
+        <TextField label={label} name={name} maxLength={8} value={f.value} onChange={f.onChange} error={fieldState.error?.message} />
       )}
     />
   )

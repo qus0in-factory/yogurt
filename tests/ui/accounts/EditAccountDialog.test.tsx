@@ -9,7 +9,7 @@ import { EditAccountDialog } from '../../../src/ui/accounts/EditAccountDialog'
 vi.mock('../../../src/app/accounts/client', () => ({ updateAccount: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const updateAccount = vi.mocked(client.updateAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '123-456-789', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderDialog = () => {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
@@ -28,7 +28,9 @@ describe('EditAccountDialog', () => {
     expect(screen.getAllByLabelText(/소유자|별칭/).map((el) => el.getAttribute('name'))).toEqual(['owner', 'alias'])
     expect(screen.getByLabelText('별칭')).toHaveValue('주계좌')
     expect(screen.getByLabelText('소유자')).toHaveValue('김철수')
-    expect(screen.getByText('123-456-789')).toBeInTheDocument()
+    expect(screen.getByLabelText('별칭')).toHaveAttribute('maxLength', '8')
+    expect(screen.getByLabelText('소유자')).toHaveAttribute('maxLength', '8')
+    expect(screen.getByText('12345678')).toBeInTheDocument()
     expect(screen.queryByLabelText('계좌번호')).not.toBeInTheDocument()
   })
 

@@ -11,6 +11,7 @@ import { useCreateAccount } from './useAccounts'
 import { accountsText } from '../glossary/accounts'
 
 type AddAccountDialogProps = { open: boolean; onClose: () => void }
+type FieldExtra = { type?: 'text' | 'password'; maxLength?: number; inputMode?: 'numeric'; pattern?: string; placeholder?: string }
 
 const DRAFT_KEY = 'yogurt:account-draft'
 
@@ -31,12 +32,12 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
     return () => sub.unsubscribe()
   }, [watch])
 
-  const field = (label: string, name: keyof AccountInput, type?: 'text' | 'password') => (
+  const field = (label: string, name: keyof AccountInput, extra: FieldExtra = {}, sanitize?: (value: string) => string) => (
     <Controller
       name={name}
       control={control}
       render={({ field: f, fieldState }) => (
-        <TextField label={label} name={name} type={type} value={f.value} onChange={f.onChange} error={fieldState.error?.message} />
+        <TextField label={label} name={name} value={f.value} onChange={(value) => f.onChange(sanitize?.(value) ?? value)} error={fieldState.error?.message} {...extra} />
       )}
     />
   )
@@ -63,11 +64,11 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} title={accountsText.addTitle}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        {field(accountsText.owner, 'owner')}
-        {field(accountsText.alias, 'alias')}
-        {field(accountsText.accountNumber, 'accountNumber')}
+        {field(accountsText.owner, 'owner', { maxLength: 8 })}
+        {field(accountsText.alias, 'alias', { maxLength: 8 })}
+        {field(accountsText.accountNumber, 'accountNumber', { maxLength: 8, inputMode: 'numeric', pattern: '[0-9]{8}', placeholder: accountsText.accountNumberExample }, (value) => value.replace(/\D/g, ''))}
         {field(accountsText.accessKey, 'accessKey')}
-        {field(accountsText.secretKey, 'secretKey', 'password')}
+        {field(accountsText.secretKey, 'secretKey', { type: 'password' })}
         <div className="sticky bottom-0 flex justify-end gap-2 bg-white">
           <Button type="button" variant="ghost" onClick={onClose}>{accountsText.cancel}</Button>
           <Button type="submit" disabled={createAccount.isPending}>{accountsText.save}</Button>

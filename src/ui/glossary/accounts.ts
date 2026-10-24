@@ -28,6 +28,7 @@ export const accountsText = {
   alias: '별칭',
   owner: '소유자',
   accountNumber: '계좌번호',
+  accountNumberExample: '12345678',
   accessKey: 'Access Key',
   secretKey: 'Secret Key',
   cancel: '취소',
