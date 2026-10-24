@@ -40,7 +40,7 @@ export function MobileMenu(props: MobileMenuProps) {
         메뉴
       </Button>
       {open ? (
-        <nav id="mobile-menu" aria-label="주 메뉴" className="flex flex-col gap-1 border-b border-stone-200 bg-white p-2">
+        <nav id="mobile-menu" aria-label="주 메뉴" className="flex flex-col gap-1 bg-white p-2">
           {MENU_ITEMS.map((item) => (
             <Button
               key={item.id}
