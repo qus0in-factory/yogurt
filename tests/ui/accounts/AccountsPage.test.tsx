@@ -32,6 +32,7 @@ describe('AccountsPage', () => {
     renderPage()
     expect(await screen.findByText('주계좌')).toBeInTheDocument()
     expect(screen.getByText('김철수')).toBeInTheDocument()
+    expect(screen.getByText('김철수').compareDocumentPosition(screen.getByText('주계좌')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.getByText('123-456-789')).toBeInTheDocument()
     expect(screen.getByLabelText('계좌 목록')).toBeInTheDocument()
     const cards = screen.getAllByRole('group')

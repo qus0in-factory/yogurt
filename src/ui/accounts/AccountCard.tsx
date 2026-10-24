@@ -14,10 +14,10 @@ export function AccountCard({ account, onSelect, onEdit }: AccountCardProps) {
       aria-label={account.alias}
       onClick={onSelect}
       onFocus={onSelect}
-      className="relative w-full shrink-0 snap-center rounded-lg border border-primary-200 bg-white p-6 shadow-sm"
+      className="relative w-full shrink-0 rounded-lg border border-primary-200 bg-white p-6 shadow-sm"
     >
-      <p className="pr-10 text-lg font-semibold text-stone-900">{account.alias}</p>
-      <p className="mt-1 text-sm text-stone-600">{account.owner}</p>
+      <p className="pr-10 text-sm text-stone-600">{account.owner}</p>
+      <p className="mt-1 pr-10 text-xl font-semibold text-stone-900">{account.alias}</p>
       <p className="mt-1 text-sm text-stone-600">{account.accountNumber}</p>
       <Button
         size="icon"
