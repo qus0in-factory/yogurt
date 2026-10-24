@@ -1,6 +1,9 @@
 import { Hono } from 'hono'
+import { zValidator } from '@hono/zod-validator'
+import { HTTPException } from 'hono/http-exception'
 import { createMiddleware } from 'hono/factory'
 import { loginHandler, logoutHandler, readSessionCookie, sessionHandler, verifySessionToken } from './auth.ts'
+import { loginRequestSchema } from '../domain/auth-schema.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -22,10 +25,16 @@ app.get('/api/health', (c) =>
 )
 
 app.use('/api/*', authMiddleware)
-app.post('/api/login', loginHandler)
+app.post('/api/login', zValidator('json', loginRequestSchema, (result, c) => {
+  if (!result.success) return c.json({ error: 'invalid request' }, 400)
+}), (c) => loginHandler(c, c.req.valid('json').password))
 app.get('/api/session', sessionHandler)
 app.post('/api/logout', logoutHandler)
 app.all('/api/*', (c) => c.notFound())
+app.onError((error, c) => {
+  if (error instanceof HTTPException && error.status === 400) return c.json({ error: 'invalid request' }, 400)
+  throw error
+})
 app.all('*', (c) => c.env.ASSETS.fetch(c.req.raw))
 
 export default app
