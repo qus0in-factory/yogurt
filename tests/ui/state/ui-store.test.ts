@@ -12,6 +12,7 @@ describe('ui store', () => {
     const state = useUiStore.getState()
     expect(state.screen).toBe('accounts')
     expect(state.drawerOpen).toBe(false)
+    expect(state.overviewTab).toBe('irp')
   })
 
   it('navigate는 화면을 바꾸고 drawer를 닫는다', () => {

@@ -1,4 +1,7 @@
 export const overviewText = {
   title: '현황',
-  count: (count: number) => `등록된 계좌 ${count}개`,
+  tabsLabel: '현황 탭',
+  irp: 'IRP',
+  total: (count: number) => `총 ${count}개`,
+  empty: 'IRP 계좌가 없습니다',
 } as const
