@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useRef } from 'react'
+import { useFocusTrap } from '../lib/useFocusTrap'
 import { Button } from '../components/Button'
 import { MENU_ITEMS, type ScreenId } from './menu'
 
@@ -10,22 +11,18 @@ type MenuDrawerProps = {
 }
 
 export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerProps) {
-  useEffect(() => {
-    if (!open) return
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  const panelRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(panelRef, open, onClose)
 
   if (!open) return null
 
   return (
     <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose}>
       <div
+        ref={panelRef}
         id="mobile-menu"
         role="dialog"
+        tabIndex={-1}
         aria-modal="true"
         aria-label="메뉴"
         className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow"
