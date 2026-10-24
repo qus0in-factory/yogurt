@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Menu } from 'lucide-react'
 import { Button } from '../components/Button'
 import type { ScreenId } from './menu'
 import { MenuDrawer } from './MenuDrawer'
@@ -31,11 +32,7 @@ export function MobileMenu(props: MobileMenuProps) {
         aria-controls="mobile-menu"
         onClick={toggle}
       >
-        <span aria-hidden="true" className="flex flex-col gap-1">
-          <span className="block h-0.5 w-5 bg-current" />
-          <span className="block h-0.5 w-5 bg-current" />
-          <span className="block h-0.5 w-5 bg-current" />
-        </span>
+        <Menu aria-hidden="true" className="h-5 w-5" />
       </Button>
       <MenuDrawer open={open} current={props.current ?? 'dashboard'} onNavigate={props.onNavigate ?? (() => {})} onClose={close} />
     </div>

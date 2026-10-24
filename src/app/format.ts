@@ -1,3 +1,6 @@
+import { format, isValid } from 'date-fns'
+import { TZDate } from '@date-fns/tz'
+
 const krwFormatter = new Intl.NumberFormat('ko-KR', {
   style: 'currency',
   currency: 'KRW',
@@ -9,6 +12,11 @@ export function formatKRW(amount: number): string {
 }
 
 export function formatDate(isoDate: string): string {
-  const [year, month, day] = isoDate.slice(0, 10).split('-')
-  return `${year}.${month}.${day}`
+  try {
+    const date = new TZDate(isoDate, 'Asia/Seoul')
+    if (!isValid(date)) return ''
+    return format(date, 'yyyy.MM.dd')
+  } catch {
+    return ''
+  }
 }

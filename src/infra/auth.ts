@@ -14,12 +14,10 @@ export function hasSessionSecret(env: Env): boolean {
   return typeof env.SESSION_SECRET === 'string' && env.SESSION_SECRET.length > 0
 }
 
-export async function loginHandler(c: Context): Promise<Response> {
+export async function loginHandler(c: Context, password: string): Promise<Response> {
   if (!hasLoginPassword(c.env) || !hasSessionSecret(c.env) || !(await isValidSessionSecret(c.env.SESSION_SECRET as string))) {
     return c.json({ error: 'LOGIN_PASSWORD or SESSION_SECRET is not configured' }, 503)
   }
-  const body = await c.req.json().catch(() => null) as { password?: unknown } | null
-  const password = typeof body?.password === 'string' ? body.password : ''
   if (!timingSafeEqualStrings(password, c.env.LOGIN_PASSWORD as string)) {
     return c.json({ error: 'invalid credentials' }, 401)
   }
