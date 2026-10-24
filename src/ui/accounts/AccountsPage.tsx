@@ -1,13 +1,40 @@
 import { Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '../components/Button'
+import { readSessionJson, writeSessionJson } from '../lib/session-draft'
+import { useUiStore } from '../state/ui-store'
 import { AddAccountDialog } from './AddAccountDialog'
 import { useAccounts } from './useAccounts'
+
+const SCROLL_KEY = 'yogurt:accounts-scroll'
 
 export function AccountsPage() {
   const [addOpen, setAddOpen] = useState(false)
   const { data, isPending, isError, refetch } = useAccounts()
   const accounts = data ?? []
+  const selectAccount = useUiStore((s) => s.selectAccount)
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const restored = useRef(false)
+
+  useEffect(() => {
+    const el = listRef.current
+    if (!el) return
+    if (!restored.current) {
+      restored.current = true
+      const saved = readSessionJson<number>(SCROLL_KEY)
+      if (typeof saved === 'number') el.scrollLeft = saved
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const onScroll = () => {
+      if (timer !== undefined) clearTimeout(timer)
+      timer = setTimeout(() => writeSessionJson(SCROLL_KEY, Math.round(el.scrollLeft)), 150)
+    }
+    el.addEventListener('scroll', onScroll)
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      if (timer !== undefined) clearTimeout(timer)
+    }
+  }, [accounts])
 
   return (
     <section>
@@ -27,13 +54,16 @@ export function AccountsPage() {
       ) : accounts.length === 0 ? (
         <p className="mt-4 text-stone-600">등록된 계좌가 없습니다</p>
       ) : (
-        <div tabIndex={0} aria-label="계좌 목록" className="mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto">
+        <div ref={listRef} tabIndex={0} aria-label="계좌 목록" className="mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto">
           {accounts.map((account) => (
             <div
               key={account.id}
               role="group"
+              tabIndex={0}
               aria-roledescription="카드"
               aria-label={account.alias}
+              onClick={() => selectAccount(account.id)}
+              onFocus={() => selectAccount(account.id)}
               className="w-full shrink-0 snap-center rounded-lg border border-primary-200 bg-white p-6 shadow-sm"
             >
               <p className="text-lg font-semibold text-stone-900">{account.alias}</p>

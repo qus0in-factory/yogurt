@@ -15,7 +15,10 @@ const renderDialog = (onClose = vi.fn()) => {
   return render(<QueryClientProvider client={queryClient}><AddAccountDialog open onClose={onClose} /></QueryClientProvider>)
 }
 
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => {
+  vi.clearAllMocks()
+  sessionStorage.clear()
+})
 afterEach(cleanup)
 
 describe('AddAccountDialog', () => {
@@ -35,5 +38,40 @@ describe('AddAccountDialog', () => {
     fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
     fireEvent.click(screen.getByRole('button', { name: '저장' }))
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('저장소가 아직 설정되지 않았습니다'))
+  })
+
+  it('별칭·계좌번호 초안을 sessionStorage에 저장하고 다시 열면 복원한다', async () => {
+    renderDialog()
+    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '초안별칭' } })
+    await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).not.toBeNull())
+    fireEvent.change(screen.getByLabelText('계좌번호'), { target: { value: '999-000' } })
+    await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).toContain('999-000'))
+    cleanup()
+    renderDialog()
+    expect(screen.getByLabelText('별칭')).toHaveValue('초안별칭')
+    expect(screen.getByLabelText('계좌번호')).toHaveValue('999-000')
+  })
+
+  it('Access Key·Secret Key는 sessionStorage 어디에도 저장하지 않는다', async () => {
+    renderDialog()
+    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: 'x' } })
+    fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AKTEST' } })
+    fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SKTEST' } })
+    await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).not.toBeNull())
+    const dump = JSON.stringify(sessionStorage)
+    expect(dump).not.toContain('AKTEST')
+    expect(dump).not.toContain('SKTEST')
+  })
+
+  it('저장 성공 시 초안을 삭제한다', async () => {
+    createAccount.mockResolvedValueOnce({ id: 'a2', alias: '새 계좌', accountNumber: '111-222', createdAt: '2026-01-01T00:00:00.000Z' })
+    renderDialog()
+    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '새 계좌' } })
+    fireEvent.change(screen.getByLabelText('계좌번호'), { target: { value: '111-222' } })
+    fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AK' } })
+    fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
+    await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).not.toBeNull())
+    fireEvent.click(screen.getByRole('button', { name: '저장' }))
+    await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).toBeNull())
   })
 })
