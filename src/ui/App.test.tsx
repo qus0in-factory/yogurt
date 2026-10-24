@@ -3,10 +3,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as auth from '../app/auth/client'
+import { toast } from 'sonner'
 import { App } from './App'
 import { useUiStore } from './store/ui-store'
 
 vi.mock('../app/auth/client', () => ({ checkSession: vi.fn(), login: vi.fn(), logout: vi.fn() }))
+vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const checkSession = vi.mocked(auth.checkSession)
 const login = vi.mocked(auth.login)
 const logout = vi.mocked(auth.logout)
@@ -17,10 +19,7 @@ const renderApp = () => {
 }
 
 beforeEach(() => useUiStore.setState({ screen: 'dashboard', drawerOpen: false }))
-afterEach(() => {
-  cleanup()
-  vi.clearAllMocks()
-})
+afterEach(() => { cleanup(); vi.clearAllMocks() })
 
 describe('App', () => {
   it('세션 확인 중에는 확인 중…을 표시한다', () => {
@@ -66,6 +65,7 @@ describe('App', () => {
     expect(await screen.findByRole('heading', { name: '대시보드' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '로그아웃' }))
     expect(await screen.findByRole('heading', { name: '로그인' })).toBeInTheDocument()
+    expect(toast).toHaveBeenCalledWith('로그아웃했습니다')
   })
   it('모바일 메뉴 버튼으로 drawer를 연다', async () => {
     checkSession.mockResolvedValueOnce(true)
