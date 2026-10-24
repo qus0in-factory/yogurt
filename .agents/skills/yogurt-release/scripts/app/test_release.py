@@ -57,16 +57,16 @@ class ReleaseCommandTest(unittest.TestCase):
         self.assertEqual((ops.created, ops.pushed), (['v1.2.3'], ['v1.2.3']))
         self.assertEqual(ops.slept, [])
 
-    def test_unmatched_health_polls_twelve_times_with_ten_second_gaps(self):
+    def test_unmatched_health_polls_thirty_times_with_ten_second_gaps(self):
         ops = FakeOps(health={'version': '9.9.9'})
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(self.run_main(ops), 1)
-        self.assertEqual((len(ops.polled), ops.slept), (12, [10] * 11))
+        self.assertEqual((len(ops.polled), ops.slept), (30, [10] * 29))
 
     def test_health_fetch_errors_count_as_unmatched(self):
         ops = FakeOps()
         self.assertEqual(self.run_main(ops), 1)
-        self.assertEqual((len(ops.polled), ops.slept), (12, [10] * 11))
+        self.assertEqual((len(ops.polled), ops.slept), (30, [10] * 29))
 
     def test_resolve_or_tag_failure_stops_before_push(self):
         for overrides in ({'resolve': lambda: (1, '', 'fetch failed')}, {'create': lambda tag, sha: (1, 'cannot tag')}):

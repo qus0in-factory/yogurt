@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from domain.version import health_matches, tag_name, validate_version
 from infra.ops import create_tag, fetch_health, list_tags, push_tag, read_version, resolve_main
 
-POLL_ATTEMPTS = 12
+POLL_ATTEMPTS = 30
 POLL_INTERVAL = 10
 
 
