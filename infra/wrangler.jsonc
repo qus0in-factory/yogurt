@@ -6,12 +6,32 @@
     "dev": {
       "name": "yogurt-dev",
       "workers_dev": true,
-      "vars": { "ENVIRONMENT": "dev" }
+      "vars": {
+        "ENVIRONMENT": "dev"
+      }
     },
     "production": {
       "name": "yogurt",
       "workers_dev": true,
-      "vars": { "ENVIRONMENT": "production" }
+      "vars": {
+        "ENVIRONMENT": "production"
+      }
+    }
+  },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true
+    },
+    "issues": {
+      "enabled": true
     }
   }
 }
