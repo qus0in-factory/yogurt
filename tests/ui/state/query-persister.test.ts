@@ -1,11 +1,17 @@
 import { QueryClient, dehydrate } from '@tanstack/react-query'
-import { beforeEach, expect, it, vi } from 'vitest'
+import { afterAll, beforeEach, expect, it, vi } from 'vitest'
 import { get, set, del } from 'idb-keyval'
+import packageJson from '../../../package.json'
 import { queryClient } from '../../../src/ui/state/query-client'
 import { PERSIST_OPTIONS, queryPersister } from '../../../src/ui/state/query-persister'
 
+vi.hoisted(async () => {
+  const { default: metadata } = await import('../../../package.json')
+  vi.stubEnv('VITE_APP_VERSION', metadata.version)
+})
 vi.mock('idb-keyval', () => ({ get: vi.fn(), set: vi.fn(), del: vi.fn() }))
 beforeEach(() => vi.clearAllMocks())
+afterAll(() => vi.unstubAllEnvs())
 
 it('성공한 accounts 쿼리만 영속화하고 세션·mutation은 제외한다', () => {
   const client = new QueryClient()
@@ -26,12 +32,12 @@ it('성공한 accounts 쿼리만 영속화하고 세션·mutation은 제외한�
   expect(state.mutations).toEqual([])
   expect(PERSIST_OPTIONS.maxAge).toBe(24 * 60 * 60 * 1000)
   expect(queryClient.getDefaultOptions().queries?.gcTime).toBeGreaterThanOrEqual(PERSIST_OPTIONS.maxAge)
-  expect(PERSIST_OPTIONS.buster).toBe(import.meta.env.VITE_BUILD_ID ?? 'v1')
+  expect(PERSIST_OPTIONS.buster).toBe(packageJson.version)
   client.clear()
 })
 
 it('IndexedDB의 yogurt:query-cache 키로 저장·복원·삭제한다', async () => {
-  const cache = { timestamp: 1, buster: 'v1', clientState: { queries: [], mutations: [] } }
+  const cache = { timestamp: 1, buster: packageJson.version, clientState: { queries: [], mutations: [] } }
   await queryPersister.persistClient(cache)
   expect(set).toHaveBeenCalledWith('yogurt:query-cache', JSON.stringify(cache))
   vi.mocked(get).mockResolvedValueOnce(JSON.stringify(cache))

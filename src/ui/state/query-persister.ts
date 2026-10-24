@@ -4,7 +4,7 @@ import { get, set, del } from 'idb-keyval'
 
 export const PERSIST_OPTIONS = {
   maxAge: 24 * 60 * 60 * 1000,
-  buster: import.meta.env.VITE_BUILD_ID ?? 'v1',
+  buster: import.meta.env.VITE_APP_VERSION,
   dehydrateOptions: {
     shouldDehydrateQuery: (query: Query) =>
       query.queryKey[0] === 'accounts' && query.state.status === 'success',

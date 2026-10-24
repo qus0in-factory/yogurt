@@ -44,6 +44,14 @@ Workers & Pages → Create application → Import a repository에서 GitHub와 `
 
 pnpm-workspace.yaml에서 esbuild·workerd의 설치 스크립트를 허용한다. 선택적 fsevents의 빌드는 사용하지 않는다. 기존 npm node_modules는 다시 사용하지 않고 pnpm으로 새로 설치한다. 의존성 변경 시 pnpm-lock.yaml도 함께 반영한다.
 
+## 버전 관리
+
+애플리케이션 semver의 단일 출처는 `package.json`의 `version`이다. 마일스톤 시작 시 `pnpm run version:minor`, 작은 수정은 `pnpm run version:patch`로 버전을 올린다. 두 명령은 파일의 버전만 변경하며 Git 태그나 커밋은 만들지 않는다.
+
+main 병합 시 조정자가 해당 버전의 `vX.Y.Z` 태그를 만든다. 배포 후 `/health` 또는 `/api/health` 응답의 `version`으로 실제 배포 버전을 확인한다.
+
+Vite는 같은 버전을 `import.meta.env.VITE_APP_VERSION`에 주입한다. 이 값은 쿼리 캐시 buster로 사용되므로 버전 변경 후 기존 IndexedDB 쿼리 캐시는 폐기된다.
+
 ## Secret 설정
 
 인증 비밀 값(`LOGIN_PASSWORD`, `SESSION_SECRET`)은 코드나 Git 저장소에 커밋하지 않는다.

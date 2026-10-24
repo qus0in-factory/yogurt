@@ -1,3 +1,4 @@
+import packageJson from '../../package.json'
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { HTTPException } from 'hono/http-exception'
@@ -20,10 +21,10 @@ const authMiddleware = createMiddleware(async (c, next) => {
 })
 
 app.get('/health', (c) =>
-  c.json({ service: 'yogurt', environment: c.env.ENVIRONMENT, status: 'ok' }),
+  c.json({ service: 'yogurt', version: packageJson.version, environment: c.env.ENVIRONMENT, status: 'ok' }),
 )
 app.get('/api/health', (c) =>
-  c.json({ service: 'yogurt', environment: c.env.ENVIRONMENT, status: 'ok' }),
+  c.json({ service: 'yogurt', version: packageJson.version, environment: c.env.ENVIRONMENT, status: 'ok' }),
 )
 
 app.use('/api/*', authMiddleware)

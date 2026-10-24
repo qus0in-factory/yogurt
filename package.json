@@ -1,5 +1,6 @@
 {
   "name": "yogurt",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,7 +18,9 @@
     "db:migrate:dev": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env dev",
     "db:migrate:main": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env production",
     "check": "tsc --noEmit",
-    "secret:setup": "node src/infra/cli/secret-setup-cli.ts"
+    "secret:setup": "node src/infra/cli/secret-setup-cli.ts",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.64.0",
