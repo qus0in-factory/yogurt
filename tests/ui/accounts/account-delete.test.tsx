@@ -53,7 +53,7 @@ describe('계좌 삭제', () => {
     expect(toast).toHaveBeenCalledWith('계좌를 삭제했습니다')
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['accounts'] })
     expect(useUiStore.getState().selectedAccountId).toBeNull()
-    expect(document.body.style.overflow).toBe('')
+    await waitFor(() => expect(document.body.style.overflow).toBe(''))
   })
 
   it('취소하면 삭제하지 않고 수정 모달을 유지한다', () => {
