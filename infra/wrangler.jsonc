@@ -13,6 +13,7 @@
     "production": {
       "name": "yogurt",
       "workers_dev": true,
+      "routes": [{ "pattern": "yogurt.qus0in.dev", "custom_domain": true }],
       "vars": {
         "ENVIRONMENT": "production"
       }
