@@ -1,3 +1,5 @@
+import { accountsText } from '../glossary/accounts'
+
 export type ScreenId = 'accounts'
 
 export type MenuItem = {
@@ -5,4 +7,4 @@ export type MenuItem = {
   label: string
 }
 
-export const MENU_ITEMS: MenuItem[] = [{ id: 'accounts', label: '계좌' }]
+export const MENU_ITEMS: MenuItem[] = [{ id: 'accounts', label: accountsText.title }]

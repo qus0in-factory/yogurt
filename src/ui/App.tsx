@@ -7,6 +7,7 @@ import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
 import { AccountsPage } from './accounts/AccountsPage'
 import { useUiStore } from './state/ui-store'
+import { commonText } from './glossary'
 
 export function App() {
   const session = useSession()
@@ -17,15 +18,15 @@ export function App() {
   const setDrawerOpen = useUiStore((state) => state.setDrawerOpen)
 
   if (session.isPending) {
-    return <p className="p-6 text-stone-600">확인 중…</p>
+    return <p className="p-6 text-stone-600">{commonText.checking}</p>
   }
 
   if (session.isError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-primary-50 p-6">
-        <p role="alert" className="text-stone-900">연결 오류</p>
+        <p role="alert" className="text-stone-900">{commonText.connectionError}</p>
         <Button variant="outline" onClick={() => void session.refetch()}>
-          다시 시도
+          {commonText.retry}
         </Button>
       </div>
     )
@@ -52,12 +53,12 @@ export function App() {
             <Button
               variant="outline"
               size="icon"
-              aria-label="로그아웃"
+              aria-label={commonText.logout}
               className="md:h-8 md:w-auto md:px-3"
-              onClick={() => logoutMutation.mutate(undefined, { onSuccess: () => toast('로그아웃했습니다') })}
+              onClick={() => logoutMutation.mutate(undefined, { onSuccess: () => toast(commonText.loggedOut) })}
             >
               <LogOut aria-hidden="true" className="h-5 w-5 md:hidden" />
-              <span className="hidden md:inline">로그아웃</span>
+              <span className="hidden md:inline">{commonText.logout}</span>
             </Button>
           </div>
         </header>

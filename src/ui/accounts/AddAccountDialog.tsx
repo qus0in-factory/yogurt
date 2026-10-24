@@ -8,6 +8,7 @@ import { Dialog } from '../components/Dialog'
 import { TextField } from '../components/TextField'
 import { readSessionJson, removeSession, writeSessionJson } from '../lib/session-draft'
 import { useCreateAccount } from './useAccounts'
+import { accountsText } from '../glossary/accounts'
 
 type AddAccountDialogProps = { open: boolean; onClose: () => void }
 
@@ -46,25 +47,25 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
         removeSession(DRAFT_KEY)
         reset({ alias: '', accountNumber: '', accessKey: '', secretKey: '' })
         onClose()
-        toast('계좌를 추가했습니다')
+        toast(accountsText.added)
       },
       onError: (error) => {
         const status = (error as { response?: { status?: number } }).response?.status
-        toast.error(status === 503 ? '저장소가 아직 설정되지 않았습니다' : '계좌를 추가하지 못했습니다')
+        toast.error(status === 503 ? accountsText.storageNotConfigured : accountsText.addFailed)
       },
     })
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="계좌 추가">
+    <Dialog open={open} onClose={onClose} title={accountsText.addTitle}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-        {field('별칭', 'alias')}
-        {field('계좌번호', 'accountNumber')}
-        {field('Access Key', 'accessKey')}
-        {field('Secret Key', 'secretKey', 'password')}
+        {field(accountsText.alias, 'alias')}
+        {field(accountsText.accountNumber, 'accountNumber')}
+        {field(accountsText.accessKey, 'accessKey')}
+        {field(accountsText.secretKey, 'secretKey', 'password')}
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onClose}>취소</Button>
-          <Button type="submit" disabled={createAccount.isPending}>저장</Button>
+          <Button type="button" variant="ghost" onClick={onClose}>{accountsText.cancel}</Button>
+          <Button type="submit" disabled={createAccount.isPending}>{accountsText.save}</Button>
         </div>
       </form>
     </Dialog>

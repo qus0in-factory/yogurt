@@ -3,6 +3,7 @@ import { Menu } from 'lucide-react'
 import { Button } from '../components/Button'
 import type { ScreenId } from './menu'
 import { MenuDrawer } from './MenuDrawer'
+import { layoutText } from '../glossary/layout'
 
 type MobileMenuProps = {
   open?: boolean
@@ -27,7 +28,7 @@ export function MobileMenu(props: MobileMenuProps) {
       <Button
         variant="outline"
         size="icon"
-        aria-label="메뉴"
+        aria-label={layoutText.menu}
         aria-expanded={open}
         aria-controls="mobile-menu"
         onClick={toggle}
