@@ -12,7 +12,7 @@
       "d1_databases": [
         { "binding": "DB", "database_name": "yogurt-dev", "database_id": "6844c20d-9a49-4253-ab56-e75d2850dc59", "migrations_dir": "migrations" }
       ],
-      "kv_namespaces": [{ "binding": "SESSIONS", "id": "64d6fa6a517f4ae59ff4b925d385872b" }]
+      "kv_namespaces": [{ "binding": "SESSIONS", "id": "64d6fa6a517f4ae59ff4b925d385872b" }, { "binding": "CACHE", "id": "7e925b30830c4610bb51df34b7666224" }]
     },
     "production": {
       "name": "yogurt",
@@ -24,7 +24,7 @@
       "d1_databases": [
         { "binding": "DB", "database_name": "yogurt", "database_id": "31842219-25db-4206-8306-1551f1870c79", "migrations_dir": "migrations" }
       ],
-      "kv_namespaces": [{ "binding": "SESSIONS", "id": "0b44d7dad3054d97937601926371034a" }]
+      "kv_namespaces": [{ "binding": "SESSIONS", "id": "0b44d7dad3054d97937601926371034a" }, { "binding": "CACHE", "id": "abb8d1626e6045e9957ea04d35a3aeb2" }]
     }
   },
   "observability": {
