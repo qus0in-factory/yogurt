@@ -24,5 +24,17 @@ class CallbackCommandTest(unittest.TestCase):
             self.assertEqual(main(['--to', 'claude', '--from', 'codex', '--status', 'working', '--summary', 'bad'], sender=lambda *_a, **_k: self.fail('must not send')), 2)
 
 
+    def test_long_summary_is_sent_truncated_and_empty_summary_fails(self):
+        calls = []
+        sender = lambda *args, **kwargs: (calls.append(args) or (True, 'callback sent'))
+        with contextlib.redirect_stderr(io.StringIO()):
+            code = main(['--to', 'claude', '--from', 'ds', '--status', 'done', '--summary', 'z' * 600], sender=sender)
+        self.assertEqual(code, 0)
+        self.assertTrue(calls[0][2].endswith('…'))
+        self.assertEqual(len(calls[0][2]), len('[callback] ds status:done ') + 500)
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(main(['--to', 'claude', '--from', 'ds', '--status', 'done', '--summary', ' '], sender=lambda *_a, **_k: self.fail('must not send')), 2)
+
+
 if __name__ == '__main__':
     unittest.main()

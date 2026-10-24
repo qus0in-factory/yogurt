@@ -1,5 +1,5 @@
 import unittest
-from domain.message import build_message, validate_agent_name
+from domain.message import MAX_SUMMARY_LENGTH, build_message, truncate_summary, validate_agent_name
 
 
 class CallbackMessageTest(unittest.TestCase):
@@ -13,12 +13,22 @@ class CallbackMessageTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_message('codex', 'working', 'summary')
 
-    def test_rejects_invalid_agent_empty_and_long_summary(self):
+    def test_rejects_invalid_agent_and_empty_summary(self):
         with self.assertRaises(ValueError):
             validate_agent_name('Bad Name')
-        for summary in ('  \n ', 'x' * 501):
-            with self.assertRaises(ValueError):
-                build_message('ds', 'failed', summary)
+        with self.assertRaises(ValueError):
+            build_message('ds', 'failed', '  \n ')
+
+    def test_truncates_long_summary_to_limit_with_ellipsis(self):
+        summary = truncate_summary('x' * 600)
+        self.assertEqual(len(summary), MAX_SUMMARY_LENGTH)
+        self.assertTrue(summary.endswith('…'))
+        self.assertEqual(truncate_summary('x' * MAX_SUMMARY_LENGTH), 'x' * MAX_SUMMARY_LENGTH)
+
+    def test_long_summary_is_truncated_in_message_instead_of_rejected(self):
+        message = build_message('ds', 'done', 'y' * 600)
+        self.assertEqual(message, f'[callback] ds status:done {truncate_summary("y" * 600)}')
+        self.assertTrue(message.endswith('…'))
 
 
 if __name__ == '__main__':
