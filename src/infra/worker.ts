@@ -4,6 +4,8 @@ import { HTTPException } from 'hono/http-exception'
 import { createMiddleware } from 'hono/factory'
 import { loginHandler, logoutHandler, readSessionCookie, sessionHandler, verifySessionToken } from './auth.ts'
 import { loginRequestSchema } from '../domain/auth-schema.ts'
+import { accountInputSchema } from '../domain/account.ts'
+import { createAccount, listAccounts } from './accounts.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -30,6 +32,10 @@ app.post('/api/login', zValidator('json', loginRequestSchema, (result, c) => {
 }), (c) => loginHandler(c, c.req.valid('json').password))
 app.get('/api/session', sessionHandler)
 app.post('/api/logout', logoutHandler)
+app.get('/api/accounts', listAccounts)
+app.post('/api/accounts', zValidator('json', accountInputSchema, (result, c) => {
+  if (!result.success) return c.json({ error: 'invalid request' }, 400)
+}), (c) => createAccount(c, c.req.valid('json')))
 app.all('/api/*', (c) => c.notFound())
 app.onError((error, c) => {
   if (error instanceof HTTPException && error.status === 400) return c.json({ error: 'invalid request' }, 400)

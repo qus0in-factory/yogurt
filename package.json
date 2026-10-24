@@ -13,7 +13,7 @@
     "secret:main": "wrangler secret put --config infra/wrangler.jsonc --env production",
     "keygen:session": "node src/infra/keygen.ts",
     "keygen:account": "node src/infra/account-keygen.ts",
-    "db:migrate:local": "wrangler d1 migrations apply DB --local --config infra/wrangler.jsonc --env dev",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local --persist-to src/ui/.wrangler/state --config infra/wrangler.jsonc --env dev",
     "db:migrate:dev": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env dev",
     "db:migrate:main": "wrangler d1 migrations apply DB --remote --config infra/wrangler.jsonc --env production",
     "check": "tsc --noEmit",
