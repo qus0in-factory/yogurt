@@ -6,6 +6,7 @@ import * as auth from '../../src/app/auth/client'
 import { App } from '../../src/ui/App'
 import { useUiStore } from '../../src/ui/state/ui-store'
 
+vi.mock('idb-keyval', () => ({ get: vi.fn(), set: vi.fn(), del: vi.fn(async () => {}) }))
 vi.mock('../../src/app/auth/client', () => ({ checkSession: vi.fn(), login: vi.fn(), logout: vi.fn() }))
 const checkSession = vi.mocked(auth.checkSession)
 const logout = vi.mocked(auth.logout)

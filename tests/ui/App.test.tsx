@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { App } from '../../src/ui/App'
 import { useUiStore } from '../../src/ui/state/ui-store'
 
+vi.mock('idb-keyval', () => ({ get: vi.fn(), set: vi.fn(), del: vi.fn(async () => {}) }))
 vi.mock('../../src/app/auth/client', () => ({ checkSession: vi.fn(), login: vi.fn(), logout: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const checkSession = vi.mocked(auth.checkSession)
