@@ -6,6 +6,7 @@ import { Button } from './components/Button'
 import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
 import { AccountsPage } from './accounts/AccountsPage'
+import { OverviewPage } from './overview/OverviewPage'
 import { useUiStore } from './state/ui-store'
 import { commonText } from './glossary'
 
@@ -13,6 +14,7 @@ export function App() {
   const session = useSession()
   const logoutMutation = useLogout()
   const screen = useUiStore((state) => state.screen)
+  const active = screen === 'overview' ? 'overview' : 'accounts'
   const drawerOpen = useUiStore((state) => state.drawerOpen)
   const navigate = useUiStore((state) => state.navigate)
   const setDrawerOpen = useUiStore((state) => state.setDrawerOpen)
@@ -38,14 +40,14 @@ export function App() {
 
   return (
     <div className="flex min-h-screen bg-primary-50">
-      <Sidebar current={screen} onNavigate={navigate} />
+      <Sidebar current={active} onNavigate={navigate} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 bg-white p-3">
           <div className="md:hidden">
             <MobileMenu
               open={drawerOpen}
               onToggle={() => setDrawerOpen(!drawerOpen)}
-              current={screen}
+              current={active}
               onNavigate={navigate}
             />
           </div>
@@ -63,7 +65,7 @@ export function App() {
           </div>
         </header>
         <main className="flex-1 p-6">
-          <AccountsPage />
+          {active === 'overview' ? <OverviewPage /> : <AccountsPage />}
         </main>
       </div>
     </div>

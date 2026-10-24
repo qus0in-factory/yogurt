@@ -7,8 +7,15 @@ import { MENU_ITEMS } from '../../../src/ui/layout/menu'
 afterEach(cleanup)
 
 describe('Sidebar', () => {
-  it('메뉴는 계좌 하나만 제공한다', () => {
-    expect(MENU_ITEMS).toEqual([{ id: 'accounts', label: '계좌' }])
+  it('메뉴는 현황을 계좌 위에 제공한다', () => {
+    expect(MENU_ITEMS).toEqual([
+      { id: 'overview', label: '현황' },
+      { id: 'accounts', label: '계좌' },
+    ])
+  })
+  it('현황과 계좌 버튼을 순서대로 표시한다', () => {
+    render(<Sidebar current="overview" onNavigate={vi.fn()} />)
+    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual(['현황', '계좌'])
   })
   it('nav에 접근 가능한 이름을 제공한다', () => {
     render(<Sidebar current="accounts" onNavigate={vi.fn()} />)
