@@ -12,13 +12,21 @@
 - 완료 조건: 산출물 상태와 보고 제출까지
 - 검증: 대상이 스스로 수행할 확인 방법(파일 재독 등)
 - 시간: 3분. 조정자가 전체 5분 경계 안의 잔여 시간으로 조정
+- 완료 시 콜백 명령: 계약 끝에 아래 명령을 실제 조정자·작업자 이름과 요약으로 채워 추가한다.
+
+```sh
+python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to <조정자> --from <작업자> --status done --summary "<한 줄 요약>" [--report <보고 파일 경로>]
+```
+
+실패·차단 시에는 상태를 `failed` 또는 `blocked`로 바꾸어 같은 명령을 실행한다.
 - 결과 보고: 완료 보고 형식
 - 차단 보고: 시작 전·진행 중 막힘 보고 형식
 
 ## 제출·대기 명령 형태
 
 - 제출: `herdr agent prompt <target> "$(cat 계약파일)" --wait --until working --timeout 20000`. `--until`은 `--wait` 없이 쓰지 않는다.
-- 대기: `herdr agent wait <target> --timeout 55000`(60000 이하).
+- 완료 취합: 작업자 콜백 메시지를 조정자 pane에서 우선 기다린다.
+- fallback: 콜백 미수신 시 `/tmp/herdr-callback/<조정자>/` 파일을 확인하고, 파일도 없을 때만 `herdr agent wait <target> --timeout 55000`으로 폴링한다.
 - 선행 조건(의존성 설치·런타임 버전 등)은 계약 발행 전 조정자가 실측하고, 계약에 실측 결과를 적는다.
 
 ## 공통 금지·보존 (모든 계약에 포함)

@@ -25,7 +25,7 @@ description: 사용자가 Herdr로 beam, glm, claude, agy, ds, codex에게 작�
 
 ## 취합
 
-[결과 취합](references/result-integration.md)을 따른다. 대기 명령에는 반드시 --timeout을 지정한다(예: herdr agent wait <target> --timeout 30000). prompt --wait에도 동일하게 적용한다. 단일 대기는 60초 이내로 두고 전체 작업의 5분 경계를 넘길 경우 사용자 확인을 받는다. get/read로 결과와 변경 파일을 확인하고, 검증 후에만 완료로 판단한다. 실패·타임아웃·agent_prompt_stalled 발생 시 get/read로 신원·화면·변경 파일을 확인한다. stalled는 시작 활동이 관찰되지 않았다는 뜻이며 미전달의 증거가 아니다. 전송된 입력을 확인한 뒤에만 재시도한다.
+[결과 취합](references/result-integration.md)을 따른다. 작업 계약 끝에 완료·실패·차단 콜백 명령을 넣고, 조정자 pane의 콜백 메시지를 우선 기다린다. 콜백 미수신 시 fallback 파일을 확인하고, 파일도 없을 때만 `herdr agent wait <target> --timeout 30000`으로 폴링한다. 대기에는 항상 60000 이하의 timeout을 지정한다. get/read로 결과와 변경 파일을 확인하고 검증 후 완료로 판단한다. 실패·타임아웃·agent_prompt_stalled 발생 시 전송된 입력과 상태를 확인한 뒤에만 재시도한다.
 
 공유 저장소에서는 담당 에이전트가 checkout, commit, push, merge, 배포, 이슈 변경을 수행하지 않게 한다. 해당 외부 작업이 요청에 포함되었다면 조정자가 취합·검증 후 수행한다. 이 스킬 자체는 외부 작업 권한을 추가하지 않는다.
 
