@@ -34,7 +34,7 @@ export function MobileMenu(props: MobileMenuProps) {
       >
         <Menu aria-hidden="true" className="h-5 w-5" />
       </Button>
-      <MenuDrawer open={open} current={props.current ?? 'dashboard'} onNavigate={props.onNavigate ?? (() => {})} onClose={close} />
+      <MenuDrawer open={open} current={props.current ?? 'accounts'} onNavigate={props.onNavigate ?? (() => {})} onClose={close} />
     </div>
   )
 }

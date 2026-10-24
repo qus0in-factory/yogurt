@@ -5,14 +5,7 @@ import { LoginForm } from './auth/LoginForm'
 import { Button } from './components/Button'
 import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
-import type { ScreenId } from './layout/menu'
 import { useUiStore } from './store/ui-store'
-
-const TITLES: Record<ScreenId, string> = {
-  dashboard: '대시보드',
-  accounts: '계좌/자산',
-  transactions: '거래',
-}
 
 export function App() {
   const session = useSession()
@@ -68,7 +61,7 @@ export function App() {
           </div>
         </header>
         <main className="flex-1 p-6">
-          <h1 className="text-2xl font-semibold text-stone-900">{TITLES[screen]}</h1>
+          <h1 className="text-2xl font-semibold text-stone-900">계좌</h1>
           <p className="mt-2 text-stone-600">샘플 데이터</p>
         </main>
       </div>

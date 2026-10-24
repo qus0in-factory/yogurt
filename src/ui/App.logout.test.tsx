@@ -14,7 +14,7 @@ afterEach(() => { cleanup(); vi.clearAllMocks() })
 
 describe('App 로그아웃 버튼', () => {
   it('접근 이름 로그아웃과 svg를 갖고 클릭 시 로그아웃을 호출한다', async () => {
-    useUiStore.setState({ screen: 'dashboard', drawerOpen: false })
+    useUiStore.setState({ screen: 'accounts', drawerOpen: false })
     checkSession.mockResolvedValueOnce(true)
     logout.mockResolvedValueOnce()
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })

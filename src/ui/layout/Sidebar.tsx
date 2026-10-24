@@ -14,7 +14,7 @@ type SidebarProps = {
 }
 
 export function Sidebar(props: SidebarProps) {
-  const current = props.current ?? props.active ?? props.activeId ?? props.selected ?? 'dashboard'
+  const current = props.current ?? props.active ?? props.activeId ?? props.selected ?? 'accounts'
   const onNavigate = props.onNavigate ?? props.onSelect ?? props.onChange ?? (() => {})
   return (
     <aside className={cn('hidden md:flex md:w-60 md:flex-col border-r border-stone-200 bg-white', props.className)}>

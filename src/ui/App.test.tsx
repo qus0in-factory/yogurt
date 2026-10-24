@@ -18,7 +18,7 @@ const renderApp = () => {
   return render(<QueryClientProvider client={client}><App /></QueryClientProvider>)
 }
 
-beforeEach(() => useUiStore.setState({ screen: 'dashboard', drawerOpen: false }))
+beforeEach(() => useUiStore.setState({ screen: 'accounts', drawerOpen: false }))
 afterEach(() => { cleanup(); vi.clearAllMocks() })
 
 describe('App', () => {
@@ -32,27 +32,25 @@ describe('App', () => {
     renderApp()
     expect(await screen.findByText('연결 오류')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
-    expect(await screen.findByRole('heading', { name: '대시보드' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '계좌' })).toBeInTheDocument()
   })
   it('세션 401이면 로그인 화면을 표시한다', async () => {
     checkSession.mockResolvedValueOnce(false)
     renderApp()
     expect(await screen.findByRole('heading', { name: '로그인' })).toBeInTheDocument()
   })
-  it('세션 200이면 대시보드 셸을 표시한다', async () => {
+  it('세션 200이면 계좌 셸을 표시한다', async () => {
     checkSession.mockResolvedValueOnce(true)
     renderApp()
-    expect(await screen.findByRole('heading', { name: '대시보드' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '계좌' })).toBeInTheDocument()
   })
-  it('메뉴 전환과 aria-current를 지원한다', async () => {
+  it('계좌 메뉴에 aria-current를 설정한다', async () => {
     checkSession.mockResolvedValueOnce(true)
     renderApp()
-    await screen.findByRole('heading', { name: '대시보드' })
-    fireEvent.click(screen.getByRole('button', { name: '계좌/자산' }))
-    expect(screen.getByRole('heading', { name: '계좌/자산' })).toBeInTheDocument()
-    const tx = screen.getByRole('button', { name: '거래' })
-    fireEvent.click(tx)
-    expect(tx).toHaveAttribute('aria-current', 'page')
+    await screen.findByRole('heading', { name: '계좌' })
+    const button = screen.getByRole('button', { name: '계좌' })
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-current', 'page')
   })
   it('로그인 성공 시 셸로 전환되고 로그아웃 시 로그인 화면으로 돌아간다', async () => {
     checkSession.mockResolvedValueOnce(false)
@@ -62,7 +60,7 @@ describe('App', () => {
     await screen.findByRole('heading', { name: '로그인' })
     fireEvent.change(screen.getByLabelText('비밀번호'), { target: { value: 'pw' } })
     fireEvent.click(screen.getByRole('button', { name: '로그인' }))
-    expect(await screen.findByRole('heading', { name: '대시보드' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '계좌' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '로그아웃' }))
     expect(await screen.findByRole('heading', { name: '로그인' })).toBeInTheDocument()
     expect(toast).toHaveBeenCalledWith('로그아웃했습니다')

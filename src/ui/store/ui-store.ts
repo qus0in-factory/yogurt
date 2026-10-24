@@ -9,7 +9,7 @@ type UiState = {
 }
 
 export const useUiStore = create<UiState>((set) => ({
-  screen: 'dashboard',
+  screen: 'accounts',
   drawerOpen: false,
   navigate: (id) => set({ screen: id, drawerOpen: false }),
   setDrawerOpen: (open) => set({ drawerOpen: open }),

@@ -2,21 +2,21 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { useUiStore } from './ui-store'
 
 beforeEach(() => {
-  useUiStore.setState({ screen: 'dashboard', drawerOpen: false })
+  useUiStore.setState({ screen: 'accounts', drawerOpen: false })
 })
 
 describe('ui store', () => {
-  it('기본 화면은 dashboard이고 drawer는 닫혀 있다', () => {
+  it('기본 화면은 accounts이고 drawer는 닫혀 있다', () => {
     const state = useUiStore.getState()
-    expect(state.screen).toBe('dashboard')
+    expect(state.screen).toBe('accounts')
     expect(state.drawerOpen).toBe(false)
   })
 
   it('navigate는 화면을 바꾸고 drawer를 닫는다', () => {
     useUiStore.getState().setDrawerOpen(true)
-    useUiStore.getState().navigate('transactions')
+    useUiStore.getState().navigate('accounts')
     const state = useUiStore.getState()
-    expect(state.screen).toBe('transactions')
+    expect(state.screen).toBe('accounts')
     expect(state.drawerOpen).toBe(false)
   })
 
