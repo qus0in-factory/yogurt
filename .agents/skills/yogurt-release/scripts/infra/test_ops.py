@@ -22,6 +22,23 @@ class GitCommandTest(unittest.TestCase):
         self.assertEqual(ops.resolve_main(run), (0, '0f3d39a', ''))
         self.assertEqual(run.argv, ['git', 'rev-parse', 'origin/main'])
 
+    def test_resolve_main_fetches_origin_main_before_rev_parse(self):
+        calls = []
+        def run(argv, **_kwargs):
+            calls.append(argv)
+            stdout = '0f3d39a\n' if argv[1] == 'rev-parse' else ''
+            return subprocess.CompletedProcess(argv, 0, stdout=stdout, stderr='')
+        self.assertEqual(ops.resolve_main(run), (0, '0f3d39a', ''))
+        self.assertEqual(calls, [['git', 'fetch', 'origin', 'main', '--tags'], ['git', 'rev-parse', 'origin/main']])
+
+    def test_resolve_main_returns_fetch_failure_and_skips_rev_parse(self):
+        calls = []
+        def run(argv, **_kwargs):
+            calls.append(argv)
+            return subprocess.CompletedProcess(argv, 3, stdout='', stderr='fetch failed')
+        self.assertEqual(ops.resolve_main(run), (3, '', 'fetch failed'))
+        self.assertEqual(calls, [['git', 'fetch', 'origin', 'main', '--tags']])
+
     def test_create_tag_makes_annotated_tag_on_sha(self):
         run = fake_run()
         self.assertEqual(ops.create_tag('v1.2.3', '0f3d39a', run), (0, ''))

@@ -19,6 +19,9 @@ def list_tags(runner=None):
 
 
 def resolve_main(runner=None):
+    code, _out, err = _git(['fetch', 'origin', 'main', '--tags'], runner)
+    if code != 0:
+        return code, '', err
     code, out, err = _git(['rev-parse', 'origin/main'], runner)
     return code, out.strip(), err
 
