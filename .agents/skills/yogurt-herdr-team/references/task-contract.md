@@ -41,6 +41,7 @@ python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to <조�
 - 5분을 넘기면 질문 대기 대신 현 상태로 콜백한다.
 - 도구 호출은 텍스트로 출력하지 말고 실제 호출로 수행한다.
 - 외부 API 가짜 객체(D1 등)는 실제 API 호출 형태(prepare().all(), prepare().bind().run())를 따른다.
+- UI 요소 사이(아이콘과 텍스트, 버튼끼리, 입력과 버튼)는 붙이지 않는다. 버튼 안 아이콘·텍스트 간격은 `Button`의 기본 `gap-2`를 쓰고, 요소 묶음은 `gap-2` 이상으로 띄운다. 개별 margin으로 간격을 맞추지 않는다.
 
 ## 복사 예시 (YAML)
 

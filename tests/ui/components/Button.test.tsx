@@ -32,6 +32,11 @@ describe('Button', () => {
     expect(button).toHaveClass('bg-primary-300', 'text-stone-900', 'hover:bg-primary-400')
   })
 
+  it('아이콘과 텍스트 사이에 기본 간격을 둔다', () => {
+    render(<Button>삭제</Button>)
+    expect(screen.getByRole('button', { name: '삭제' })).toHaveClass('gap-2')
+  })
+
   it('전달한 className을 기본 스타일과 병합한다', () => {
     render(<Button className="mt-4">추가</Button>)
     expect(screen.getByRole('button', { name: '추가' })).toHaveClass('mt-4')
