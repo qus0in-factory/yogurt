@@ -2,10 +2,12 @@ import { ACCOUNT_PRODUCTS } from '../../domain/accounts/products'
 import { productAccounts } from '../../app/overview/product-accounts'
 import { useAccounts } from '../accounts/useAccounts'
 import { Carousel } from '../components/Carousel'
+import { EmptyState } from '../components/EmptyState'
 import { accountsText } from '../glossary/accounts'
 import { overviewText } from '../glossary/overview'
 import { useUiStore } from '../state/ui-store'
 import { productDetails } from './product-details'
+import { productIcons } from './product-icons'
 import { IrpAccountBox } from './IrpAccountBox'
 
 export function ProductTab({ productCode }: { productCode: string }) {
@@ -23,7 +25,7 @@ export function ProductTab({ productCode }: { productCode: string }) {
     <div className="flex flex-col gap-2">
       <p className="text-stone-600">{overviewText.total(accounts.length)}</p>
       {accounts.length === 0 ? (
-        <p className="text-stone-600">{overviewText.productEmpty(product.label)}</p>
+        <EmptyState icon={productIcons[product.key]} title={overviewText.productEmpty(product.label)} description={overviewText.productEmptyHint(product.label)} />
       ) : (
         <Carousel items={accounts} labels={labels} renderItem={(account) => <IrpAccountBox key={account.id} account={account}
           selected={selectedId === account.id} onSelect={() => select(product.key, selectedId === account.id ? null : account.id)} />} />

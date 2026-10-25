@@ -1,4 +1,5 @@
 import { profitTone } from '../overview/profit-tone'
+import { withObjectParticle } from '../lib/josa'
 
 export const overviewText = {
   detail: '잔고 상세',
@@ -29,7 +30,7 @@ export const overviewText = {
   loanAmountTooltipLabel: '대출금액 기준',
   loanTooltipLabel: '융자비율 기준',
   manwon: (value: number) => `${new Intl.NumberFormat('ko-KR').format(Math.round(value / 10000))}만원`,
-  maxLoanTooltip: (maxLoan: string, percent: number, required: string) => `인지세 기준 대출은 최대 ${maxLoan}입니다. 펀드 평가금액이 ${maxLoan} ÷ ${percent}% ≈ ${required}을 넘으면 초과분은 매도 후 추가 인출할 수 있습니다.`,
+  maxLoanTooltip: (maxLoan: string, percent: number, required: string) => `인지세 기준 대출은 최대 ${maxLoan}입니다. 펀드 평가금액이 ${maxLoan} ÷ ${percent}% ≈ ${withObjectParticle(required)} 넘으면 초과분은 매도 후 추가 인출할 수 있습니다.`,
   withdrawableNotice: (amount: string) => `추가 매도·인출 가능: 약 ${amount}`,
   withdrawableDetail: (required: string) => `펀드 평가금액이 필요 담보(약 ${required})를 초과했습니다.`,
   collateralTooltip: (limit: number) => `펀드 평가금액 ÷ 대출금 × 100. ${limit}%를 넘어야 합니다(이하이면 담보 부족).`,
@@ -63,5 +64,6 @@ export const overviewText = {
   listLabel: 'IRP 계좌 목록',
   empty: 'IRP 계좌가 없습니다',
   productEmpty: (label: string) => `${label} 계좌가 없습니다`,
+  productEmptyHint: (label: string) => `계좌 카드에서 ${withObjectParticle(label)} 켜면 여기에 표시됩니다`,
   productListLabel: (label: string) => `${label} 계좌 목록`,
 } as const
