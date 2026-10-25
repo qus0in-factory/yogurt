@@ -3,53 +3,46 @@ import { formatPercent } from '../../app/accounts/isa-progress-position'
 import { isaText } from '../glossary/isa'
 
 interface Props {
-  currentAssets: number
-  points: PathPoint[]
-  hasMid: boolean
-  currentMonth?: string
-  expiryMonth?: string
-  lastClosedAssets?: number | null
+  currentAssets: number; points: PathPoint[]; hasMid: boolean
+  currentMonth?: string; expiryMonth?: string
+  lastClose?: { date: string; totalAssetsWon: number } | null
+  isLoadingLastClose?: boolean
 }
 
-export function IsaProgressChart({ currentAssets, points, hasMid, currentMonth, expiryMonth }: Props) {
+export function IsaProgressChart({
+  currentAssets, points, hasMid, currentMonth, expiryMonth, lastClose, isLoadingLastClose,
+}: Props) {
   const isExp = Boolean(currentMonth && expiryMonth && currentMonth === expiryMonth)
   const { minManwon, maxManwon, ticks } = calculateAxisRange(currentAssets, points)
-  const [w, h, pl, pr, pt, pb, pw, ph] = [600, 220, 50, 60, 20, 30, 490, 170]
+  const [w, h, pl, pr, pt, pw, ph] = [600, 220, 50, 60, 20, 490, 170]
   const count = points.length
   const getX = (i: number) => pl + (count <= 1 ? pw / 2 : (i / (count - 1)) * pw)
   const getY = (v: number | null) => (v === null ? 0 : pt + ph - ((Math.max(0, v) / 10_000 - minManwon) / (maxManwon - minManwon || 1)) * ph)
-
-  const toLine = (k: 'min' | 'mid' | 'max') =>
-    points.filter((p) => p[k] !== null).map((p, i) => `${i ? 'L' : 'M'} ${getX(i)} ${getY(p[k])}`).join(' ')
+  const toLine = (k: 'min' | 'mid' | 'max') => points.filter((p) => p[k] !== null).map((p, i) => `${i ? 'L' : 'M'} ${getX(i)} ${getY(p[k])}`).join(' ')
   const toBand = () => {
     const v = points.filter((p) => p.min !== null && p.max !== null)
     return v.length < 2 ? '' : `${v.map((p, i) => `${i ? 'L' : 'M'} ${getX(i)} ${getY(p.max)}`).join(' ')} ${v.slice().reverse().map((_, i) => `L ${getX(v.length - 1 - i)} ${getY(v[v.length - 1 - i]?.min ?? null)}`).join(' ')} Z`
   }
   const toMan = (v: number | null) => (v !== null ? `${Math.round(v / 10_000)}${isaText.manUnit}` : '')
-
   const curIdx = Math.max(0, currentMonth ? points.findIndex((p) => p.month === currentMonth) : Math.floor(count / 2))
   const [curMin, curMid, curMax] = [points[curIdx]?.min ?? null, points[curIdx]?.mid ?? null, points[curIdx]?.max ?? null]
   const [isBelow, isAbove] = [curMin !== null && currentAssets < curMin, curMax !== null && currentAssets > curMax]
-  const rangeSpan = curMin !== null && curMax !== null ? curMax - curMin : 0
-  const posRatio = rangeSpan > 0 ? (100 * (currentAssets - curMin!)) / rangeSpan : null
-  const statusText = isBelow ? `${isaText.progressBelow} ${formatPercent(posRatio ?? 0)}`.trim() : isAbove ? `${isaText.progressAbove} ${formatPercent(posRatio ?? 0)}`.trim() : ''
+  const span = curMin !== null && curMax !== null ? curMax - curMin : 0
+  const statusText = isBelow ? `${isaText.progressBelow} ${formatPercent(span > 0 ? (100 * (currentAssets - curMin!)) / span : 0)}`.trim() : isAbove ? `${isaText.progressAbove} ${formatPercent(span > 0 ? (100 * (currentAssets - curMin!)) / span : 0)}`.trim() : ''
   const plotValue = Math.max(0, isBelow ? (curMin ?? 0) : isAbove ? (curMax ?? 0) : currentAssets)
-  const targetLabel = [curMin !== null ? toMan(curMin) : null, curMid !== null ? toMan(curMid) : null, curMax !== null ? toMan(curMax) : null].filter(Boolean).join(' · ')
-
+  const targetLabel = [curMin, curMid, curMax].map(toMan).filter(Boolean).join(' · ')
   const py = Math.min(pt + ph, Math.max(pt, getY(plotValue)))
-  const shift = Math.max(0, py + (statusText ? 24 : 14) - (h - 22))
+  const [shift, waitY] = [Math.max(0, py + (statusText ? 24 : 14) - (h - 22)), Math.min(h - 22, Math.max(12, getY(plotValue)))]
   const [titleY, statusY, targetY] = [py - 8 - shift, py + 14 - shift, py + (statusText ? 24 : 14) - shift]
-  const waitY = Math.min(h - 22, Math.max(12, getY(plotValue)))
+  const closedWon = isExp && lastClose ? Math.max(0, lastClose.totalAssetsWon) : null
+  const closedY = closedWon !== null ? Math.min(pt + ph, Math.max(pt, getY(closedWon))) : null
 
   return (
     <div className="w-full overflow-hidden">
       <svg role="img" aria-label={isaText.progressTitle} viewBox={`0 0 ${w} ${h}`} className="w-full h-auto">
         <defs><clipPath id="chart-plot-area"><rect x={pl} y={pt} width={pw} height={ph} /></clipPath></defs>
         {ticks.map((t) => (
-          <g key={t}>
-            <line x1={pl} y1={getY(t * 10_000)} x2={w - pr} y2={getY(t * 10_000)} stroke="#e2e8f0" strokeDasharray="3 3" />
-            <text x={pl - 6} y={getY(t * 10_000) + 4} textAnchor="end" className="text-[10px] fill-slate-400">{t.toLocaleString('ko-KR')}</text>
-          </g>
+          <g key={t}><line x1={pl} y1={getY(t * 10_000)} x2={w - pr} y2={getY(t * 10_000)} stroke="#e2e8f0" strokeDasharray="3 3" /><text x={pl - 6} y={getY(t * 10_000) + 4} textAnchor="end" className="text-[10px] fill-slate-400">{t.toLocaleString('ko-KR')}</text></g>
         ))}
         <g clipPath="url(#chart-plot-area)">
           {toBand() && <path data-testid="band-path" d={toBand()} fill="#bfdbfe" fillOpacity="0.35" />}
@@ -57,12 +50,21 @@ export function IsaProgressChart({ currentAssets, points, hasMid, currentMonth, 
           {hasMid && toLine('mid') && <path data-testid="mid-path" d={toLine('mid')} fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="3 3" />}
           {toLine('max') && <path d={toLine('max')} fill="none" stroke="#2563eb" strokeWidth="1.5" />}
           {!isExp && <circle data-testid="current-dot" cx={getX(curIdx)} cy={getY(plotValue)} r="5" fill="#1d4ed8" />}
+          {isExp && closedY !== null && <circle data-testid="last-close-dot" cx={getX(curIdx)} cy={closedY} r="5" fill="#1d4ed8" />}
         </g>
         {points.map((p, i) => (
           <text data-testid="month-tick" key={p.month} x={getX(i)} y={h - 8} textAnchor="middle" className="text-[10px] fill-slate-500">{p.month.slice(2).replace('-', '.')}</text>
         ))}
         {isExp ? (
-          <text data-testid="closing-wait" x={getX(curIdx)} y={waitY} textAnchor="middle" className="text-[10px] font-semibold fill-amber-700">{isaText.progressWaitClosing}</text>
+          isLoadingLastClose ? (
+            <text data-testid="closing-loading" x={getX(curIdx)} y={waitY} textAnchor="middle" className="text-[10px] font-semibold fill-slate-500">{isaText.progressClosingLoading}</text>
+          ) : closedWon !== null && lastClose ? (
+            <text x={getX(curIdx)} y={Math.max(12, (closedY ?? waitY) - 8)} textAnchor="middle" className="text-[10px] font-bold fill-primary-700">
+              <tspan data-testid="last-close-value">{toMan(closedWon)}</tspan> <tspan data-testid="last-close-date" className="text-[9px] font-normal fill-slate-500">{lastClose.date}</tspan>
+            </text>
+          ) : (
+            <text data-testid="closing-wait" x={getX(curIdx)} y={waitY} textAnchor="middle" className="text-[10px] font-semibold fill-amber-700">{isaText.progressWaitClosing}</text>
+          )
         ) : (
           <>
             <text x={getX(curIdx)} y={titleY} textAnchor="middle" className="text-[10px] font-bold fill-primary-700">{isaText.progressCurrent}</text>

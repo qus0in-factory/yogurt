@@ -1,3 +1,4 @@
+import { HTTPError } from 'ky'
 import { z } from 'zod'
 import { accountSchema, type Account, type AccountInput, type AccountUpdate } from '../../domain/accounts/account.ts'
 import type { ProductPlanRequest } from '../../domain/accounts/product-plan.ts'
@@ -37,4 +38,22 @@ export async function setAccountProduct(id: string, code: string, enabled: boole
 export async function setProductPlan(id: string, code: string, plan: ProductPlanRequest): Promise<Account> {
   const path = `accounts/${encodeURIComponent(id)}/products/${encodeURIComponent(code)}/plan`
   return accountSchema.parse(await api.put(path, { json: plan }).json())
+}
+
+export const isaLastCloseSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  totalAssetsWon: z.number().int(),
+})
+export type IsaLastClose = z.infer<typeof isaLastCloseSchema>
+
+export async function getIsaLastClose(accountId: string): Promise<IsaLastClose | null> {
+  try {
+    const res = await api.get(`accounts/${encodeURIComponent(accountId)}/isa-last-close`)
+    const parsed = isaLastCloseSchema.safeParse(await res.json())
+    return parsed.success ? parsed.data : null
+  } catch (err: unknown) {
+    if (err instanceof HTTPError && err.response.status === 404) return null
+    if (typeof err === 'object' && err !== null && 'response' in err && (err as { response?: { status?: number } }).response?.status === 404) return null
+    throw err
+  }
 }

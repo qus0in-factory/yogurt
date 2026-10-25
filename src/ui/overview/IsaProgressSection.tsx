@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { computeIsaProgress, type IsaPlanInput } from '../../app/accounts/isa-progress'
 import { PROGRESS_WINDOW_HALF_SPAN_DESKTOP, PROGRESS_WINDOW_HALF_SPAN_MOBILE } from '../../app/accounts/isa-progress-months'
-import { seoulToday } from '../../app/accounts/isa-term'
+import { isaExpiry, seoulToday } from '../../app/accounts/isa-term'
 import { Button } from '../components/Button'
 import { isaText } from '../glossary/isa'
 import { typeScale } from '../styles/type-scale'
 import { IsaProgressChart } from './IsaProgressChart'
 import { IsaProgressSummary } from './IsaProgressSummary'
 import { IsaProgressTable } from './IsaProgressTable'
+import { useIsaLastClose } from './useIsaLastClose'
 import { useIsaProgress } from './useIsaProgress'
 
 interface Props {
@@ -18,6 +19,8 @@ interface Props {
 
 export function IsaProgressSection({ accountId, plan, today = seoulToday() }: Props) {
   const { isPending, isError, totalAssets, refetch } = useIsaProgress(accountId)
+  const isExp = Boolean(plan?.startDate && today.slice(0, 7) === isaExpiry(plan.startDate)?.slice(0, 7))
+  const { data: lastClose, isPending: isLastClosePending } = useIsaLastClose(accountId, isExp)
   const [wide, setWide] = useState(() => (typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(min-width: 768px)').matches : false))
   useEffect(() => {
     const media = window.matchMedia?.('(min-width: 768px)')
@@ -36,7 +39,7 @@ export function IsaProgressSection({ accountId, plan, today = seoulToday() }: Pr
     )
   }
   const halfSpan = wide ? PROGRESS_WINDOW_HALF_SPAN_DESKTOP : PROGRESS_WINDOW_HALF_SPAN_MOBILE
-  const prog = computeIsaProgress(today, plan, totalAssets, undefined, halfSpan)
+  const prog = computeIsaProgress(today, plan, totalAssets, isExp ? lastClose?.totalAssetsWon : undefined, halfSpan)
   if (prog.state === 'no_targets') return <p className={typeScale.caption}>{isaText.progressTargetsMissing}</p>
   if (prog.state === 'expired') return <p className={typeScale.caption}>{isaText.progressAfterMaturity}</p>
   if (prog.state !== 'ready' || totalAssets === null) return <p role="alert" className={typeScale.caption}>{isaText.progressInvalid}</p>
@@ -58,6 +61,8 @@ export function IsaProgressSection({ accountId, plan, today = seoulToday() }: Pr
         hasMid={prog.hasMid}
         currentMonth={prog.currentMonth}
         expiryMonth={prog.expiry ? prog.expiry.slice(0, 7) : undefined}
+        lastClose={isExp ? lastClose : null}
+        isLoadingLastClose={isExp && isLastClosePending}
       />
       <IsaProgressTable points={prog.pathPoints} hasMid={prog.hasMid} />
       <p className={`text-slate-400 ${typeScale.caption}`}>{isaText.progressNoHistory}</p>
