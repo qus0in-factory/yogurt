@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { AccountCarousel } from '../../../src/ui/accounts/AccountCarousel'
 import { useUiStore } from '../../../src/ui/state/ui-store'
-const accounts = Array.from({ length: 6 }, (_, i) => ({ id: String(i), alias: `계좌${i + 1}`, owner: '소유자', accountNumber: '1234', createdAt: '' }))
+const accounts = Array.from({ length: 6 }, (_, i) => ({ id: String(i), alias: `계좌${i + 1}`, owner: '소유자', accountNumber: '1234', productCode: '01', createdAt: '' }))
 const listeners = new Set<(event: MediaQueryListEvent) => void>()
 const animate = vi.fn()
 let wide = false

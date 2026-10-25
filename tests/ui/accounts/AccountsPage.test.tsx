@@ -10,7 +10,7 @@ vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 
 const listAccounts = vi.mocked(client.listAccounts)
 const createAccount = vi.mocked(client.createAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', productCode: '29', createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -33,7 +33,7 @@ describe('AccountsPage', () => {
     expect(await screen.findByText('주계좌')).toBeInTheDocument()
     expect(screen.getByText('김철수')).toBeInTheDocument()
     expect(screen.getByText('김철수').compareDocumentPosition(screen.getByText('주계좌')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(screen.getByText('12345678')).toBeInTheDocument()
+    expect(screen.getByText('12345678-29')).toBeInTheDocument()
     expect(screen.getByLabelText('계좌 목록')).toBeInTheDocument()
     const cards = screen.getAllByRole('group')
     expect(cards).toHaveLength(1)
@@ -56,7 +56,7 @@ describe('AccountsPage', () => {
     fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
     fireEvent.click(screen.getByRole('button', { name: '저장' }))
     await waitFor(() => expect(createAccount).toHaveBeenCalled())
-    expect(createAccount.mock.calls[0][0]).toEqual({ alias: '새 계좌', owner: '김철수', accountNumber: '11112222', accessKey: 'AK', secretKey: 'SK' })
+    expect(createAccount.mock.calls[0][0]).toEqual({ alias: '새 계좌', owner: '김철수', accountNumber: '11112222', productCode: '01', accessKey: 'AK', secretKey: 'SK' })
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(await screen.findByText('새 계좌')).toBeInTheDocument()
   })

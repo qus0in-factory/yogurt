@@ -1,7 +1,11 @@
 import { irpAccounts } from '../../app/overview/irp-accounts'
 import { useAccounts } from '../accounts/useAccounts'
+import { Carousel } from '../components/Carousel'
 import { accountsText } from '../glossary/accounts'
 import { overviewText } from '../glossary/overview'
+import { IrpAccountBox } from './IrpAccountBox'
+
+const labels = { list: overviewText.listLabel, previous: accountsText.previous, next: accountsText.next, goTo: accountsText.goTo, position: accountsText.position }
 
 export function IrpTab() {
   const { data, isPending } = useAccounts()
@@ -13,15 +17,7 @@ export function IrpTab() {
       {accounts.length === 0 ? (
         <p className="text-stone-600">{overviewText.empty}</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {accounts.map((account) => (
-            <li key={account.id} className="flex flex-col gap-1 rounded-lg border border-primary-200 bg-white p-4">
-              <p className="text-sm text-stone-600">{account.owner}</p>
-              <p className="text-lg font-semibold text-stone-900">{account.alias}</p>
-              <p className="text-sm text-stone-600">{account.accountNumber}</p>
-            </li>
-          ))}
-        </ul>
+        <Carousel items={accounts} labels={labels} renderItem={(account) => <IrpAccountBox key={account.id} account={account} />} />
       )}
     </div>
   )

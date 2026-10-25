@@ -2,8 +2,8 @@ import { expect, it } from 'vitest'
 import { filterAccounts } from '../../../src/app/accounts/filter-accounts'
 
 const accounts = [
-  { id: '1', alias: 'Main Account', owner: '김 철수', accountNumber: '12345678', createdAt: '' },
-  { id: '2', alias: 'Trading', owner: '홍길동', accountNumber: '87654321', createdAt: '' },
+  { id: '1', alias: 'Main Account', owner: '김 철수', accountNumber: '12345678', productCode: '01', createdAt: '' },
+  { id: '2', alias: 'Trading', owner: '홍길동', accountNumber: '87654321', productCode: '01', createdAt: '' },
 ]
 it('별칭·소유자를 공백과 대소문자 무시 부분 일치로 필터링한다', () => {
   expect(filterAccounts(accounts, '  mAIN acc ')).toEqual([accounts[0]])

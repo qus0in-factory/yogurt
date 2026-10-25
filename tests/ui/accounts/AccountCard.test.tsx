@@ -9,7 +9,7 @@ import { AccountCard } from '../../../src/ui/accounts/AccountCard'
 vi.mock('../../../src/app/accounts/client', () => ({ requestKisToken: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const requestKisToken = vi.mocked(client.requestKisToken)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', productCode: '29', createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderCard = () => {
   const onSelect = vi.fn()
@@ -59,5 +59,12 @@ describe('AccountCard KIS', () => {
     const button = screen.getByRole('button', { name: 'KIS 연결 확인' })
     fireEvent.click(button)
     await waitFor(() => expect(button).toBeDisabled())
+  })
+})
+
+describe('계좌 카드 표시', () => {
+  it('계좌번호를 계좌번호-상품코드 형식으로 표시한다', () => {
+    renderCard()
+    expect(screen.getByText('12345678-29')).toBeInTheDocument()
   })
 })

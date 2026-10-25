@@ -33,7 +33,7 @@ export function AccountCard({ account, onSelect, onEdit }: AccountCardProps) {
       <div className="flex flex-col gap-2 pr-10">
         <p className="text-sm text-stone-600">{account.owner}</p>
         <p className="text-xl font-semibold text-stone-900">{account.alias}</p>
-        <p className="text-sm text-stone-600">{account.accountNumber}</p>
+        <p className="text-sm text-stone-600">{accountsText.numberWithCode(account.accountNumber, account.productCode)}</p>
         <Button
           size="sm"
           variant="outline"

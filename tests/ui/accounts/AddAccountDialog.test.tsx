@@ -17,7 +17,6 @@ const renderDialog = (onClose = vi.fn()) => {
 const fill = (values: Record<string, string>) => {
   for (const [label, value] of Object.entries(values)) fireEvent.change(screen.getByLabelText(label), { target: { value } })
 }
-
 beforeEach(() => {
   vi.clearAllMocks()
   sessionStorage.clear()
@@ -25,10 +24,10 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('AddAccountDialog', () => {
-  it('필드 순서는 소유자→별칭→계좌번호→Access Key→Secret Key다', () => {
+  it('필드 순서는 소유자→별칭→계좌번호→상품코드→Access Key→Secret Key다', () => {
     renderDialog()
-    const names = screen.getAllByLabelText(/소유자|별칭|계좌번호|Access Key|Secret Key/).map((el) => el.getAttribute('name'))
-    expect(names).toEqual(['owner', 'alias', 'accountNumber', 'accessKey', 'secretKey'])
+    const names = screen.getAllByLabelText(/소유자|별칭|계좌번호|상품코드|Access Key|Secret Key/).map((el) => el.getAttribute('name'))
+    expect(names).toEqual(['owner', 'alias', 'accountNumber', 'productCode', 'accessKey', 'secretKey'])
   })
 
   it('Secret Key는 password 입력이고 빈 값이면 저장하지 않는다', async () => {
@@ -56,9 +55,9 @@ describe('AddAccountDialog', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('저장소가 아직 설정되지 않았습니다'))
   })
 
-  it('별칭·소유자·계좌번호 초안만 저장하고 다시 열면 복원한다', async () => {
+  it('별칭·소유자·계좌번호·상품코드 초안만 저장하고 다시 열면 복원한다', async () => {
     renderDialog()
-    fill({ 별칭: '초안별칭', 소유자: '초안소유자', 계좌번호: '99900000', 'Access Key': 'AKTEST', 'Secret Key': 'SKTEST' })
+    fill({ 별칭: '초안별칭', 소유자: '초안소유자', 계좌번호: '99900000', 상품코드: '99', 'Access Key': 'AKTEST', 'Secret Key': 'SKTEST' })
     await waitFor(() => expect(JSON.stringify(sessionStorage)).toContain('초안소유자'))
     const dump = JSON.stringify(sessionStorage)
     expect(dump).not.toContain('AKTEST'); expect(dump).not.toContain('SKTEST')
@@ -67,10 +66,11 @@ describe('AddAccountDialog', () => {
     expect(screen.getByLabelText('별칭')).toHaveValue('초안별칭')
     expect(screen.getByLabelText('소유자')).toHaveValue('초안소유자')
     expect(screen.getByLabelText('계좌번호')).toHaveValue('99900000')
+    expect(screen.getByLabelText('상품코드')).toHaveValue('99')
   })
 
   it('저장 성공 시 초안을 삭제한다', async () => {
-    createAccount.mockResolvedValueOnce({ id: 'a2', alias: '새 계좌', owner: '김철수', accountNumber: '11112222', createdAt: '2026-01-01T00:00:00.000Z' })
+    createAccount.mockResolvedValueOnce({ id: 'a2', alias: '새 계좌', owner: '김철수', accountNumber: '11112222', productCode: '01', createdAt: '2026-01-01T00:00:00.000Z' })
     renderDialog()
     fill({ 별칭: '새 계좌', 소유자: '김철수', 계좌번호: '11112222', 'Access Key': 'AK', 'Secret Key': 'SK' })
     await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).not.toBeNull())

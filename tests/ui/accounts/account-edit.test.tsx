@@ -11,7 +11,7 @@ vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 
 const listAccounts = vi.mocked(client.listAccounts)
 const updateAccount = vi.mocked(client.updateAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', productCode: '29', createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -34,7 +34,7 @@ describe('계좌 수정', () => {
     fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '연금' } })
     fireEvent.change(screen.getByLabelText('소유자'), { target: { value: '이영희' } })
     fireEvent.click(screen.getByRole('button', { name: '저장' }))
-    await waitFor(() => expect(updateAccount).toHaveBeenCalledWith('a1', { alias: '연금', owner: '이영희' }))
+    await waitFor(() => expect(updateAccount).toHaveBeenCalledWith('a1', { alias: '연금', owner: '이영희', productCode: '29' }))
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(await screen.findByText('연금')).toBeInTheDocument()
     expect(screen.getByText('이영희')).toBeInTheDocument()

@@ -13,6 +13,7 @@ import { DeleteAccountDialog } from './DeleteAccountDialog'
 import { useAccounts, useUpdateAccount } from './useAccounts'
 
 type EditAccountDialogProps = { account: Account; onClose: () => void }
+type FieldExtra = { list?: string; autoComplete?: string; maxLength?: number; inputMode?: 'numeric'; pattern?: string; placeholder?: string }
 
 export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) {
   const updateAccount = useUpdateAccount()
@@ -21,16 +22,15 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
   const owners = ownerSuggestions(data ?? [])
   const [deleteOpen, setDeleteOpen] = useState(false)
   const { control, handleSubmit } = useForm<AccountUpdate>({
-    defaultValues: { alias: account.alias, owner: account.owner },
+    defaultValues: { alias: account.alias, owner: account.owner, productCode: account.productCode },
     resolver: zodResolver(accountUpdateSchema),
   })
-
-  const field = (label: string, name: keyof AccountUpdate, extra: { list?: string; autoComplete?: string } = {}) => (
+  const field = (label: string, name: keyof AccountUpdate, extra: FieldExtra = {}, sanitize?: (value: string) => string) => (
     <Controller
       name={name}
       control={control}
       render={({ field: f, fieldState }) => (
-        <TextField label={label} name={name} maxLength={8} value={f.value} onChange={f.onChange} error={fieldState.error?.message} {...extra} />
+        <TextField label={label} name={name} maxLength={8} value={f.value} onChange={(value) => f.onChange(sanitize?.(value) ?? value)} error={fieldState.error?.message} {...extra} />
       )}
     />
   )
@@ -56,6 +56,7 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
           {field(accountsText.owner, 'owner', { list: ownerListId, autoComplete: 'off' })}
           <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
           {field(accountsText.alias, 'alias')}
+          {field(accountsText.productCode, 'productCode', { maxLength: 2, inputMode: 'numeric', pattern: '[0-9]{2}', placeholder: accountsText.productCodeExample }, (value) => value.replace(/\D/g, ''))}
           <p className="text-sm text-stone-600">
             {accountsText.accountNumber}: <span>{account.accountNumber}</span>
           </p>
