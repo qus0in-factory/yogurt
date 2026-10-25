@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest'
-import { getKisToken, issueKisToken } from '../../../src/infra/kis/kis-token.ts'
+import { getKisToken, invalidateKisToken, issueKisToken } from '../../../src/infra/kis/kis-token.ts'
 import { createFakeKv } from '../fakes/kv.ts'
 
 describe('kis token', () => {
@@ -31,4 +31,13 @@ describe('kis token', () => {
     expect(result.issued).toBe(true)
     expect(result.accessToken).toBe('token-2')
   })
+})
+
+it('invalidates only the requested account token', async () => {
+  const cache = createFakeKv()
+  await cache.put('kis-token:a', 'a')
+  await cache.put('kis-token:b', 'b')
+  await invalidateKisToken(cache, 'a')
+  expect(await cache.get('kis-token:a')).toBeNull()
+  expect(await cache.get('kis-token:b')).toBe('b')
 })

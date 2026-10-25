@@ -27,3 +27,7 @@ export async function getKisToken(cache: KVNamespace, accountId: string, creds: 
   await cache.put(key, JSON.stringify({ accessToken: issued.accessToken, expiresAt }), { expirationTtl })
   return { accessToken: issued.accessToken, expiresAt, issued: true }
 }
+
+export async function invalidateKisToken(cache: KVNamespace, accountId: string) {
+  await cache.delete(`kis-token:${accountId}`)
+}
