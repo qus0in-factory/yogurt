@@ -2,6 +2,7 @@ import { TZDate } from '@date-fns/tz'
 import { format } from 'date-fns'
 import { CircleAlert, Link2, LoaderCircle, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
+import { ProductToggles } from './ProductToggles'
 import { useKisToken } from './useKisToken'
 import type { Account } from '../../domain/accounts/account'
 import type { KisStatusInfo } from './useKisStatus'
@@ -48,6 +49,7 @@ export function AccountCard({ account, onSelect, onEdit, kisStatus }: AccountCar
           <Icon aria-hidden="true" className="h-4 w-4" />
           {badgeText(kisStatus)}
         </span>
+        <ProductToggles account={account} />
         <Button size="sm" variant="outline" className="w-full gap-2" disabled={kisToken.isPending}
           onClick={(event) => { event.stopPropagation(); checkKis() }}>
           <Link2 aria-hidden="true" className="h-4 w-4" />

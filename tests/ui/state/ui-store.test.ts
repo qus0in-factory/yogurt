@@ -3,7 +3,7 @@ import { useUiStore } from '../../../src/ui/state/ui-store'
 
 beforeEach(() => {
   localStorage.clear()
-  useUiStore.setState({ screen: 'accounts', drawerOpen: false, selectedAccountId: null })
+  useUiStore.setState({ screen: 'accounts', drawerOpen: false, selectedAccountId: null, selectedIrpAccountId: null })
   useUiStore.persist.clearStorage()
 })
 
@@ -37,13 +37,14 @@ describe('ui store', () => {
     expect(useUiStore.getState().selectedAccountId).toBeNull()
   })
 
-  it('저장 시 localStorage에는 selectedAccountId만 있다', () => {
+  it('계좌와 IRP 계좌를 선택하면 두 선택 id를 localStorage에 저장한다', () => {
     useUiStore.getState().selectAccount('acc-1')
+    useUiStore.getState().selectIrpAccount('irp-1')
     const raw = localStorage.getItem('yogurt:ui')
     expect(raw).not.toBeNull()
     const parsed = JSON.parse(raw as string)
     expect(parsed.version).toBe(1)
-    expect(parsed.state).toEqual({ selectedAccountId: 'acc-1' })
+    expect(parsed.state).toEqual({ selectedAccountId: 'acc-1', selectedIrpAccountId: 'irp-1' })
   })
 
   it('drawerOpen은 localStorage에 저장하지 않는다', () => {
@@ -56,9 +57,10 @@ describe('ui store', () => {
     }
   })
 
-  it('rehydrate 시 selectedAccountId를 복원한다', () => {
-    localStorage.setItem('yogurt:ui', JSON.stringify({ state: { selectedAccountId: 'acc-2' }, version: 1 }))
+  it('저장한 상태를 복원하면 계좌와 IRP 계좌의 선택 id가 복원된다', () => {
+    localStorage.setItem('yogurt:ui', JSON.stringify({ state: { selectedAccountId: 'acc-2', selectedIrpAccountId: 'irp-2' }, version: 1 }))
     useUiStore.persist.rehydrate()
     expect(useUiStore.getState().selectedAccountId).toBe('acc-2')
+    expect(useUiStore.getState().selectedIrpAccountId).toBe('irp-2')
   })
 })

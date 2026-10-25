@@ -1,4 +1,5 @@
 export const accountsText = {
+  productFailed: '상품 설정을 변경하지 못했습니다',
   title: '계좌',
   loading: '불러오는 중…',
   loadError: '계좌를 불러오지 못했습니다',
