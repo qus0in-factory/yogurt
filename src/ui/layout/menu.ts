@@ -1,8 +1,9 @@
 import { LayoutDashboard, Wallet, type LucideIcon } from 'lucide-react'
 import { accountsText } from '../glossary/accounts'
 import { overviewText } from '../glossary/overview'
+import type { PageId } from '../../domain/navigation/page'
 
-export type ScreenId = 'accounts' | 'overview'
+export type ScreenId = PageId
 
 export type MenuItem = {
   id: ScreenId

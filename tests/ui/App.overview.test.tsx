@@ -15,7 +15,7 @@ vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 
 const checkSession = vi.mocked(auth.checkSession)
 const listAccounts = vi.mocked(accounts.listAccounts)
-const account = { id: 'a1', alias: 'IRP 연금', owner: '김철수', accountNumber: '12345678', products: ['01', '29'], createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: 'IRP 연금', owner: '김철수', accountNumber: '12345678', products: ['01', '29'], productPlans: {}, createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderApp = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -47,5 +47,13 @@ describe('현황 화면', () => {
     renderApp()
     expect(await screen.findByRole('heading', { name: '계좌' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '현황' })).not.toBeInTheDocument()
+  })
+
+  it('최상위 레이아웃에 전역 break-keep을 적용한다', async () => {
+    checkSession.mockResolvedValueOnce(true)
+    const { container } = renderApp()
+    await screen.findByRole('heading', { name: '계좌' })
+    expect(container.firstElementChild).toHaveClass('break-keep')
+    expect(container.firstElementChild).not.toHaveClass('max-md:break-keep')
   })
 })

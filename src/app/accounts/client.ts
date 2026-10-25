@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { accountSchema, type Account, type AccountInput, type AccountUpdate } from '../../domain/accounts/account.ts'
+import type { ProductPlanRequest } from '../../domain/accounts/product-plan.ts'
 import { api } from '../http/http.ts'
 
 export async function listAccounts(): Promise<Account[]> {
@@ -31,4 +32,9 @@ export async function requestKisToken(id: string): Promise<{ issued: boolean; ex
 export async function setAccountProduct(id: string, code: string, enabled: boolean): Promise<Account> {
   const path = `accounts/${encodeURIComponent(id)}/products/${encodeURIComponent(code)}`
   return accountSchema.parse(await api.put(path, { json: { enabled } }).json())
+}
+
+export async function setProductPlan(id: string, code: string, plan: ProductPlanRequest): Promise<Account> {
+  const path = `accounts/${encodeURIComponent(id)}/products/${encodeURIComponent(code)}/plan`
+  return accountSchema.parse(await api.put(path, { json: plan }).json())
 }

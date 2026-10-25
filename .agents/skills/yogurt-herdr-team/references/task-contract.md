@@ -1,6 +1,6 @@
-# 작업 전달 양식 (작업 계약)
+# 작업 계약 파일
 
-빔/glm/claude/agy 각 대상에 개별 발행하는 문서형 계약. [역할·소유권](roles.md)에 따라 한 파일의 작성자가 확정된 경우에만 발행한다. 이름·모델·pane에 능력을 고정하지 않으므로 네 대상에 같은 양식을 쓰고, 목표·입력·허용 파일·검증·시간을 작업별로 채운다. 이 양식 전문을 `herdr agent prompt <target> <text>`의 text로 전달한다.
+조정자는 [프리셋·소유권](roles.md)에 따라 작성자를 확정한 뒤 계약을 파일로 저장한다. `worker.py open`으로 새 별도 탭을 열고 `worker.py prompt`로 계약 파일 경로를 전달한다. 전문을 셸 인라인 문자열로 주입하지 않는다.
 
 ## 필수 항목
 
@@ -23,12 +23,22 @@ python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to <조�
 - 결과 보고: 완료 보고 형식
 - 차단 보고: 시작 전·진행 중 막힘 보고 형식
 
-## 제출·대기 명령 형태
+## 제출·대기·종료
 
-- 제출: `herdr agent prompt <target> "$(cat 계약파일)" --wait --until working --timeout 20000`. `--until`은 `--wait` 없이 쓰지 않는다.
-- 완료 취합: 작업자 콜백 메시지를 조정자 pane에서 우선 기다린다.
-- fallback: 콜백 미수신 시 `/tmp/herdr-callback/<조정자>/` 파일을 확인하고, 파일도 없을 때만 `herdr agent wait <target> --timeout 55000`으로 폴링한다.
-- 선행 조건(의존성 설치·런타임 버전 등)은 계약 발행 전 조정자가 실측하고, 계약에 실측 결과를 적는다.
+- `python3 .agents/skills/yogurt-herdr-team/scripts/app/worker.py --help`와 각 하위 명령의 `--help`로 실제 인자를 확인한다.
+- `worker.py open`은 별도 탭·저장소 cwd·no-focus를 적용한다. 같은 프리셋이 상태 파일 또는 herdr agent list에 있으면 중복 생성하지 않는다. 동시 워커 최대 5개다.
+- `worker.py prompt`에 계약 파일을 전달하고 working 전환을 확인한다. 하위 Herdr 호출에서 `--until`을 쓰면 `--wait`도 필요하며 timeout을 명시한다.
+- `worker.py await`로 콜백을 우선 기다린다. fallback은 배정 직전 ISO 시각 또는 마지막 파일명 커서로 감시한다. 각 대기는 60초 이하, 전체는 5분 경계 안이다.
+
+```sh
+python3 .agents/skills/yogurt-herdr-callback/scripts/app/watch.py --to <조정자> --since <커서> --timeout 30
+```
+
+- fallback도 없을 때만 `herdr agent wait <target> --timeout 30000`으로 확인한다.
+- `sandboxed: true`인 codex 워커(sol/luna)는 Vitest를 실행하지 않는다. 테스트 파일·권장 명령·미실행 사실을 보고하고 조정자가 테스트를 실행한다. agy/ds는 계약에 지정된 테스트를 실행한다.
+- 조정자 검증 후 `worker.py close`한다. failed/blocked는 탭을 유지하고 get/read로 원인·중간 결과를 확보한 뒤 close한다. 승인 UI에 임의 응답하지 않는다.
+- 사용량 한도로 닫히면 사용자 새 지침을 기다리고 다른 모델로 대체하지 않는다. `worker.py run`도 조정자 검증 전 close하지 않는다.
+- 의존성 설치·런타임 버전 등 선행 조건은 계약 발행 전 조정자가 실측해 적는다.
 
 ## 공통 금지·보존 (모든 계약에 포함)
 
@@ -39,8 +49,8 @@ python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to <조�
 - 시간 초과가 예상되면 완료까지 기다리지 않고 진행 중에 차단 보고한다.
 - 5분 초과 시 중간 상태 blocked 보고 후, 인계 계약에 이전 담당의 중간 파일 목록을 적는다.
 - 공개 export·함수 시그니처는 계약에 적은 형태만 사용하고, 별칭·다형 인자·옵션 객체 추가를 금지한다.
-- 테스트 실행이 30초 넘게 출력이 없으면 중단하고 '테스트 미실행'으로 콜백하며 검증은 조정자가 수행한다.
-- 5분을 넘기면 질문 대기 대신 현 상태로 콜백한다.
+- 테스트 실행이 허용된 워커도 30초 넘게 출력이 없으면 중단하고 '테스트 미실행'으로 콜백하며 검증은 조정자가 수행한다.
+- 5분 경계에서 blocked 콜백 후 멈춘다. 사용자 확인 없이 계속하지 않는다.
 - 도구 호출은 텍스트로 출력하지 말고 실제 호출로 수행한다.
 - 외부 API 가짜 객체(D1 등)는 실제 API 호출 형태(prepare().all(), prepare().bind().run())를 따른다.
 - UI 요소 사이(아이콘과 텍스트, 버튼끼리, 입력과 버튼)는 붙이지 않는다. 버튼 안 아이콘·텍스트 간격은 `Button`의 기본 `gap-2`를 쓰고, 요소 묶음은 `gap-2` 이상으로 띄운다. 개별 margin으로 간격을 맞추지 않는다.
@@ -48,8 +58,9 @@ python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to <조�
 ## 복사 예시 (YAML)
 
 ```yaml
-# 예시 목적: layered-tdd 스킬 참조 문서에 예시 1개 추가 (target 실행 명령은 herdr 스킬의 현재 명세를 따른다)
-대상: <현재 세션 확인 절차로 식별한 idle/done 대상, 예: claude>
+# 예시 목적: layered-tdd 스킬 참조 문서에 예시 1개 추가 (이 YAML을 계약 파일로 저장해 전달한다)
+프리셋: sol
+대상: <worker.py open 응답의 새 워커 이름·탭/pane ID>
 작업명: layered-tdd 참조 예시 보강
 목표: >
   .agents/skills/yogurt-layered-tdd/references/examples.md 에
@@ -69,7 +80,7 @@ python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to <조�
   - 위 허용 파일 외 전부. 특히 SKILL.md, roles.md, task-contract.md, AGENTS.md, CLAUDE.md, README.md
   - git checkout/commit/push/merge, 배포, GitHub 이슈·PR 변경
   - 코드·실행 스크립트 추가, 필요 이상의 도구·빌드 실행
-  - 다른 에이전트(beam/glm/claude/agy/ds/codex) 호출 및 추가 지시
+  - 다른 워커 호출 및 추가 지시
 완료 조건: |
   - examples.md에 예시 1개가 추가되고 기존 내용은 수정·삭제하지 않음
   - 아래 형식의 완료 보고를 제출함

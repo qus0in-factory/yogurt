@@ -8,7 +8,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 it.each([1, 3])('데스크톱 계좌 %i개가 한 페이지이면 모든 페이지 인디케이터를 숨긴다', count => {
   vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
   const accounts = Array.from({ length: count }, (_, index) => ({
-    id: String(index), alias: `계좌${index}`, owner: '소유자', accountNumber: '12345678', products: [], createdAt: '',
+    id: String(index), alias: `계좌${index}`, owner: '소유자', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '',
   }))
   render(<QueryClientProvider client={new QueryClient()}><AccountCarousel accounts={accounts} onEdit={vi.fn()} /></QueryClientProvider>)
   expect(screen.getAllByRole('group')).toHaveLength(count)

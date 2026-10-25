@@ -39,8 +39,16 @@ describe('account schemas', () => {
     expect(accountUpdateSchema.safeParse({ alias: '', owner: '김철수' }).success).toBe(false)
   })
 
-  it('계좌 응답은 products 목록을 담고 키는 담지 않는다', () => {
-    const account = { id: 'id-1', alias: '주식', owner: '홍길동', accountNumber: '12345678', products: ['29'], createdAt: '2026-10-24T09:00:00.000Z' }
+  it('계좌 응답은 products 목록과 productPlans를 담고 키는 담지 않는다', () => {
+    const account = {
+      id: 'id-1',
+      alias: '주식',
+      owner: '홍길동',
+      accountNumber: '12345678',
+      products: ['01'],
+      productPlans: { '01': { startDate: '2024-03-15', minTargetAmountWon: 12_500_000, maxTargetAmountWon: null } },
+      createdAt: '2026-10-24T09:00:00.000Z',
+    }
     const parsed = accountSchema.parse({ ...account, accessKey: 'ak', secretKey: 'sk' })
     expect(parsed).toEqual(account)
   })

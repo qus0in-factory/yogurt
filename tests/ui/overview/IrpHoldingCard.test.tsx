@@ -44,6 +44,13 @@ it('모바일 비중은 소수 두 자리와 막대로 표시한다', () => {
   expect(screen.getByText('75.00%')).toBeInTheDocument()
   expect(screen.getByTestId('holding-weight')).toHaveStyle({ width: '75%' })
 })
+it('긴 종목명은 잘리지 않고 줄바꿈되며 그리드 칸이 줄어든다', () => {
+  show({ name: '아주아주긴한국어종목이름테스트용라벨' })
+  const name = screen.getByText('아주아주긴한국어종목이름테스트용라벨')
+  expect(name).toHaveClass('break-words', 'min-w-0')
+  expect(name).not.toHaveClass('truncate', 'whitespace-nowrap')
+  expect(name.closest('li')?.querySelector('dl > div')).toHaveClass('min-w-0')
+})
 it('위험 토글은 전파를 막고 콜백을 호출한다', () => {
   const onToggle = vi.fn()
   const parent = vi.fn()

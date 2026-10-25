@@ -6,15 +6,16 @@ import { createMiddleware } from 'hono/factory'
 import { isSessionValid, loginHandler, logoutHandler, readSessionCookie, sessionHandler } from './auth/auth.ts'
 import { loginRequestSchema } from '../domain/auth/auth-schema.ts'
 import { accountInputSchema, accountUpdateSchema, accountOrderSchema } from '../domain/accounts/account.ts'
-import { accountProductSchema } from '../domain/accounts/products.ts'
+import { productPlanRequestSchema } from '../domain/accounts/product-plan.ts'
+import { accountProductSchema, productCodeSchema } from '../domain/accounts/products.ts'
 import { replaceCredentials } from './accounts/credentials-handler.ts'
-import { productCodeSchema } from '../domain/accounts/products.ts'
-import { createAccount, listAccounts, updateAccount, deleteAccount, setAccountProduct, reorderAccounts } from './accounts/accounts.ts'
+import { createAccount, listAccounts, updateAccount, deleteAccount, setAccountProduct, reorderAccounts, setAccountProductPlan } from './accounts/accounts.ts'
 import { kisTokenHandler } from './kis/kis-token-handler.ts'
 import { kisBalanceHandler } from './kis/kis-balance-handler.ts'
 import { kisAssetsHandler } from './kis/kis-assets-handler.ts'
 import { kisStatusStream } from './kis/kis-status-stream.ts'
 import { getRiskClassesHandler, setRiskClassHandler } from './holdings/risk-class-handlers.ts'
+import { runIsaMonthlySnapshots } from './snapshots/run-isa-monthly-snapshots.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -60,6 +61,9 @@ app.put('/api/accounts/:id/products/:code', zValidator('json', accountProductSch
   if (!productCodeSchema.safeParse(code).success) return c.json({ error: 'invalid request' }, 400)
   return setAccountProduct(c, c.req.param('id') as string, code, c.req.valid('json'))
 }) as any)
+app.put('/api/accounts/:id/products/:code/plan', zValidator('json', productPlanRequestSchema, (result, c) => {
+  if (!result.success) return c.json({ error: 'invalid request' }, 400)
+}), c => setAccountProductPlan(c, c.req.param('id'), c.req.param('code'), c.req.valid('json')))
 app.post('/api/accounts/:id/kis-token', (c) => kisTokenHandler(c))
 app.get('/api/kis/status', (c) => kisStatusStream(c))
 app.get('/api/accounts/:id/products/:code/balance', (c) => kisBalanceHandler(c))
@@ -73,4 +77,4 @@ app.onError((error, c) => {
 })
 app.all('*', (c) => c.env.ASSETS.fetch(c.req.raw))
 
-export default app
+export default { fetch: app.fetch, scheduled: (_event: ScheduledController, env: Env, ctx: ExecutionContext) => ctx.waitUntil(runIsaMonthlySnapshots(env)) }

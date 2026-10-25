@@ -8,8 +8,8 @@ import { AccountsPage } from '../../../src/ui/accounts/AccountsPage'
 
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn(), reorderAccounts: vi.fn() }))
 const accounts = [
-  { id: '1', alias: '주계좌', owner: '김철수', accountNumber: '1234', products: [], createdAt: '' },
-  { id: '2', alias: '보조계좌', owner: '홍길동', accountNumber: '5678', products: [], createdAt: '' },
+  { id: '1', alias: '주계좌', owner: '김철수', accountNumber: '1234', products: [], productPlans: {}, createdAt: '' },
+  { id: '2', alias: '보조계좌', owner: '홍길동', accountNumber: '5678', products: [], productPlans: {}, createdAt: '' },
 ]
 const renderPage = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><AccountsPage /></QueryClientProvider>)
 beforeEach(() => {

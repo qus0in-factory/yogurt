@@ -7,7 +7,7 @@ import { AccountsPage } from '../../../src/ui/accounts/AccountsPage'
 
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn(), reorderAccounts: vi.fn() }))
 vi.mock('../../../src/ui/accounts/useKisStatus', () => ({ useKisStatus: () => new Map() }))
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '' }
 const second = { ...account, id: 'a2', alias: '보조계좌' }
 const show = () => render(<QueryClientProvider client={new QueryClient()}><AccountsPage /></QueryClientProvider>)
 beforeEach(() => { vi.clearAllMocks(); sessionStorage.clear() })

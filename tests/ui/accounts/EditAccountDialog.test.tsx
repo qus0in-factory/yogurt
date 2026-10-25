@@ -9,7 +9,7 @@ import { EditAccountDialog } from '../../../src/ui/accounts/EditAccountDialog'
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const updateAccount = vi.mocked(client.updateAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderDialog = () => {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })

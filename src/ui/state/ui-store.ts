@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { ScreenId } from '../layout/menu'
 import { ACCOUNT_PRODUCTS, type ProductKey } from '../../domain/accounts/products'
+import { readLastPage, writeLastPage } from '../../infra/navigation/last-page-storage'
 
 export type OverviewTab = ProductKey
 
@@ -25,13 +26,16 @@ const normalizeTab = (tab: unknown): OverviewTab => ACCOUNT_PRODUCTS.find(produc
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
-      screen: 'accounts',
+      screen: readLastPage(),
       drawerOpen: false,
       selectedAccountId: null,
       selectedProductAccountIds: {},
       selectedIrpAccountId: null,
       overviewTab: ACCOUNT_PRODUCTS[0].key,
-      navigate: (id) => set({ screen: id, drawerOpen: false }),
+      navigate: (id) => {
+        writeLastPage(id)
+        set({ screen: id, drawerOpen: false })
+      },
       setDrawerOpen: (open) => set({ drawerOpen: open }),
       selectAccount: (id) => set({ selectedAccountId: id }),
       selectProductAccount: (key, id) => set((s) => ({
@@ -55,7 +59,7 @@ export const useUiStore = create<UiState>()(
       },
       merge: (persisted, current) => {
         const saved = persisted as Partial<UiState> | undefined
-        return { ...current, ...saved, overviewTab: normalizeTab(saved?.overviewTab) }
+        return { ...current, ...saved, screen: current.screen, overviewTab: normalizeTab(saved?.overviewTab) }
       },
       partialize: (s) => ({
         overviewTab: s.overviewTab,

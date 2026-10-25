@@ -8,7 +8,7 @@ import { typeScale } from '../styles/type-scale'
 type Summary = { totalEvaluation: number; cash: number; profitLoss: number; purchaseAmount: number }
 type Risk = { ratio: number; exceeds: boolean }
 
-export function IrpSummary({ summary, risk }: { summary: Summary; risk?: Risk }) {
+export function IrpSummary({ summary, risk, showCash = true }: { summary: Summary; risk?: Risk; showCash?: boolean }) {
   const rate = summary.purchaseAmount === 0 ? 0 : summary.profitLoss / summary.purchaseAmount * 100
   const loss = profitTone(summary.profitLoss)
   const returnTone = profitTone(rate)
@@ -20,7 +20,7 @@ export function IrpSummary({ summary, risk }: { summary: Summary; risk?: Risk })
       <p className="text-xs text-stone-500">{text.totalEvaluation}</p>
       <p className="text-2xl font-semibold text-stone-900">{text.won(summary.totalEvaluation)}</p>
       <StatGrid className="mt-3 grid grid-cols-2 gap-4 md:grid-cols-3" items={[
-        { label: <span className={typeScale.label}>{text.cash}</span>, value: <span className={typeScale.number}>{text.won(summary.cash)}</span> },
+        ...(showCash ? [{ label: <span className={typeScale.label}>{text.cash}</span>, value: <span className={typeScale.number}>{text.won(summary.cash)}</span> }] : []),
         { label: <span className={typeScale.label}>{text.profitLoss}</span>, value: <span className={`${typeScale.number} ${loss.className}`}>{loss.sign}{text.won(Math.abs(summary.profitLoss))}</span> },
         { label: <span className={typeScale.label}>{text.profitRate}</span>, value: <span className={`${typeScale.number} ${returnTone.className}`}>{returnTone.sign}{text.percent(Math.abs(rate))}</span> },
       ]} />

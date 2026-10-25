@@ -11,7 +11,7 @@ vi.mock('../../../src/ui/components/Carousel', () => ({
 afterEach(cleanup)
 it('passes each account status to its card', () => {
   const accounts = ['a', 'b'].map(id => ({
-    id, alias: id, owner: '소유자', accountNumber: '12345678', products: [], createdAt: '',
+    id, alias: id, owner: '소유자', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '',
   }))
   const statuses = new Map([
     ['a', { status: 'error' as const }],

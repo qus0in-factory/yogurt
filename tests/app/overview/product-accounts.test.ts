@@ -8,6 +8,7 @@ const account = (id: string, alias: string, products: string[]): Account => ({
   owner: '김철수',
   accountNumber: '12345678',
   products,
+  productPlans: {},
   createdAt: '2026-01-01',
 })
 

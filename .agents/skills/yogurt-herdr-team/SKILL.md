@@ -1,33 +1,36 @@
 ---
 name: yogurt-herdr-team
-description: 사용자가 Herdr로 현재 Herdr 탭 이름과 같은 에이전트에게 작업을 분배하거나 결과를 취합하도록 요청할 때 적용한다. 일반적인 단독 작업에서 자동으로 다른 에이전트를 시작하지 않는다.
+description: 사용자가 Herdr로 작업별 임시 워커 탭을 열어 작업을 분배하거나 결과를 취합하도록 요청할 때 적용한다. 일반적인 단독 작업에서 자동으로 다른 에이전트를 시작하지 않는다.
 ---
 
 # Herdr 팀 작업 분배
 
+먼저 references/coordinator-checklist.md를 읽고 각 단계에서 확인한다.
 저장소 AGENTS.md를 읽고 요청 범위와 5분 제한을 지킨다. 실행 전 `test "${HERDR_ENV:-}" = 1`을 확인한다. 실패하면 Herdr 세션을 조회하거나 제어하지 말고 중단 이유를 알린다.
 
-## 현재 세션 확인
+## 작업 분해 → 프리셋 선택
 
-1. 설치된 herdr 스킬을 읽고 `herdr --help`, `herdr agent`, `herdr agent list`로 현재 CLI와 대상 상태를 확인한다. bare `herdr`는 실행하지 않는다.
-2. 이름이 없으면 명시적 pane ID로 `herdr agent read <target> --source recent-unwrapped --lines 50`을 실행한다. 화면의 모델·cwd를 확인해 현재 Herdr 탭 이름과 같은 에이전트를 식별한다. pane 순서·ID·모델을 추측하지 않는다.
-3. 실제 모델 종류와 사용자가 부른 이름은 다를 수 있다. Beam/GLM이 OpenCode 안에서 실행되는 경우 kind는 opencode다. 실행 중 모델·effort는 변경하지 않는다.
-4. 확인된 idle/done 대상만 사용한다. 이름이 없으면 `herdr agent rename <pane-id> <탭 이름>`으로 탭 라벨과 같은 이름을 붙인다. working에는 중복 작업을 투입하지 않는다. blocked/unknown은 get/read로 확인하고 승인·질문 UI에 임의로 답하지 않는다.
-5. 없는 에이전트를 임의의 대체 모델로 실행하지 않는다. 새 pane·실행이 필요한 경우 herdr 스킬의 현재 디렉터리·동일 탭·no-focus 규칙을 따른다. 사용 가능한 kind로 사용자가 지정한 모델을 보존할 수 없으면 필요한 정보를 묻는다.
+요청을 직접 받은 pane이 조정자다. [프리셋·소유권](references/roles.md)에 따라 독립 작업과 선행 인터페이스를 정한다. 필요한 수만 열며 동시 워커는 최대 5개, 같은 프리셋은 동시에 하나만 연다. 같은 파일의 동시 작성자는 한 명이며 충돌 가능 작업은 순차 처리한다.
 
-## 분배
+## open → 계약 파일 전달 → await
 
-[역할·소유권](references/roles.md)을 읽고, 실제 요청의 독립 작업만 분리한다. 모델 이름으로 능력을 고정하지 않는다. 요청이 작으면 네 에이전트를 채우려고 범위를 늘리지 않는다.
+1. 설치된 herdr 스킬과 `herdr --help`, `herdr agent`를 확인한다. bare `herdr`는 실행하지 않는다. `python3 .agents/skills/yogurt-herdr-team/scripts/app/worker.py --help`와 각 하위 명령의 `--help`로 실제 인자를 확인한다.
+2. `worker.py open`으로 선택한 프리셋의 **별도 탭**을 연다. 조정자 탭 내부 pane split은 금지한다. 저장소 루트 cwd와 no-focus를 유지한다. 이 사용자 지침이 herdr 스킬의 기본 동일 탭 split보다 우선한다.
+3. open은 상태 파일과 `herdr agent list`에서 같은 프리셋 워커를 확인한다. 이미 열려 있으면 새로 만들지 않고 오류 또는 기존 이름 안내로 끝낸다. 기존 탭에 새 작업을 얹지 말고 이전 작업 검증·close 후 새 탭을 연다.
+4. 프리셋에서 kind·모델·effort·sandboxed를 읽어 시작한다. 생성 응답의 탭/pane ID와 이름을 기록하고 순서·모델을 추측하지 않는다. 실행 중 모델·effort를 바꾸지 않는다. idle/done 준비 상태를 확인하고 working에는 중복 제출하지 않는다.
+   scripts/app/check_contract.py로 계약을 검사한 뒤 보낸다.
+5. [작업 계약](references/task-contract.md)을 파일로 저장하고 `worker.py prompt`로 **계약 파일 경로**를 전달한다. 전문을 셸 인라인 문자열로 조립하지 않는다. 제출 성공만으로 시작·완료를 보고하지 않고 working 전환을 확인한다.
+6. `worker.py await`로 콜백을 우선 기다리고 fallback 파일을 감시한다. 각 대기는 60000ms 이하이며 전체 5분 경계를 지킨다. 관찰 중 독립 작업은 병행할 수 있다.
 
-[작업 계약](references/task-contract.md)으로 각 대상에 목표, 허용 파일, 제외 범위, 검증과 완료 보고를 전달한다. 같은 파일의 작성자는 한 명으로 제한한다. 공통 인터페이스와 선행 결과를 먼저 정하고, 충돌 가능 작업은 순차 처리한다.
+## 조정자 검증 → close
 
-`herdr agent prompt <target> <text>`로 제출한다. 셸을 경유하면 인자를 올바르게 quoting한다. 상태 응답과 실제 working 전환을 확인한다. 관찰하면서 계속 다른 독립 작업을 진행할 수 있다. 제출 성공만으로 시작·완료를 보고하지 않는다.
+[결과 취합](references/result-integration.md)에 따라 계약·diff·산출물·검증 결과를 조정자가 확인한다. `sandboxed: true`인 codex 워커(sol/luna)는 Vitest를 실행하지 않고 조정자가 테스트를 실행한다. callback fallback은 watch.py로 감시한다.
 
-## 취합
+검증 후 `worker.py close`로 해당 작업에서 만든 탭만 종료한다. failed/blocked는 탭을 먼저 유지하고 get/read로 원인·중간 결과를 확보한 뒤 close한다. unknown도 get/read로 확인하며 승인·질문 UI에 임의 응답하지 않는다. `worker.py run` 통합 경로도 계약 파일 전달과 조정자 검증 후 close라는 경계를 지킨다.
 
-[결과 취합](references/result-integration.md)을 따른다. 작업 계약 끝에 완료·실패·차단 콜백 명령을 넣고, 조정자 pane의 콜백 메시지를 우선 기다린다. 콜백 미수신 시 fallback 파일을 확인하고, 파일도 없을 때만 `herdr agent wait <target> --timeout 30000`으로 폴링한다. 대기에는 항상 60000 이하의 timeout을 지정한다. get/read로 결과와 변경 파일을 확인하고 검증 후 완료로 판단한다. 실패·타임아웃·agent_prompt_stalled 발생 시 전송된 입력과 상태를 확인한 뒤에만 재시도한다.
+사용량 한도로 워커가 닫히면 사용자 새 지침을 기다린다. 다른 모델·프리셋으로 임의 대체·재시작하지 않는다. 실패·타임아웃·agent_prompt_stalled는 미전달 증거가 아니므로 입력·상태·변경 파일 확인 후에만 재시도한다.
 
-공유 저장소에서는 담당 에이전트가 checkout, commit, push, merge, 배포, 이슈 변경을 수행하지 않게 한다. 해당 외부 작업이 요청에 포함되었다면 조정자가 취합·검증 후 수행한다. 이 스킬 자체는 외부 작업 권한을 추가하지 않는다.
+5분 초과 예상 시 진행 중 blocked 콜백으로 중간 결과를 보고한다. 5분 경계에서 멈추고 사용자 확인 없이 계속하지 않는다. 공유 저장소의 checkout/commit/push/merge·배포·이슈 변경은 워커에게 맡기지 않는다. 해당 외부 작업을 사용자가 허용한 경우 조정자만 취합·검증 후 수행한다.
 
 ## 실패·지연 회고
 

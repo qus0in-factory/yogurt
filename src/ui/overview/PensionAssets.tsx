@@ -5,8 +5,11 @@ import { typeScale } from '../styles/type-scale'
 import { WeightBar } from '../components/WeightBar'
 import { SectionHeading } from '../components/SectionHeading'
 
-export function PensionAssets({ rows, productCode = '22' }: { rows: AccountAssets['rows']; productCode?: string }) {
+export function PensionAssets({ rows, productCode = '22', showStock = true, showCash = true }: {
+  rows: AccountAssets['rows']; productCode?: string; showStock?: boolean; showCash?: boolean
+}) {
   const { items, total } = classifyAssetRows(rows, productCode)
+  const visible = items.filter((row) => (showStock || row.label !== 'stock') && (showCash || row.label !== 'cash'))
   return (
     <section aria-label={text.assetGroups}>
       <SectionHeading>{text.assetGroups}</SectionHeading>
@@ -18,7 +21,7 @@ export function PensionAssets({ rows, productCode = '22' }: { rows: AccountAsset
             <th scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 text-right`}>{text.weight}</th>
           </tr></thead>
           <tbody className="divide-y divide-stone-100">
-            {items.map((row) => (
+            {visible.map((row) => (
               <tr key={row.index}>
                 <th scope="row" className={`py-3 pr-4 text-left font-medium ${typeScale.body}`}>{row.label ? text.assetClass[row.label] : text.assetGroup(row.index)}</th>
                 <td className={`py-3 pr-4 text-right ${typeScale.number}`}>{text.won(row.evaluationAmount)}</td>

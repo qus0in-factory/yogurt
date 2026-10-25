@@ -7,7 +7,7 @@ import { setAccountProduct } from '../../../src/app/accounts/client'
 import { ProductToggles } from '../../../src/ui/accounts/ProductToggles'
 vi.mock('../../../src/app/accounts/client', () => ({ setAccountProduct: vi.fn() }))
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }))
-const account = { id: 'a', alias: 'a', owner: 'o', accountNumber: '12345678', products: [], createdAt: '' }
+const account = { id: 'a', alias: 'a', owner: 'o', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '' }
 afterEach(() => { cleanup(); vi.clearAllMocks() })
 function show(products: string[] = []) {
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } })

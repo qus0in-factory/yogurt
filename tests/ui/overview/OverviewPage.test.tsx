@@ -8,7 +8,7 @@ import { useUiStore } from '../../../src/ui/state/ui-store'
 
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn() }))
 const listAccounts = vi.mocked(client.listAccounts)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })

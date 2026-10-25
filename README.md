@@ -3,7 +3,7 @@
 
 - 저장소: https://github.com/qus0in-factory/yogurt
 - 서비스: https://yogurt.qus0in.dev
-    - 개발(dev) Worker: https://yogurt-dev.qus0in.workers.dev/
+    - 개발(dev) Worker: https://yogurt-dev.qus0in.workers.dev
     - 운영(production) Worker: https://yogurt.qus0in.workers.dev
 
 ### 서버 · 데이터
@@ -29,3 +29,4 @@
 ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)
 ![MSW](https://img.shields.io/badge/MSW-FF6A33?logo=mockserviceworker&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)
+
