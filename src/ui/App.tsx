@@ -41,7 +41,7 @@ export function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-primary-50">
+    <div className="flex min-h-screen bg-primary-50 break-keep">
       <Sidebar current={active} onNavigate={navigate} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 bg-white p-4">

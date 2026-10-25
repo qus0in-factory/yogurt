@@ -1,5 +1,7 @@
 import type { Context } from 'hono'
 import type { AccountInput, AccountUpdate, AccountProduct } from '../../domain/accounts/account.ts'
+import type { ProductPlanRequest } from '../../domain/accounts/product-plan.ts'
+import { productCodeSchema } from '../../domain/accounts/products.ts'
 import { isValidEncryptionKey } from './account-crypto.ts'
 import { createAccountRepository } from './account-repository.ts'
 
@@ -58,4 +60,12 @@ export async function reorderAccounts(c: AppContext, input: { ids: string[] }): 
   const accounts = await createAccountRepository(c.env.DB).reorder(input.ids)
   if (!accounts) return c.json({ error: 'invalid request' }, 400)
   return c.json(accounts, 200)
+}
+
+export async function setAccountProductPlan(c: AppContext, id: string, code: string, input: ProductPlanRequest): Promise<Response> {
+  if (!productCodeSchema.safeParse(code).success) return c.json({ error: 'invalid request' }, 400)
+  if (!c.env.DB) return c.json(CONFIG_ERROR, 503)
+  const account = await createAccountRepository(c.env.DB).setProductPlan(id, code, input)
+  if (!account) return c.json({ error: 'product not enabled' }, 404)
+  return c.json(account)
 }

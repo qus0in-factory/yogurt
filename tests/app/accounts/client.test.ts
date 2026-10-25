@@ -4,7 +4,7 @@ import { setupServer } from 'msw/node'
 import { createAccount, listAccounts, updateAccount } from '../../../src/app/accounts/client'
 
 const accountsUrl = `${window.location.origin}/api/accounts`
-const account = { id: 'a1', alias: '주계좌', owner: '홍길동', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '홍길동', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '2026-01-01T00:00:00.000Z' }
 let body: unknown
 const server = setupServer(
   http.get(accountsUrl, () => HttpResponse.json([account])),

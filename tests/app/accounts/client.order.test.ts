@@ -4,7 +4,7 @@ import { setupServer } from 'msw/node'
 import { reorderAccounts } from '../../../src/app/accounts/client'
 
 const url = `${window.location.origin}/api/accounts/order`
-const rows = ['b', 'a'].map((id) => ({ id, alias: id, owner: '소유자', accountNumber: '12345678', products: [], createdAt: '' }))
+const rows = ['b', 'a'].map((id) => ({ id, alias: id, owner: '소유자', accountNumber: '12345678', products: [], productPlans: {}, createdAt: '' }))
 let body: unknown
 const server = setupServer(http.put(url, async ({ request }) => { body = await request.json(); return HttpResponse.json(rows) }))
 beforeAll(() => server.listen())

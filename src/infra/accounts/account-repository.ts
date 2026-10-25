@@ -1,18 +1,16 @@
 import type { Account, AccountInput, AccountUpdate } from '../../domain/accounts/account.ts'
+import type { ProductPlanRequest } from '../../domain/accounts/product-plan.ts'
 import { reorderAccountIds } from './account-order.ts'
-import { encryptText, decryptText } from './account-crypto.ts'
+import { encryptText } from './account-crypto.ts'
+import { findAccountCredentials } from './account-credentials-repository.ts'
+import { toAccount, type AccountRow, type ProductRow } from './account-mapper.ts'
 
-type AccountRow = { id: string; alias: string; owner: string; account_number: string; product_code: string; created_at: string }
-type ProductRow = { product_code: string }
 const columns = 'id, alias, owner, account_number, created_at'
 
-function toAccount(row: AccountRow, products: string[]): Account {
-  return { id: row.id, alias: row.alias, owner: row.owner, accountNumber: row.account_number, products, createdAt: row.created_at }
-}
-
-async function loadProducts(db: D1Database, id: string): Promise<string[]> {
-  const { results = [] } = await db.prepare('SELECT product_code FROM account_products WHERE account_id = ?').bind(id).all<ProductRow>()
-  return results.map((row) => row.product_code)
+async function loadProducts(db: D1Database, id: string): Promise<ProductRow[]> {
+  const sql = 'SELECT product_code, start_date, min_target_amount_won, max_target_amount_won FROM account_products WHERE account_id = ?'
+  const { results = [] } = await db.prepare(sql).bind(id).all<ProductRow>()
+  return results
 }
 
 export function createAccountRepository(db: D1Database) {
@@ -27,7 +25,7 @@ export function createAccountRepository(db: D1Database) {
       ])
       const account: Account = {
         id: crypto.randomUUID(), alias: input.alias, owner: input.owner,
-        accountNumber: input.accountNumber, products: [], createdAt: new Date().toISOString(),
+        accountNumber: input.accountNumber, products: [], productPlans: {}, createdAt: new Date().toISOString(),
       }
       await db.prepare('INSERT INTO accounts (id, alias, owner, account_number, access_key_enc, secret_key_enc, created_at, sort_order) SELECT ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order) + 1, 0) FROM accounts')
         .bind(account.id, account.alias, account.owner, account.accountNumber, accessKey, secretKey, account.createdAt).run()
@@ -64,17 +62,13 @@ export function createAccountRepository(db: D1Database) {
       if (!accountRow) return null
       return toAccount(accountRow, await loadProducts(db, id))
     },
-    async findCredentials(id: string, keyB64: string): Promise<{ accessKey: string; secretKey: string; accountNumber: string; productCode: string } | null> {
-      const row = await db.prepare('SELECT access_key_enc, secret_key_enc, account_number, product_code FROM accounts WHERE id = ?').bind(id).first<{ access_key_enc: string; secret_key_enc: string; account_number: string; product_code: string }>()
-      if (!row) return null
-      try {
-        const [accessKey, secretKey] = await Promise.all([
-          decryptText(row.access_key_enc, keyB64), decryptText(row.secret_key_enc, keyB64),
-        ])
-        return { accessKey, secretKey, accountNumber: row.account_number, productCode: row.product_code }
-      } catch {
-        return null
-      }
+    async setProductPlan(id: string, code: string, plan: ProductPlanRequest): Promise<Account | null> {
+      const sql = 'UPDATE account_products SET start_date = ?, min_target_amount_won = ?, max_target_amount_won = ? WHERE account_id = ? AND product_code = ?'
+      const result = await db.prepare(sql).bind(plan.startDate, plan.minTargetAmountWon, plan.maxTargetAmountWon, id, code).run()
+      if (result.meta.changes === 0) return null
+      const row = await db.prepare(`SELECT ${columns} FROM accounts WHERE id = ?`).bind(id).first<AccountRow>()
+      return row ? toAccount(row, await loadProducts(db, id)) : null
     },
+    findCredentials: (id: string, keyB64: string) => findAccountCredentials(db, id, keyB64),
   }
 }

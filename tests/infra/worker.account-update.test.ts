@@ -28,7 +28,7 @@ beforeAll(async () => {
 it('PATCH는 키 설정 없이 200과 수정 계좌를 반환한다', async () => {
   const res = await call(input, db())
   expect(res.status).toBe(200)
-  expect(await res.json()).toEqual({ id: 'a1', ...input, accountNumber: row.account_number, products: [], createdAt: row.created_at })
+  expect(await res.json()).toEqual({ id: 'a1', ...input, accountNumber: row.account_number, products: [], productPlans: {}, createdAt: row.created_at })
 })
 
 it.each([{ alias: '', owner: '김철수' }, { alias: '수정', owner: '' }])('PATCH 검증 실패는 400이다', async body => {

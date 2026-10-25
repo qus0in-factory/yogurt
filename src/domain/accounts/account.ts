@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { accountCredentialsSchema } from './credentials'
+import { productPlanSchema } from './product-plan'
 import type { accountProductSchema } from './products'
 
 const alias = z.string().trim().min(1, { error: '별칭을 입력하세요' }).max(8, { error: '별칭은 8자 이하로 입력하세요' })
@@ -22,6 +23,7 @@ export const accountSchema = z.object({
   owner: z.string(),
   accountNumber: z.string(),
   products: z.array(z.string()),
+  productPlans: z.record(z.string(), productPlanSchema),
   createdAt: z.string(),
 })
 

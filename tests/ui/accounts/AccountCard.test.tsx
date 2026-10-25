@@ -8,7 +8,7 @@ import * as kisToken from '../../../src/ui/accounts/useKisToken'
 
 vi.mock('../../../src/ui/accounts/useKisToken', () => ({ useKisToken: vi.fn() }))
 
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: ['29'], createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: ['29'], productPlans: {}, createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderCard = (kisStatus?: KisStatusInfo) => {
   const onSelect = vi.fn()

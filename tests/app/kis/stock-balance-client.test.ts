@@ -9,7 +9,7 @@ it('requests the encoded account balance path and rejects invalid data', async (
   expect(api.get).toHaveBeenCalledWith('accounts/a%2Fb/products/29/balance', expect.anything())
 })
 it('sets a product with PUT and validates the returned account', async () => {
-  const account = { id: 'a', alias: 'a', owner: 'o', accountNumber: '12345678', products: ['29'], createdAt: '' }
+  const account = { id: 'a', alias: 'a', owner: 'o', accountNumber: '12345678', products: ['29'], productPlans: {}, createdAt: '' }
   vi.mocked(api.put).mockReturnValue({ json: async () => account } as never)
   expect(await setAccountProduct('a/b', '29', true)).toEqual(account)
   expect(api.put).toHaveBeenCalledWith('accounts/a%2Fb/products/29', { json: { enabled: true } })

@@ -6,7 +6,7 @@ import { useReorderAccounts } from '../../../src/ui/accounts/useAccounts'
 
 vi.mock('../../../src/app/accounts/client', async () => ({ ...(await vi.importActual('../../../src/app/accounts/client')), reorderAccounts: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
-const rows = ['a', 'b'].map((id) => ({ id, alias: id, owner: id, accountNumber: id, products: [], createdAt: '' }))
+const rows = ['a', 'b'].map((id) => ({ id, alias: id, owner: id, accountNumber: id, products: [], productPlans: {}, createdAt: '' }))
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
   client.setQueryData(['accounts'], rows)

@@ -69,7 +69,7 @@ describe('AddAccountDialog', () => {
   })
 
   it('저장 성공 시 초안을 삭제한다', async () => {
-    createAccount.mockResolvedValueOnce({ id: 'a2', alias: '새 계좌', owner: '김철수', accountNumber: '11112222', products: [], createdAt: '2026-01-01T00:00:00.000Z' })
+    createAccount.mockResolvedValueOnce({ id: 'a2', alias: '새 계좌', owner: '김철수', accountNumber: '11112222', products: [], productPlans: {}, createdAt: '2026-01-01T00:00:00.000Z' })
     renderDialog()
     fill({ 별칭: '새 계좌', 소유자: '김철수', 계좌번호: '11112222', 'Access Key': 'AK', 'Secret Key': 'SK' })
     await waitFor(() => expect(sessionStorage.getItem('yogurt:account-draft')).not.toBeNull())

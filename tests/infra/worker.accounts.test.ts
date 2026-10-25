@@ -51,7 +51,7 @@ describe('account routes', () => {
     const rows = [{ id: '1', alias: 'Main', owner: '홍길동', account_number: '12345678', created_at: '2026-01-01T00:00:00.000Z' }]
     const res = await call('GET', undefined, env(fakeDb(rows), key))
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual([{ id: '1', alias: 'Main', owner: '홍길동', accountNumber: '12345678', products: [], createdAt: rows[0].created_at }])
+    expect(await res.json()).toEqual([{ id: '1', alias: 'Main', owner: '홍길동', accountNumber: '12345678', products: [], productPlans: {}, createdAt: rows[0].created_at }])
   })
 
 
