@@ -5,11 +5,12 @@ import { Carousel } from '../components/Carousel'
 import { accountsText } from '../glossary/accounts'
 import { overviewText } from '../glossary/overview'
 import { useUiStore } from '../state/ui-store'
-import { IrpDetail } from './IrpDetail'
+import { productDetails } from './product-details'
 import { IrpAccountBox } from './IrpAccountBox'
 
 export function ProductTab({ productCode }: { productCode: string }) {
   const product = ACCOUNT_PRODUCTS.find((p) => p.code === productCode) ?? ACCOUNT_PRODUCTS[0]
+  const Detail = productDetails[product.key]
   const { data, isPending } = useAccounts()
   const selectedId = useUiStore((state) => state.selectedProductAccountIds[product.key] ?? null)
   const select = useUiStore((state) => state.selectProductAccount)
@@ -27,7 +28,7 @@ export function ProductTab({ productCode }: { productCode: string }) {
         <Carousel items={accounts} labels={labels} renderItem={(account) => <IrpAccountBox key={account.id} account={account}
           selected={selectedId === account.id} onSelect={() => select(product.key, selectedId === account.id ? null : account.id)} />} />
       )}
-      {isSelected && (product.key === 'irp' ? <IrpDetail key={selectedId} accountId={selectedId!} /> : <p className="text-stone-600">{overviewText.pensionDetailComingSoon}</p>)}
+      {isSelected && <Detail key={selectedId} accountId={selectedId!} />}
     </div>
   )
 }

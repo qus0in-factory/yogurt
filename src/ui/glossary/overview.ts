@@ -47,5 +47,4 @@ export const overviewText = {
   empty: 'IRP 계좌가 없습니다',
   productEmpty: (label: string) => `${label} 계좌가 없습니다`,
   productListLabel: (label: string) => `${label} 계좌 목록`,
-  pensionDetailComingSoon: '연금저축 상세는 준비 중',
 } as const
