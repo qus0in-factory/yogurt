@@ -2,6 +2,8 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { del } from 'idb-keyval'
 import { queryClient } from '../../../src/ui/state/query-client'
 import { clearClientStorage } from '../../../src/ui/state/clear-client-storage'
+import { useUiStore } from '../../../src/ui/state/ui-store'
+import { LAST_PAGE_STORAGE_KEY } from '../../../src/infra/navigation/last-page-storage'
 
 vi.mock('idb-keyval', () => ({ del: vi.fn(), get: vi.fn(), set: vi.fn() }))
 afterEach(() => {
@@ -36,4 +38,17 @@ it('clearQuery가 false이면 쿼리는 유지하고 yogurt: 키만 지운다', 
   expect(queryClient.getQueryCache().getAll()).toHaveLength(1)
   expect(localStorage.getItem('yogurt:ui')).toBeNull()
   expect(localStorage.getItem('other')).toBe('keep')
+})
+
+it.each([true, false])('clear(%s) 호출 시 메모리 screen을 accounts로 초기화하고 drawer를 닫으며 새 키를 지운다', async (clearQuery) => {
+  useUiStore.setState({ screen: 'overview', drawerOpen: true })
+  localStorage.setItem(LAST_PAGE_STORAGE_KEY, JSON.stringify({ version: 1, screen: 'overview' }))
+  localStorage.setItem('other-app:key', 'preserved')
+
+  await clearClientStorage(clearQuery)
+
+  expect(useUiStore.getState().screen).toBe('accounts')
+  expect(useUiStore.getState().drawerOpen).toBe(false)
+  expect(localStorage.getItem(LAST_PAGE_STORAGE_KEY)).toBeNull()
+  expect(localStorage.getItem('other-app:key')).toBe('preserved')
 })
