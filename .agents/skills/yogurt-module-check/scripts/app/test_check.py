@@ -30,6 +30,24 @@ class CheckCommandTest(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertIn('81', output.getvalue())
 
+    def test_typography_option_detects_violations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            relative = Path('src/ui/overview/Card.tsx')
+            module = root / relative
+            module.parent.mkdir(parents=True)
+            module.write_text('<div className="text-sm" />\n')
+            def run(args):
+                output = io.StringIO()
+                with patch('sys.argv', ['check', '--root', tmp, *args]), \
+                        patch('app.check.source_files', return_value=[relative]), \
+                        contextlib.redirect_stdout(output):
+                    return main(), output
+            self.assertEqual(run([])[0], 0)
+            code, output = run(['--typography'])
+            self.assertEqual(code, 1)
+            self.assertIn('hardcoded typography', output.getvalue())
+
     def test_input_error_returns_two(self):
         with patch('sys.argv', ['check']), \
                 patch('app.check.source_files', side_effect=OSError('unavailable')), \

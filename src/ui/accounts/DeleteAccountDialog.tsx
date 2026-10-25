@@ -3,6 +3,7 @@ import type { Account } from '../../domain/accounts/account'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
 import { accountsText } from '../glossary/accounts'
+import { typeScale } from '../styles/type-scale'
 import { useUiStore } from '../state/ui-store'
 import { useDeleteAccount } from './useAccounts'
 
@@ -40,7 +41,7 @@ export function DeleteAccountDialog({ account, onClose, onDeleted }: DeleteAccou
   return (
     <Dialog open onClose={onClose} title={accountsText.deleteTitle}>
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-stone-600">{accountsText.deleteBody(account.owner, account.alias, account.accountNumber)}</p>
+        <p className={typeScale.body}>{accountsText.deleteBody(account.owner, account.alias, account.accountNumber)}</p>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={onClose}>{accountsText.cancel}</Button>
           <Button type="button" className="bg-red-600 text-white hover:bg-red-700" disabled={deleteAccount.isPending} onClick={confirm}>{accountsText.deleteConfirm}</Button>

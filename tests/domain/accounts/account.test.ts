@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { accountInputSchema, accountSchema, accountUpdateSchema, accountProductSchema } from '../../../src/domain/accounts/account'
+import { accountInputSchema, accountSchema, accountUpdateSchema } from '../../../src/domain/accounts/account'
+import { accountProductSchema } from '../../../src/domain/accounts/products'
 import { productCodeSchema } from '../../../src/domain/accounts/products'
 
 const valid = { alias: '주식', owner: '홍길동', accountNumber: '12345678', accessKey: 'ak', secretKey: 'sk' }
@@ -46,7 +47,8 @@ describe('account schemas', () => {
 
   it('상품코드 스키마는 등록된 상품만 허용한다', () => {
     expect(productCodeSchema.safeParse('29').success).toBe(true)
-    expect(productCodeSchema.safeParse('01').success).toBe(false)
+    expect(productCodeSchema.safeParse('22').success).toBe(true)
+    expect(productCodeSchema.safeParse('01').success).toBe(true)
     expect(accountProductSchema.parse({ enabled: true })).toEqual({ enabled: true })
   })
 })

@@ -1,4 +1,4 @@
-import { Check, Plus } from 'lucide-react'
+import { productIcons } from '../overview/product-icons'
 import { toast } from 'sonner'
 import type { Account } from '../../domain/accounts/account'
 import { ACCOUNT_PRODUCTS } from '../../domain/accounts/products'
@@ -11,7 +11,7 @@ export function ProductToggles({ account }: { account: Account }) {
   return <div className="flex flex-wrap gap-2" onFocus={event => event.stopPropagation()}>
     {ACCOUNT_PRODUCTS.map(product => {
       const enabled = account.products.includes(product.code)
-      const Icon = enabled ? Check : Plus
+      const Icon = productIcons[product.key]
       return <Button key={product.code} size="sm" variant={enabled ? 'default' : 'outline'}
         aria-pressed={enabled} disabled={mutation.isPending} className="gap-2"
         onClick={event => {

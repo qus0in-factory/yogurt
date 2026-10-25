@@ -32,6 +32,7 @@ describe('account repository', () => {
   it('별칭·소유자·계좌번호는 평문, access/secret key는 암호문으로 저장한다', async () => {
     const { db, calls } = fakeDb()
     const account = await createAccountRepository(db).create(input, key)
+    expect(calls[0].sql).toContain('sort_order) SELECT ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order) + 1, 0) FROM accounts')
     expect(calls[0].args.slice(1, 4)).toEqual(['Primary', '홍길동', '12345678'])
     expect(calls[0].args).not.toContain('AK_plain_1234')
     expect(calls[0].args).not.toContain('SK_plain_secret')
@@ -41,10 +42,10 @@ describe('account repository', () => {
     expect(account).not.toHaveProperty('secretKey')
   })
 
-  it('created_at 오름차순 목록에 products를 포함한다', async () => {
+  it('sort_order·created_at 오름차순 목록에 products를 포함한다', async () => {
     const { db, calls } = fakeDb([row])
     const accounts = await createAccountRepository(db).list()
-    expect(calls[0].sql).toContain('ORDER BY created_at ASC')
+    expect(calls[0].sql).toContain('ORDER BY sort_order ASC, created_at ASC')
     expect(accounts).toEqual([{ id: 'a', alias: 'Main', owner: '홍길동', accountNumber: '12345678', products: [], createdAt: row.created_at }])
   })
 

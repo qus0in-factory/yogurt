@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { TextField } from '../../../src/ui/components/TextField'
+import { typeScale } from '../../../src/ui/styles/type-scale'
 
 afterEach(cleanup)
 
@@ -9,6 +10,7 @@ describe('TextField', () => {
   it('label과 input이 연결된다', () => {
     render(<TextField label="이름" name="name" value="" onChange={vi.fn()} />)
     expect(screen.getByLabelText('이름')).toBeInTheDocument()
+    expect(screen.getByText('이름')).toHaveClass(...typeScale.label.split(' '))
   })
 
   it('입력하면 onChange에 값이 전달된다', () => {

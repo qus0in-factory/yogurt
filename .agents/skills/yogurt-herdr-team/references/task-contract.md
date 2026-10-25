@@ -11,6 +11,7 @@
 - 금지 범위: 허용 목록 외 전부, 보호 파일, 외부 작업, 계약 밖 도구
 - 완료 조건: 산출물 상태와 보고 제출까지
 - 검증: 대상이 스스로 수행할 확인 방법(파일 재독 등)
+- 재사용 컴포넌트 확인: UI 작업인 경우 .agents/skills/yogurt-layered-tdd/references/ui-components.md 카탈로그 확인 및 컴포넌트·typeScale 재사용
 - 시간: 3분. 조정자가 전체 5분 경계 안의 잔여 시간으로 조정
 - 완료 시 콜백 명령: 계약 끝에 아래 명령을 실제 조정자·작업자 이름과 요약으로 채워 추가한다.
 
@@ -60,6 +61,8 @@ python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to <조�
 선행 조건: |
   - 조정자가 examples.md의 작성자 잠금을 이 대상으로 확정하여 통보함
   - 예시 형식과 테스트 프레임워크는 SKILL.md 기준으로 이미 확정됨
+재사용 컴포넌트 확인: |
+  - UI 작업인 경우 ui-components.md 카탈로그를 확인하고 기존 컴포넌트·typeScale을 재사용함
 허용 파일:
   - .agents/skills/yogurt-layered-tdd/references/examples.md
 금지 범위: |

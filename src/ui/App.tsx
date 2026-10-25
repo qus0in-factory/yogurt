@@ -9,6 +9,8 @@ import { AccountsPage } from './accounts/AccountsPage'
 import { OverviewPage } from './overview/OverviewPage'
 import { useUiStore } from './state/ui-store'
 import { commonText } from './glossary'
+import { cn } from './lib/cn'
+import { spacing, typeScale } from './styles/type-scale'
 
 export function App() {
   const session = useSession()
@@ -20,13 +22,13 @@ export function App() {
   const setDrawerOpen = useUiStore((state) => state.setDrawerOpen)
 
   if (session.isPending) {
-    return <p className="p-6 text-stone-600">{commonText.checking}</p>
+    return <p className={cn(spacing.page, typeScale.body)}>{commonText.checking}</p>
   }
 
   if (session.isError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-primary-50 p-6">
-        <p role="alert" className="text-stone-900">{commonText.connectionError}</p>
+        <p role="alert" className={typeScale.body}>{commonText.connectionError}</p>
         <Button variant="outline" onClick={() => void session.refetch()}>
           {commonText.retry}
         </Button>
@@ -42,7 +44,7 @@ export function App() {
     <div className="flex min-h-screen bg-primary-50">
       <Sidebar current={active} onNavigate={navigate} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-stone-200 bg-white p-3">
+        <header className="flex items-center justify-between border-b border-stone-200 bg-white p-4">
           <div className="md:hidden">
             <MobileMenu
               open={drawerOpen}
@@ -64,7 +66,7 @@ export function App() {
             </Button>
           </div>
         </header>
-        <main className="flex-1 p-6">
+        <main className={cn('flex-1', spacing.page)}>
           {active === 'overview' ? <OverviewPage /> : <AccountsPage />}
         </main>
       </div>

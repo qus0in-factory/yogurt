@@ -4,6 +4,8 @@ import { useFocusTrap } from '../lib/useFocusTrap'
 import { Button } from '../components/Button'
 import { MENU_ITEMS, type ScreenId } from './menu'
 import { layoutText } from '../glossary/layout'
+import { typeScale } from '../styles/type-scale'
+import { cn } from '../lib/cn'
 
 type MenuDrawerProps = {
   open: boolean
@@ -31,7 +33,7 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-2 text-lg font-semibold">
+          <div className={cn('flex items-center gap-2', typeScale.sectionTitle)}>
             <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 rounded" />
             <span>{layoutText.appName}</span>
           </div>
@@ -40,20 +42,22 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
           </Button>
         </div>
         <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-2 p-2">
-          {MENU_ITEMS.map((item) => (
-            <Button
+          {MENU_ITEMS.map((item) => {
+            const Icon = item.icon
+            return <Button
               key={item.id}
               variant={current === item.id ? 'default' : 'ghost'}
-              className="w-full justify-start"
+              className="w-full justify-start py-2.5 px-3"
               aria-current={current === item.id ? 'page' : undefined}
               onClick={() => {
                 onNavigate(item.id)
                 onClose()
               }}
             >
-              {item.label}
+              <Icon aria-hidden="true" className="h-4 w-4 text-current" />
+              <span>{item.label}</span>
             </Button>
-          ))}
+          })}
         </nav>
       </div>
     </div>

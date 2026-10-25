@@ -71,7 +71,7 @@ class HealthIoTest(unittest.TestCase):
         self.assertEqual(ops.fetch_health('https://x/health', opener), {'version': '1.2.3'})
         request, timeout = opened[0]
         self.assertEqual((request.full_url, timeout), ('https://x/health', 10))
-        self.assertEqual(request.get_header('User-agent'), 'yogurt-release/1 (+https://github.com/usagi-ai-kr/yogurt)')
+        self.assertEqual(request.get_header('User-agent'), 'yogurt-release/1 (+https://github.com/qus0in-factory/yogurt)')
         self.assertEqual(request.get_header('Cache-control'), 'no-cache')
 
 

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { toast } from 'sonner'
 import { AccountCard } from '../../../src/ui/accounts/AccountCard'
 import * as kisToken from '../../../src/ui/accounts/useKisToken'
+import { spacing, typeScale } from '../../../src/ui/styles/type-scale'
 
 vi.mock('../../../src/ui/accounts/useKisToken', () => ({ useKisToken: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
@@ -23,6 +24,16 @@ beforeEach(() => vi.clearAllMocks())
 afterEach(cleanup)
 
 describe('AccountCard KIS', () => {
+  it('카드 여백과 계좌 텍스트에 공통 토큰을 사용한다', () => {
+    vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: false, mutate: vi.fn() } as never)
+    renderCard()
+    const card = screen.getByRole('group', { name: '주계좌' })
+    expect(card).toHaveClass(...spacing.card.split(' '))
+    expect(screen.getByText('주계좌')).toHaveClass(...typeScale.cardTitle.split(' '))
+    expect(screen.getByText('김철수')).toHaveClass(...typeScale.caption.split(' '))
+    expect(screen.getByText('12345678')).toHaveClass(...typeScale.number.split(' '))
+  })
+
   it('KIS 상태 아이콘 버튼을 표시한다', () => {
     vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: false, mutate: vi.fn() } as never)
     renderCard()

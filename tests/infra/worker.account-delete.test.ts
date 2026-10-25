@@ -11,7 +11,8 @@ let token = ''
 const fakeSessions = createFakeKv()
 function fakeDb(changes: number) {
   const prepare = vi.fn(() => ({ bind: (..._args: unknown[]) => ({ run: async () => ({ meta: { changes } }) }) }))
-  return { db: { prepare } as unknown as D1Database, prepare }
+  const batch = async () => [0, 1, 2].map(() => ({ meta: { changes } }))
+  return { db: { prepare, batch } as unknown as D1Database, prepare }
 }
 const call = (DB: D1Database | undefined, authenticated = true) => app.fetch(
   new Request('https://example.com/api/accounts/a1', {

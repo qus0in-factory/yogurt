@@ -6,7 +6,7 @@ import * as client from '../../../src/app/accounts/client'
 import { useUiStore } from '../../../src/ui/state/ui-store'
 import { AccountsPage } from '../../../src/ui/accounts/AccountsPage'
 
-vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn() }))
+vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn(), reorderAccounts: vi.fn() }))
 const accounts = [
   { id: '1', alias: '주계좌', owner: '김철수', accountNumber: '1234', products: [], createdAt: '' },
   { id: '2', alias: '보조계좌', owner: '홍길동', accountNumber: '5678', products: [], createdAt: '' },

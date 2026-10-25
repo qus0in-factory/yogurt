@@ -1,4 +1,5 @@
 import type { Account, AccountInput, AccountUpdate } from '../../domain/accounts/account.ts'
+import { reorderAccountIds } from './account-order.ts'
 import { encryptText, decryptText } from './account-crypto.ts'
 
 type AccountRow = { id: string; alias: string; owner: string; account_number: string; product_code: string; created_at: string }
@@ -17,10 +18,8 @@ async function loadProducts(db: D1Database, id: string): Promise<string[]> {
 export function createAccountRepository(db: D1Database) {
   return {
     async list(): Promise<Account[]> {
-      const { results = [] } = await db.prepare(`SELECT ${columns} FROM accounts ORDER BY created_at ASC`).all<AccountRow>()
-      const accounts: Account[] = []
-      for (const row of results) accounts.push(toAccount(row, await loadProducts(db, row.id)))
-      return accounts
+      const { results = [] } = await db.prepare(`SELECT ${columns} FROM accounts ORDER BY sort_order ASC, created_at ASC`).all<AccountRow>()
+      return Promise.all(results.map(async row => toAccount(row, await loadProducts(db, row.id))))
     },
     async create(input: AccountInput, keyB64: string): Promise<Account> {
       const [accessKey, secretKey] = await Promise.all([
@@ -30,13 +29,21 @@ export function createAccountRepository(db: D1Database) {
         id: crypto.randomUUID(), alias: input.alias, owner: input.owner,
         accountNumber: input.accountNumber, products: [], createdAt: new Date().toISOString(),
       }
-      await db.prepare('INSERT INTO accounts (id, alias, owner, account_number, access_key_enc, secret_key_enc, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      await db.prepare('INSERT INTO accounts (id, alias, owner, account_number, access_key_enc, secret_key_enc, created_at, sort_order) SELECT ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order) + 1, 0) FROM accounts')
         .bind(account.id, account.alias, account.owner, account.accountNumber, accessKey, secretKey, account.createdAt).run()
       return account
     },
+    async reorder(ids: string[]): Promise<Account[] | null> {
+      if (!(await reorderAccountIds(db, ids))) return null
+      return this.list()
+    },
     async remove(id: string): Promise<boolean> {
-      await db.prepare('DELETE FROM account_products WHERE account_id = ?').bind(id).run()
-      const result = await db.prepare('DELETE FROM accounts WHERE id = ?').bind(id).run()
+      const results = await db.batch([
+        db.prepare('DELETE FROM account_products WHERE account_id = ?').bind(id),
+        db.prepare('DELETE FROM holding_risk_classes WHERE account_id = ?').bind(id),
+        db.prepare('DELETE FROM accounts WHERE id = ?').bind(id),
+      ])
+      const result = results[2]
       return result.meta.changes > 0
     },
     async update(id: string, input: AccountUpdate): Promise<Account | null> {
