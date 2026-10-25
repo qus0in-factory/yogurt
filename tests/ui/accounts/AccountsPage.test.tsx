@@ -27,6 +27,8 @@ describe('AccountsPage', () => {
     listAccounts.mockResolvedValueOnce([])
     renderPage()
     expect(await screen.findByText('등록된 계좌가 없습니다')).toBeInTheDocument()
+    expect(screen.getByText('+ 버튼으로 첫 계좌를 추가하세요')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '첫 계좌 추가' })).toBeInTheDocument()
   })
 
   it('계좌 목록에 카드로 별칭·소유자·계좌번호와 수정 버튼을 표시한다', async () => {

@@ -7,6 +7,7 @@ import { readSessionJson, writeSessionJson } from '../lib/session-draft'
 import { AddAccountDialog } from './AddAccountDialog'
 import { EditAccountDialog } from './EditAccountDialog'
 import { AccountCarousel } from './AccountCarousel'
+import { AccountsEmptyState } from './AccountsEmptyState'
 import { AccountSearch } from './AccountSearch'
 import { useAccounts, useReorderAccounts } from './useAccounts'
 import { AccountOrderList } from './AccountOrderList'
@@ -67,7 +68,7 @@ export function AccountsPage() {
         if (ids.some((id, index) => id !== accounts[index]?.id)) void reorder.mutateAsync(ids).then(() => setOrderEditing(false)).catch(() => {})
         else setOrderEditing(false)
       }} /> : filtered.length === 0 ? (
-        <p className={typeScale.body}>{query.replace(/\s/g, '') ? accountsText.noResults : accountsText.empty}</p>
+        <AccountsEmptyState searching={Boolean(query.replace(/\s/g, ''))} onAdd={() => setAddOpen(true)} />
       ) : <AccountCarousel key={query} accounts={filtered} onEdit={setEditing} kisStatuses={kisStatuses} />}
       <AddAccountDialog open={addOpen} onClose={() => setAddOpen(false)} />
       {editing ? <EditAccountDialog account={editing} onClose={() => setEditing(null)} /> : null}

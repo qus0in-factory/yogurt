@@ -63,5 +63,6 @@ export const overviewText = {
   listLabel: 'IRP 계좌 목록',
   empty: 'IRP 계좌가 없습니다',
   productEmpty: (label: string) => `${label} 계좌가 없습니다`,
+  productEmptyHint: (label: string) => `계좌 카드에서 ${label}을 켜면 여기에 표시됩니다`,
   productListLabel: (label: string) => `${label} 계좌 목록`,
 } as const

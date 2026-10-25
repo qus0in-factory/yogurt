@@ -39,6 +39,7 @@ describe('ProductTab', () => {
     listAccounts.mockResolvedValueOnce([])
     renderTab('22')
     expect(await screen.findByText('연금저축 계좌가 없습니다')).toBeInTheDocument()
+    expect(screen.getByText('계좌 카드에서 연금저축을 켜면 여기에 표시됩니다')).toBeInTheDocument()
   })
   it('연금저축 계좌를 선택하면 PensionDetail을 조회하고 다시 누르면 닫는다', async () => {
     listAccounts.mockResolvedValueOnce([{ ...base, id: 'pen-1', alias: '개인연금', products: ['22'] }])

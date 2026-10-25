@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { PackageOpen } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getStockBalance } from '../../app/kis/stock-balance-client'
 import { withWeights } from '../../app/kis/holding-weights'
@@ -8,6 +9,7 @@ import { commonText } from '../glossary/common'
 import { overviewText as text } from '../glossary/overview'
 import { spacing, typeScale } from '../styles/type-scale'
 import { Button } from '../components/Button'
+import { EmptyState } from '../components/EmptyState'
 import { IrpSummary } from './IrpSummary'
 import { IrpHoldingRow } from './IrpHoldingRow'
 import { IrpHoldingCard } from './IrpHoldingCard'
@@ -50,7 +52,7 @@ export function IrpDetail({ accountId }: { accountId: string }) {
     ) : null}
     <div>
       <h3 className={`mb-3 ${typeScale.cardTitle}`}>{text.holdings}</h3>
-      {weighted.length === 0 ? <p className={typeScale.body}>{text.emptyHoldings}</p> : null}
+      {weighted.length === 0 ? <EmptyState icon={PackageOpen} title={text.emptyHoldings} className="py-8" /> : null}
       {wide ? (
         <div className="overflow-x-auto">
           <table className="w-full">
