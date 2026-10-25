@@ -1,16 +1,7 @@
 from dataclasses import dataclass
+from domain.post_start import DS_POST_START, GROK_POST_START, MIMO_POST_START, MUSE_POST_START
 
 GA_MODEL_ID = 'gemini-4-argon-medium'
-
-DS_POST_START = (
-    ('send_text', '/models'),
-    ('send_keys', 'enter'),
-    ('send_text', 'DeepSeek V4.1 Flash OpenCode'),
-    ('send_keys', 'down'),
-    ('send_keys', 'enter'),
-    ('wait_output', 'DeepSeek V4.1 Flash OpenCode Go · max'),
-)
-
 
 @dataclass(frozen=True)
 class Preset:
@@ -41,17 +32,29 @@ PRESETS: dict[str, Preset] = {
         sandboxed=True,
     ),
     'gf': Preset(
-        name='gf', kind='agy', args=['--effort', 'high'], sandboxed=False,
+        name='gf', kind='agy', args=['--effort', 'medium'], sandboxed=False,
     ),
     'ga': make_ga_preset(),
     'ds': Preset(
         name='ds', kind='opencode', args=[], sandboxed=False,
         post_start=DS_POST_START,
     ),
+    'grok': Preset(
+        name='grok', kind='opencode', args=[], sandboxed=False,
+        post_start=GROK_POST_START,
+    ),
+    'mimo': Preset(
+        name='mimo', kind='opencode', args=[], sandboxed=False,
+        post_start=MIMO_POST_START,
+    ),
+    'muse': Preset(
+        name='muse', kind='opencode', args=[], sandboxed=False,
+        post_start=MUSE_POST_START,
+    ),
 }
 
-DEFAULT_PRIORITY = ('sol', 'luna', 'gf', 'ga', 'ds')
-NEED_TESTS_PRIORITY = ('gf', 'ga', 'ds', 'sol', 'luna')
+DEFAULT_PRIORITY = ('sol', 'luna', 'gf', 'ga', 'ds', 'grok', 'mimo', 'muse')
+NEED_TESTS_PRIORITY = ('gf', 'ga', 'ds', 'grok', 'sol', 'luna', 'mimo', 'muse')
 
 
 def get_preset(name: str) -> Preset:

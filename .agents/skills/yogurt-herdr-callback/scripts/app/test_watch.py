@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from app.watch import main
+from infra.process_lock import acquire_lock, release_lock
 
 
 class FakeClock:
@@ -56,6 +57,23 @@ class WatchCommandTest(unittest.TestCase):
                 code = main(args, root=tmp, sleep_fn=clock.sleep, clock_fn=clock)
             self.assertEqual(code, 2)
             self.assertEqual(out.getvalue(), '')
+
+
+    def test_active_lock_rejects_second_watcher_and_releases_owner(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'watch.pid'
+            self.assertTrue(acquire_lock(path, pid=123))
+            self.assertFalse(acquire_lock(path, pid=456, alive=lambda _pid: True))
+            self.assertFalse(release_lock(path, pid=456))
+            self.assertTrue(release_lock(path, pid=123))
+
+    def test_stale_pid_lock_is_recovered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'watch.pid'
+            path.write_text('123')
+            self.assertTrue(acquire_lock(path, pid=456, alive=lambda _pid: False))
+            self.assertEqual(path.read_text(), '456')
+            self.assertTrue(release_lock(path, pid=456))
 
 
 if __name__ == '__main__':

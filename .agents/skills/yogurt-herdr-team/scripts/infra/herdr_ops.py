@@ -1,4 +1,5 @@
 import json
+import subprocess
 from infra.herdr_cli import run_herdr
 
 
@@ -33,7 +34,7 @@ def start_agent(
     ]
     if args:
         cmd.extend(['--'] + args)
-    res = run_herdr(cmd, runner)
+    res = run_herdr(cmd, runner, timeout=timeout / 1000 + 5)
     return res.returncode == 0
 
 
@@ -48,15 +49,22 @@ def run_post_start(
         elif action == 'send_keys':
             cmd = ['herdr', 'pane', 'send-keys', pane_id, value]
         elif action == 'wait_output':
-            cmd = ['herdr', 'pane', 'wait-output', '--match', value, pane_id]
+            cmd = ['herdr', 'pane', 'wait-output', '--timeout', '10000',
+                   '--match', value, pane_id]
         else:
-            continue
-        res = run_herdr(cmd, runner)
+            raise RuntimeError(f'delegated failure: unknown post-start action {action}')
+        try:
+            res = run_herdr(cmd, runner, timeout=12)
+        except subprocess.TimeoutExpired as error:
+            raise RuntimeError(f'delegated failure: post-start timed out: {error}') from error
         if res.returncode != 0:
-            raise RuntimeError(f'Post-start step failed ({action}): {res.stderr}')
+            raise RuntimeError(f'delegated failure: post-start step failed ({action}): {res.stderr}')
 
 
-def prompt_agent(name: str, text: str, runner=None) -> bool:
+def prompt_agent(name: str, text: str, runner=None, timeout: float = 65) -> bool:
     cmd = ['herdr', 'agent', 'prompt', name, text]
-    res = run_herdr(cmd, runner)
+    try:
+        res = run_herdr(cmd, runner, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return False
     return res.returncode == 0

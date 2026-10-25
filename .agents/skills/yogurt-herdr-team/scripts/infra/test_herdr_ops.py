@@ -41,13 +41,25 @@ class TestHerdrOps(unittest.TestCase):
         self.assertEqual(len(called), 3)
         self.assertEqual(called[0], ['herdr', 'pane', 'send-text', 'p-1', '/models'])
         self.assertEqual(called[1], ['herdr', 'pane', 'send-keys', 'p-1', 'enter'])
-        self.assertEqual(called[2], ['herdr', 'pane', 'wait-output', '--match', 'ready', 'p-1'])
+        self.assertEqual(called[2], ['herdr', 'pane', 'wait-output', '--timeout', '10000', '--match', 'ready', 'p-1'])
 
     def test_prompt_agent(self):
         called = []
         runner = lambda cmd, **kw: called.append(cmd) or DummyProc(0, out='{}')
         self.assertTrue(prompt_agent('sol', 'do task', runner=runner))
         self.assertEqual(called[0], ['herdr', 'agent', 'prompt', 'sol', 'do task'])
+
+
+    def test_picker_is_checked_before_search_and_commands_are_bounded(self):
+        calls = []
+        def runner(cmd, **kw):
+            calls.append((cmd, kw))
+            return DummyProc(0, out='{}')
+        steps = (('send_text', '/models'), ('send_keys', 'enter'),
+                 ('wait_output', 'Select model'), ('send_text', 'DeepSeek'))
+        run_post_start('p-1', steps, runner=runner)
+        self.assertIn('--timeout', calls[2][0])
+        self.assertTrue(all(call[1].get('timeout') for call in calls))
 
 
 if __name__ == '__main__':

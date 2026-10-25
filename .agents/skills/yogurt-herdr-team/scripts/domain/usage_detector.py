@@ -16,3 +16,11 @@ def detect_usage_issue(text: str) -> str | None:
         if pattern in lower:
             return pattern
     return None
+
+
+def detect_capacity_error(text: str) -> str | None:
+    lower = text.lower()
+    for marker in ('ttft_admission_refused', 'at capacity'):
+        if marker in lower:
+            return marker
+    return None

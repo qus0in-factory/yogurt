@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from domain.picker import pick_preset
+from domain.presets import DEFAULT_PRIORITY
 
 
 class TestPicker(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestPicker(unittest.TestCase):
         self.assertEqual(pick_preset(need_tests=True, active_presets={'gf'}), 'ga')
 
     def test_pick_all_excluded_returns_none(self):
-        all_presets = {'sol', 'luna', 'gf', 'ga', 'ds'}
+        all_presets = set(DEFAULT_PRIORITY)
         self.assertIsNone(pick_preset(excluded=all_presets))
 
 

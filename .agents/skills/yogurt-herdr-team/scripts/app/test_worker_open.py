@@ -55,5 +55,25 @@ class TestWorkerOpen(unittest.TestCase):
         self.assertTrue((self.state_dir / 'w-ga.json').exists())
 
 
+    def test_start_failure_closes_created_tab_and_saves_no_state(self):
+        calls = []
+        def runner(cmd, **kw):
+            calls.append(cmd)
+            if cmd[:3] == ['herdr', 'agent', 'list']:
+                return DummyProc(0, out='{"result":{"agents":[]}}')
+            if cmd[:3] == ['herdr', 'pane', 'current']:
+                return DummyProc(0, out='{"result":{"pane":{"workspace_id":"ws"}}}')
+            if cmd[:3] == ['herdr', 'tab', 'create']:
+                return DummyProc(0, out='{"result":{"tab":{"tab_id":"t-new"},"root_pane":{"pane_id":"p-new"}}}')
+            if cmd[:3] == ['herdr', 'agent', 'start']:
+                return DummyProc(1, err='provider unavailable')
+            return DummyProc(0, out='{}')
+        code, out = cmd_open('gf', name='w-fail', state_dir=self.state_dir, runner=runner)
+        self.assertNotEqual(code, 0)
+        self.assertIn('external failure', out)
+        self.assertIn(['herdr', 'tab', 'close', 't-new'], calls)
+        self.assertFalse((self.state_dir / 'w-fail.json').exists())
+
+
 if __name__ == '__main__':
     unittest.main()

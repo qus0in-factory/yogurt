@@ -2,7 +2,7 @@ import unittest
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from domain.usage_detector import detect_usage_issue
+from domain.usage_detector import detect_capacity_error, detect_usage_issue
 
 
 class TestUsageDetector(unittest.TestCase):
@@ -23,6 +23,11 @@ class TestUsageDetector(unittest.TestCase):
 
     def test_normal_text_not_detected(self):
         self.assertIsNone(detect_usage_issue("Task finished. All tests passed successfully."))
+
+    def test_capacity_markers_are_separate_from_quota(self):
+        self.assertEqual(detect_capacity_error('TTFT_ADMISSION_REFUSED'), 'ttft_admission_refused')
+        self.assertEqual(detect_capacity_error('Provider at capacity'), 'at capacity')
+        self.assertIsNone(detect_capacity_error('rate limit exceeded'))
 
 
 if __name__ == '__main__':

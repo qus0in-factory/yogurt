@@ -1,4 +1,5 @@
 import tempfile
+import subprocess
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -52,6 +53,21 @@ class CallbackSenderTest(unittest.TestCase):
                 ok, _ = send_callback('claude', 'codex', 'message', runner=lambda *_a, **_k: (calls.append(1) or result(code, error)), sleeper=sleeps.append, fallback_root=Path(tmp))
                 self.assertFalse(ok)
                 self.assertEqual((len(calls), sleeps), (1, []))
+
+
+    def test_hung_direct_send_times_out_and_writes_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            calls = []
+            def hung(command, **options):
+                calls.append(command)
+                self.assertEqual(options['timeout'], 10)
+                raise subprocess.TimeoutExpired(command, options['timeout'])
+            ok, note = send_callback('claude', 'luna', 'done', runner=hung,
+                                     sleeper=lambda _seconds: None, fallback_root=Path(tmp))
+            self.assertFalse(ok)
+            self.assertIn('fallback saved', note)
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(len(list((Path(tmp) / 'claude').glob('*.md'))), 1)
 
 
 if __name__ == '__main__':
