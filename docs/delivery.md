@@ -10,7 +10,7 @@
 
 ## Cloudflare 대시보드 연결
 
-Workers & Pages → Create application → Import a repository에서 GitHub와 `usagi-ai-kr/yogurt`를 연결한다. 아래 설정으로 Worker를 두 개 만든다. 이미 Worker를 만들었다면 해당 Worker의 Settings → Build에서 저장소를 연결한다.
+Workers & Pages → Create application → Import a repository에서 GitHub와 `qus0in-factory/yogurt`를 연결한다. 아래 설정으로 Worker를 두 개 만든다. 이미 Worker를 만들었다면 해당 Worker의 Settings → Build에서 저장소를 연결한다.
 
 | 설정 | dev 미리보기 | 운영 |
 | --- | --- | --- |
