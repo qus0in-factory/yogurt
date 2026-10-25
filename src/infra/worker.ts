@@ -9,6 +9,7 @@ import { accountInputSchema, accountUpdateSchema, accountOrderSchema } from '../
 import { productPlanRequestSchema } from '../domain/accounts/product-plan.ts'
 import { accountProductSchema, productCodeSchema } from '../domain/accounts/products.ts'
 import { replaceCredentials } from './accounts/credentials-handler.ts'
+import { isaLastCloseHandler } from './accounts/isa-last-close.ts'
 import { createAccount, listAccounts, updateAccount, deleteAccount, setAccountProduct, reorderAccounts, setAccountProductPlan } from './accounts/accounts.ts'
 import { kisTokenHandler } from './kis/kis-token-handler.ts'
 import { kisBalanceHandler } from './kis/kis-balance-handler.ts'
@@ -16,7 +17,6 @@ import { kisAssetsHandler } from './kis/kis-assets-handler.ts'
 import { kisStatusStream } from './kis/kis-status-stream.ts'
 import { getRiskClassesHandler, setRiskClassHandler } from './holdings/risk-class-handlers.ts'
 import { runIsaMonthlySnapshots } from './snapshots/run-isa-monthly-snapshots.ts'
-
 const app = new Hono<{ Bindings: Env }>()
 
 const authMiddleware = createMiddleware(async (c, next) => {
@@ -43,6 +43,7 @@ app.post('/api/login', zValidator('json', loginRequestSchema, (result, c) => {
 app.get('/api/session', sessionHandler)
 app.post('/api/logout', logoutHandler)
 app.get('/api/accounts', listAccounts)
+app.get('/api/accounts/:accountId/isa-last-close', isaLastCloseHandler)
 app.post('/api/accounts', zValidator('json', accountInputSchema, (result, c) => {
   if (!result.success) return c.json({ error: 'invalid request' }, 400)
 }), (c) => createAccount(c, c.req.valid('json')))
@@ -76,5 +77,4 @@ app.onError((error, c) => {
   throw error
 })
 app.all('*', (c) => c.env.ASSETS.fetch(c.req.raw))
-
 export default { fetch: app.fetch, scheduled: (_event: ScheduledController, env: Env, ctx: ExecutionContext) => ctx.waitUntil(runIsaMonthlySnapshots(env)) }

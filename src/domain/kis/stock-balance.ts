@@ -10,8 +10,15 @@ const holdingSchema = z.object({
   evlu_pfls_rt: numberValue,
 })
 
+const cashValue = z.union([z.string(), z.number(), z.null()]).optional()
+  .transform((value) => {
+    if (value === null || value === undefined) return 0
+    const number = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''))
+    return Number.isFinite(number) ? number : 0
+  })
+
 const summarySchema = z.object({
-  dnca_tot_amt: numberValue, scts_evlu_amt: numberValue, tot_evlu_amt: numberValue, nass_amt: numberValue,
+  dnca_tot_amt: cashValue, scts_evlu_amt: numberValue, tot_evlu_amt: numberValue, nass_amt: numberValue,
   pchs_amt_smtl_amt: numberValue, evlu_amt_smtl_amt: numberValue, evlu_pfls_smtl_amt: numberValue,
   asst_icdc_amt: numberValue, asst_icdc_erng_rt: numberValue,
 })

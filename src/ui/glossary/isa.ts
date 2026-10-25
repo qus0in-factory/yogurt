@@ -49,6 +49,7 @@ export const isaText = {
   diffMax: '최대 대비',
   noTarget: '목표 없음',
   progressWaitClosing: '마감 기록 대기',
+  progressClosingLoading: '마감 기록 조회 중…',
   needStartDate: '시작일 필요',
   beforeStart: '시작 전',
   progressMidLabel: '50%',

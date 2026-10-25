@@ -26,6 +26,12 @@ describe('parseStockBalance', () => {
     expect(parseStockBalance({ ...raw, output1: [] })).toEqual({ summary: expected.summary, holdings: [] })
   })
 
+  it('dnca_tot_amt가 없거나 비면 현금 0으로 파싱한다', () => {
+    const { dnca_tot_amt, ...withoutCash } = summaryRow
+    expect(parseStockBalance({ ...raw, output2: [withoutCash] }).summary.cash).toBe(0)
+    expect(parseStockBalance({ ...raw, output2: [{ ...summaryRow, dnca_tot_amt: '' }] }).summary.cash).toBe(0)
+  })
+
   it('모르는 필드는 제거하고 요약·보유만 나타낸다', () => {
     const parsed = parseStockBalance({ ...raw, ctx_area_fk100: 'x' })
     expect(Object.keys(parsed)).toEqual(['summary', 'holdings'])
