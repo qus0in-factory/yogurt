@@ -26,4 +26,9 @@ describe('productAccounts', () => {
   it('해당 상품이 활성화된 계좌가 없으면 빈 배열을 반환한다', () => {
     expect(productAccounts([account('1', '주계좌', ['01'])], '29')).toEqual([])
   })
+
+  it('입력된 서버 계좌 순서를 보존한다', () => {
+    const accounts = [account('b', '두번째', ['29']), account('a', '첫번째', ['29'])]
+    expect(productAccounts(accounts, '29').map(({ id }) => id)).toEqual(['b', 'a'])
+  })
 })

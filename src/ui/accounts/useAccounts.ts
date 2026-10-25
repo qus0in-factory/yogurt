@@ -1,9 +1,32 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createAccount, deleteAccount, listAccounts, setAccountProduct, updateAccount } from '../../app/accounts/client'
-import type { AccountUpdate } from '../../domain/accounts/account'
+import { createAccount, deleteAccount, listAccounts, reorderAccounts, setAccountProduct, updateAccount } from '../../app/accounts/client'
+import type { Account, AccountUpdate } from '../../domain/accounts/account'
+import { toast } from 'sonner'
+import { accountsText } from '../glossary/accounts'
 
 export function useAccounts() {
   return useQuery({ queryKey: ['accounts'], queryFn: listAccounts })
+}
+
+export function useReorderAccounts() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (ids: string[]) => reorderAccounts(ids),
+    onMutate: async (ids) => {
+      await client.cancelQueries({ queryKey: ['accounts'] })
+      const previous = client.getQueryData<Account[]>(['accounts'])
+      client.setQueryData<Account[]>(['accounts'], (accounts) => ids.flatMap((id) => {
+        const account = accounts?.find((entry) => entry.id === id)
+        return account ? [account] : []
+      }))
+      return { previous }
+    },
+    onError: (_error, _ids, context) => {
+      if (context?.previous) client.setQueryData(['accounts'], context.previous)
+      toast.error(accountsText.reorderFailed)
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }),
+  })
 }
 
 export function useCreateAccount() {

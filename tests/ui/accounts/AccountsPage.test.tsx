@@ -6,7 +6,7 @@ import * as client from '../../../src/app/accounts/client'
 import { AccountsPage } from '../../../src/ui/accounts/AccountsPage'
 import { spacing, typeScale } from '../../../src/ui/styles/type-scale'
 
-vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn() }))
+vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn(), reorderAccounts: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 vi.mock('../../../src/ui/accounts/useKisStatus', () => ({ useKisStatus: () => new Map([['a1', { status: 'connected', expiresAt: Date.UTC(2026, 0, 1, 3, 5) }]]) }))
 

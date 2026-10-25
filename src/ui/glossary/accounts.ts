@@ -48,4 +48,9 @@ export const accountsText = {
   cancel: '취소',
   save: '저장',
   addTitle: '계좌 추가',
+  reorder: '순서 편집',
+  reorderDone: '완료',
+  reorderCancel: '취소',
+  reorderHandle: (alias: string) => `${alias} 순서 이동`,
+  reorderFailed: '계좌 순서를 저장하지 못했습니다',
 } as const
