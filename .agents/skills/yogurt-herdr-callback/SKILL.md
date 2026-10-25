@@ -17,4 +17,6 @@ python3 .agents/skills/yogurt-herdr-callback/scripts/app/callback.py --to claude
 
 ## 조정자 사용법
 
+Codex 샌드박스에서 Herdr 소켓 접근이 실패해 fallback 파일이 생성되면 조정자는 `scripts/app/watch.py --to <agent> --since <filename-or-time>`로 감시한다.
+
 각 작업 계약 끝에 작업자 이름, 조정자 이름, 상태별 판단 기준, 한 줄 요약 자리를 채운 콜백 명령을 넣는다. 조정자는 `herdr agent wait`로 반복 폴링하지 않고 조정자 pane에 도착하는 `[callback] ...` 메시지를 우선 기다린다. 콜백이 오지 않으면 `/tmp/herdr-callback/<조정자>/` 파일을 확인하고, 그래도 없을 때만 `herdr agent wait <target> --timeout 30000`으로 상태를 확인한다.
