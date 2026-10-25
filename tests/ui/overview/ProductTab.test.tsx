@@ -13,7 +13,10 @@ vi.mock('../../../src/app/kis/account-assets-client', () => ({ getAccountAssets:
 vi.mock('../../../src/ui/overview/IrpDetail', () => ({ IrpDetail: ({ accountId }: { accountId: string }) => <div data-testid="irp-detail">{accountId}</div> }))
 const listAccounts = vi.mocked(client.listAccounts)
 const base = { owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
-const assets = { rows: [], summary: {
+const assets = { rows: [
+  { index: 1, purchaseAmount: 12000, evaluationAmount: 12000, profitLoss: 0, creditLoan: 0, netAssets: 12000, weight: 0 },
+  { index: 9, purchaseAmount: 13000, evaluationAmount: 13000, profitLoss: 0, creditLoan: 0, netAssets: 13000, weight: 100 },
+], summary: {
   totalAssets: 13000, netAssets: 13000, evaluationAmount: 12000, purchaseAmount: 10000,
   profitLoss: 2000, loanAmount: 500, deposit: 1000, totalDeposit: 1000,
   cmaEvaluation: 0, foreignEvaluation: 0,

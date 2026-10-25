@@ -1,15 +1,14 @@
 import type { AccountAssets } from '../../app/kis/account-assets-client'
+import { classifyAssetRows } from '../../app/kis/asset-classes'
 import { overviewText as text } from '../glossary/overview'
 import { typeScale } from '../styles/type-scale'
+import { WeightBar } from '../components/WeightBar'
 
 export function PensionAssets({ rows }: { rows: AccountAssets['rows'] }) {
-  const filled = rows.filter((row) => [
-    row.purchaseAmount, row.evaluationAmount, row.profitLoss, row.creditLoan, row.netAssets, row.weight,
-  ].some((value) => value !== 0))
+  const { items, total } = classifyAssetRows(rows)
   return (
-    <section aria-label={text.fundSection}>
-      <h3 className={typeScale.cardTitle}>{text.fundSection}</h3>
-      <p className={`mb-3 mt-1 ${typeScale.label}`}>{text.assetGroups}</p>
+    <section aria-label={text.assetGroups}>
+      <h3 className={typeScale.cardTitle}>{text.assetGroups}</h3>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead><tr>
@@ -18,13 +17,18 @@ export function PensionAssets({ rows }: { rows: AccountAssets['rows'] }) {
             <th scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 text-right`}>{text.weight}</th>
           </tr></thead>
           <tbody className="divide-y divide-stone-100">
-            {filled.sort((a, b) => a.index - b.index).map((row, position) => (
+            {items.map((row) => (
               <tr key={row.index}>
-                <th scope="row" className={`py-3 pr-4 text-left font-medium ${typeScale.body}`}>{text.assetGroup(position)}</th>
+                <th scope="row" className={`py-3 pr-4 text-left font-medium ${typeScale.body}`}>{row.label ? text.assetClass[row.label] : text.assetGroup(row.index)}</th>
                 <td className={`py-3 pr-4 text-right ${typeScale.number}`}>{text.won(row.evaluationAmount)}</td>
-                <td className={`py-3 text-right ${typeScale.number}`}>{text.weightPercent(row.weight)}</td>
+                <td className="py-3 pr-4 text-right"><WeightBar weight={row.weight} /></td>
               </tr>
             ))}
+            {total ? <tr className="border-t-2 border-stone-300">
+              <th scope="row" className={`py-3 pr-4 text-left font-medium ${typeScale.body}`}>{text.assetClass.total}</th>
+              <td className={`py-3 pr-4 text-right ${typeScale.number}`}>{text.won(total.evaluationAmount)}</td>
+              <td className="py-3 pr-4 text-right"><WeightBar weight={total.weight} /></td>
+            </tr> : null}
           </tbody>
         </table>
       </div>

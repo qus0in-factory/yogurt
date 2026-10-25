@@ -65,6 +65,11 @@ it('화면이 md 이상이면 구분선이 있는 표로 전환하고 모바일�
   const table = await screen.findByRole('table')
   expect(table.querySelector('tbody')).toHaveClass('divide-y', 'divide-stone-100')
   expect(screen.getByRole('columnheader', { name: '비중' })).toHaveClass('text-right')
+  const rows = Array.from(table.querySelectorAll<HTMLTableRowElement>('tbody tr'))
+  const columns = table.querySelectorAll('thead th').length
+  expect(columns).toBe(7)
+  expect(rows.every((row) => row.cells.length === columns)).toBe(true)
+  expect(rows.at(-1)?.cells[5]).toHaveClass('pr-4', 'text-right')
   act(() => resize.forEach(listener => listener({ matches: false } as MediaQueryListEvent)))
   expect(screen.queryByRole('table')).not.toBeInTheDocument()
   expect(screen.getAllByRole('listitem')).toHaveLength(2)

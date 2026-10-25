@@ -2,7 +2,8 @@ import { overviewText as text } from '../glossary/overview'
 import type { RiskClass } from '../../app/kis/risk-class-client'
 import { typeScale } from '../styles/type-scale'
 import { RiskToggle } from './RiskToggle'
-import { IrpWeightBar, type IrpHolding } from './IrpHoldingRow'
+import { WeightBar } from '../components/WeightBar'
+import type { IrpHolding } from './IrpHoldingRow'
 
 export function IrpHoldingCard({ holding, riskClass = 'risk', onToggle = () => {}, disabled = false, showRiskToggle = true }: {
   holding: IrpHolding; riskClass?: RiskClass; onToggle?: () => void; disabled?: boolean; showRiskToggle?: boolean
@@ -35,7 +36,7 @@ export function IrpHoldingCard({ holding, riskClass = 'risk', onToggle = () => {
         </div>
         <div>
           <dt className={typeScale.label}>{text.weight}</dt>
-          <dd className={`text-right ${typeScale.number}`}><IrpWeightBar weight={holding.weight} /></dd>
+          <dd className={`text-right ${typeScale.number}`}><WeightBar weight={holding.weight} /></dd>
         </div>
       </dl>
     </li>

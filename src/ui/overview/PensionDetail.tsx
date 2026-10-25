@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { getAccountAssets, getProductBalance } from '../../app/kis/account-assets-client'
+import { fundEvaluation } from '../../app/kis/asset-classes'
 import { accountsText } from '../glossary/accounts'
 import { overviewText as text } from '../glossary/overview'
 import { spacing, typeScale } from '../styles/type-scale'
@@ -30,10 +31,11 @@ export function PensionDetail({ accountId }: { accountId: string }) {
   }, [])
   if (assets.isPending || balance.isPending) return <p role="status">{accountsText.loading}</p>
   if (assets.isError || balance.isError) return <p role="alert">{text.pensionUnavailable}</p>
+  const fundAmount = fundEvaluation(assets.data.rows)
   return (
     <section aria-label={text.detail} className={`${spacing.section} mb-8 rounded-lg border border-primary-200 bg-white p-4`}>
       <h2 className={typeScale.sectionTitle}>{text.detail}</h2>
-      <PensionLoan summary={assets.data.summary} rows={assets.data.rows} />
+      {fundAmount > 0 ? <PensionLoan loanAmount={assets.data.summary.loanAmount} collateralAmount={fundAmount} /> : null}
       <PensionAssets rows={assets.data.rows} />
       <PensionHoldings summary={balance.data.summary} holdings={balance.data.holdings} wide={wide} />
     </section>

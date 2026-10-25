@@ -6,9 +6,8 @@ import { IrpSummary } from './IrpSummary'
 import { IrpHoldingRow } from './IrpHoldingRow'
 import { IrpHoldingCard } from './IrpHoldingCard'
 import { IrpCashCard, IrpCashRow } from './IrpCash'
+import { holdingColumns } from './holding-columns'
 
-const headers = [text.name, text.quantity, text.evaluation, text.profitLoss, text.profitRate, text.weight]
-const align = (index: number) => index === 0 ? 'text-left' : 'text-right'
 
 export function PensionHoldings({ summary, holdings, wide }: {
   summary: ProductBalance['summary']; holdings: ProductBalance['holdings']; wide: boolean
@@ -25,7 +24,7 @@ export function PensionHoldings({ summary, holdings, wide }: {
       {wide ? (
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr>{headers.map((label, index) => <th key={label} scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 pr-4 last:pr-0 ${align(index)}`}>{label}</th>)}</tr></thead>
+            <thead><tr>{holdingColumns(false).map((column) => <th key={column.id} scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 pr-4 ${column.align === 'left' ? 'text-left' : 'text-right'}`}>{column.label}</th>)}</tr></thead>
             <tbody className="divide-y divide-stone-100">
               {weighted.map((holding) => <IrpHoldingRow key={holding.code} holding={holding} showRiskToggle={false} />)}
               <IrpCashRow cash={summary.cash} weight={cashWeight} showRiskColumn={false} />

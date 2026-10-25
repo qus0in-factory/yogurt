@@ -12,10 +12,9 @@ import { IrpSummary } from './IrpSummary'
 import { IrpHoldingRow } from './IrpHoldingRow'
 import { IrpHoldingCard } from './IrpHoldingCard'
 import { IrpCashCard, IrpCashRow } from './IrpCash'
+import { holdingColumns } from './holding-columns'
 import { useRiskClasses } from './useRiskClasses'
 
-const headers = [text.name, text.quantity, text.evaluation, text.profitLoss, text.profitRate, text.weight, text.riskClass]
-const headerAlign = (index: number) => index === 0 ? 'text-left' : 'text-right'
 
 export function IrpDetail({ accountId }: { accountId: string }) {
   const { data, isPending, isError } = useQuery({
@@ -55,7 +54,7 @@ export function IrpDetail({ accountId }: { accountId: string }) {
       {wide ? (
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr>{headers.map((label, index) => <th key={label} scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 pr-4 last:pr-0 ${headerAlign(index)}`}>{label}</th>)}</tr></thead>
+            <thead><tr>{holdingColumns(true).map((column) => <th key={column.id} scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 pr-4 ${column.align === 'left' ? 'text-left' : 'text-right'}`}>{column.label}</th>)}</tr></thead>
             <tbody className="divide-y divide-stone-100">
               {weighted.map((holding) => <IrpHoldingRow key={holding.code} holding={holding} riskClass={classOf(holding.code)} onToggle={() => toggleFor(holding.code)} disabled={disabled} />)}
               <IrpCashRow cash={data.summary.cash} weight={cashWeight} />
