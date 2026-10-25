@@ -13,14 +13,19 @@ export const accountInputSchema = z.object({
 
 export const accountUpdateSchema = z.object({ alias, owner })
 
+import { accountProductSchema } from './products'
+export { accountProductSchema } from './products'
+
 export const accountSchema = z.object({
   id: z.string(),
   alias: z.string(),
   owner: z.string(),
   accountNumber: z.string(),
+  products: z.array(z.string()),
   createdAt: z.string(),
 })
 
 export type AccountInput = z.infer<typeof accountInputSchema>
 export type AccountUpdate = z.infer<typeof accountUpdateSchema>
 export type Account = z.infer<typeof accountSchema>
+export type AccountProduct = z.infer<typeof accountProductSchema>

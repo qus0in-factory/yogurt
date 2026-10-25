@@ -13,6 +13,7 @@ import { DeleteAccountDialog } from './DeleteAccountDialog'
 import { useAccounts, useUpdateAccount } from './useAccounts'
 
 type EditAccountDialogProps = { account: Account; onClose: () => void }
+type FieldExtra = { list?: string; autoComplete?: string; maxLength?: number; inputMode?: 'numeric'; pattern?: string; placeholder?: string }
 
 export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) {
   const updateAccount = useUpdateAccount()
@@ -24,13 +25,12 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
     defaultValues: { alias: account.alias, owner: account.owner },
     resolver: zodResolver(accountUpdateSchema),
   })
-
-  const field = (label: string, name: keyof AccountUpdate, extra: { list?: string; autoComplete?: string } = {}) => (
+  const field = (label: string, name: keyof AccountUpdate, extra: FieldExtra = {}, sanitize?: (value: string) => string) => (
     <Controller
       name={name}
       control={control}
       render={({ field: f, fieldState }) => (
-        <TextField label={label} name={name} maxLength={8} value={f.value} onChange={f.onChange} error={fieldState.error?.message} {...extra} />
+        <TextField label={label} name={name} maxLength={8} value={f.value} onChange={(value) => f.onChange(sanitize?.(value) ?? value)} error={fieldState.error?.message} {...extra} />
       )}
     />
   )

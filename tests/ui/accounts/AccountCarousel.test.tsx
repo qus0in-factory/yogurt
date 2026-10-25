@@ -1,9 +1,10 @@
 import '@testing-library/jest-dom/vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { AccountCarousel } from '../../../src/ui/accounts/AccountCarousel'
 import { useUiStore } from '../../../src/ui/state/ui-store'
-const accounts = Array.from({ length: 6 }, (_, i) => ({ id: String(i), alias: `계좌${i + 1}`, owner: '소유자', accountNumber: '1234', createdAt: '' }))
+const accounts = Array.from({ length: 6 }, (_, i) => ({ id: String(i), alias: `계좌${i + 1}`, owner: '소유자', accountNumber: '1234', products: ['01'], createdAt: '' }))
 const listeners = new Set<(event: MediaQueryListEvent) => void>()
 const animate = vi.fn()
 let wide = false
@@ -21,7 +22,7 @@ beforeEach(() => {
   Object.defineProperty(Element.prototype, 'animate', { configurable: true, value: animate })
 })
 afterEach(() => { cleanup(); listeners.clear(); vi.unstubAllGlobals() })
-const show = (items = accounts) => render(<AccountCarousel accounts={items} onEdit={vi.fn()} />)
+const show = (items = accounts) => render(<QueryClientProvider client={new QueryClient()}><AccountCarousel accounts={items} onEdit={vi.fn()} /></QueryClientProvider>)
 it('모바일 다음·이전과 경계 disabled는 페이지 단위다', () => {
   show()
   expect(screen.getAllByRole('group')).toHaveLength(1)

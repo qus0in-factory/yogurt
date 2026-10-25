@@ -5,8 +5,12 @@ import { HTTPException } from 'hono/http-exception'
 import { createMiddleware } from 'hono/factory'
 import { isSessionValid, loginHandler, logoutHandler, readSessionCookie, sessionHandler } from './auth/auth.ts'
 import { loginRequestSchema } from '../domain/auth/auth-schema.ts'
-import { accountInputSchema, accountUpdateSchema } from '../domain/accounts/account.ts'
-import { createAccount, listAccounts, updateAccount, deleteAccount } from './accounts/accounts.ts'
+import { accountInputSchema, accountUpdateSchema, accountProductSchema } from '../domain/accounts/account.ts'
+import { productCodeSchema } from '../domain/accounts/products.ts'
+import { createAccount, listAccounts, updateAccount, deleteAccount, setAccountProduct } from './accounts/accounts.ts'
+import { kisTokenHandler } from './kis/kis-token-handler.ts'
+import { kisBalanceHandler } from './kis/kis-balance-handler.ts'
+import { kisStatusStream } from './kis/kis-status-stream.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -41,6 +45,16 @@ app.patch('/api/accounts/:id', zValidator('json', accountUpdateSchema, (result, 
   if (!result.success) return c.json({ error: 'invalid request' }, 400)
 }), (c) => updateAccount(c, c.req.param('id'), c.req.valid('json')))
 app.delete('/api/accounts/:id', (c) => deleteAccount(c, c.req.param('id')))
+app.put('/api/accounts/:id/products/:code', zValidator('json', accountProductSchema, (result, c) => {
+  if (!result.success) return c.json({ error: 'invalid request' }, 400)
+}) as any, (async (c: any) => {
+  const code = c.req.param('code') as string
+  if (!productCodeSchema.safeParse(code).success) return c.json({ error: 'invalid request' }, 400)
+  return setAccountProduct(c, c.req.param('id') as string, code, c.req.valid('json'))
+}) as any)
+app.post('/api/accounts/:id/kis-token', (c) => kisTokenHandler(c))
+app.get('/api/kis/status', (c) => kisStatusStream(c))
+app.get('/api/accounts/:id/products/:code/balance', (c) => kisBalanceHandler(c))
 app.all('/api/*', (c) => c.notFound())
 app.onError((error, c) => {
   if (error instanceof HTTPException && error.status === 400) return c.json({ error: 'invalid request' }, 400)

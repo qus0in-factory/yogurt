@@ -8,10 +8,21 @@ const row = { id: 'a', alias: 'Main', owner: '홍길동', account_number: '12345
 function fakeDb(rows: unknown[] = []) {
   const calls: { sql: string; args: unknown[] }[] = []
   const db = { prepare: (sql: string) => ({
-    all: async () => (calls.push({ sql, args: [] }), { results: rows }),
+    all: async () => {
+      calls.push({ sql, args: [] })
+      if (sql.includes('account_products')) return { results: [] }
+      return { results: rows }
+    },
     bind: (...args: unknown[]) => {
       calls.push({ sql, args })
-      return { run: async () => ({ success: true }), first: async () => rows[0] ?? null }
+      return {
+        run: async () => ({ success: true, meta: { changes: rows.length ? 1 : 0 } }),
+        first: async () => (sql.includes('account_products') ? null : (rows[0] ?? null)),
+        all: async () => {
+          if (sql.includes('account_products')) return { results: [] }
+          return { results: rows }
+        },
+      }
     },
   }) } as unknown as D1Database
   return { db, calls }
@@ -26,15 +37,15 @@ describe('account repository', () => {
     expect(calls[0].args).not.toContain('SK_plain_secret')
     expect(calls[0].args[4]).toMatch(/^v1:/)
     expect(calls[0].args[5]).toMatch(/^v1:/)
-    expect(account).toEqual({ id: expect.any(String), alias: 'Primary', owner: '홍길동', accountNumber: '12345678', createdAt: expect.any(String) })
+    expect(account).toEqual({ id: expect.any(String), alias: 'Primary', owner: '홍길동', accountNumber: '12345678', products: [], createdAt: expect.any(String) })
     expect(account).not.toHaveProperty('secretKey')
   })
 
-  it('created_at 오름차순 목록에 owner를 포함한다', async () => {
+  it('created_at 오름차순 목록에 products를 포함한다', async () => {
     const { db, calls } = fakeDb([row])
     const accounts = await createAccountRepository(db).list()
     expect(calls[0].sql).toContain('ORDER BY created_at ASC')
-    expect(accounts).toEqual([{ id: 'a', alias: 'Main', owner: '홍길동', accountNumber: '12345678', createdAt: row.created_at }])
+    expect(accounts).toEqual([{ id: 'a', alias: 'Main', owner: '홍길동', accountNumber: '12345678', products: [], createdAt: row.created_at }])
   })
 
   it('update는 별칭·소유자·id만 바인딩하고 키 컬럼을 수정하지 않는다', async () => {
@@ -42,8 +53,8 @@ describe('account repository', () => {
     const account = await createAccountRepository(db).update('a', { alias: 'New', owner: '김철수' })
     expect(calls[0].args).toEqual(['New', '김철수', 'a'])
     expect(calls[0].sql).toMatch(/UPDATE accounts SET alias = \?, owner = \? WHERE id = \?/)
-    expect(calls[0].sql).not.toMatch(/access_key|secret_key/)
-    expect(account).toMatchObject({ id: 'a', alias: 'New', owner: '김철수', accountNumber: row.account_number, createdAt: row.created_at })
+    expect(calls[0].sql).not.toMatch(/access_key|secret_key|product_code/)
+    expect(account).toMatchObject({ id: 'a', alias: 'New', owner: '김철수', accountNumber: row.account_number, products: [], createdAt: row.created_at })
   })
 
   it('update 대상이 없으면 null이다', async () => {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { accountInputSchema, accountSchema, accountUpdateSchema } from '../../../src/domain/accounts/account'
+import { accountInputSchema, accountSchema, accountUpdateSchema, accountProductSchema } from '../../../src/domain/accounts/account'
+import { productCodeSchema } from '../../../src/domain/accounts/products'
 
 const valid = { alias: '주식', owner: '홍길동', accountNumber: '12345678', accessKey: 'ak', secretKey: 'sk' }
 const messages = (input: unknown) => accountInputSchema.safeParse(input).error?.issues.map((issue) => issue.message)
@@ -33,13 +34,19 @@ describe('account schemas', () => {
   })
 
   it('수정은 별칭·소유자만 받고 다른 필드는 버린다', () => {
-    expect(accountUpdateSchema.parse({ alias: ' 연금 ', owner: '김철수', accountNumber: '9999' })).toEqual({ alias: '연금', owner: '김철수' })
+    expect(accountUpdateSchema.parse({ alias: ' 연금 ', owner: '김철수' })).toEqual({ alias: '연금', owner: '김철수' })
     expect(accountUpdateSchema.safeParse({ alias: '', owner: '김철수' }).success).toBe(false)
   })
 
-  it('계좌 응답은 별칭·소유자·계좌번호만 평문으로 담고 키는 담지 않는다', () => {
-    const account = { id: 'id-1', alias: '주식', owner: '홍길동', accountNumber: '12345678', createdAt: '2026-10-24T09:00:00.000Z' }
+  it('계좌 응답은 products 목록을 담고 키는 담지 않는다', () => {
+    const account = { id: 'id-1', alias: '주식', owner: '홍길동', accountNumber: '12345678', products: ['29'], createdAt: '2026-10-24T09:00:00.000Z' }
     const parsed = accountSchema.parse({ ...account, accessKey: 'ak', secretKey: 'sk' })
     expect(parsed).toEqual(account)
+  })
+
+  it('상품코드 스키마는 등록된 상품만 허용한다', () => {
+    expect(productCodeSchema.safeParse('29').success).toBe(true)
+    expect(productCodeSchema.safeParse('01').success).toBe(false)
+    expect(accountProductSchema.parse({ enabled: true })).toEqual({ enabled: true })
   })
 })

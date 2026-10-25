@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createAccount, deleteAccount, listAccounts, updateAccount } from '../../app/accounts/client'
+import { createAccount, deleteAccount, listAccounts, setAccountProduct, updateAccount } from '../../app/accounts/client'
 import type { AccountUpdate } from '../../domain/accounts/account'
 
 export function useAccounts() {
@@ -31,5 +31,13 @@ export function useDeleteAccount() {
       const status = (error as { response?: { status?: number } }).response?.status
       if (status === 404) void client.invalidateQueries({ queryKey: ['accounts'] })
     },
+  })
+}
+
+export function useSetAccountProduct() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, code, enabled }: { id: string; code: string; enabled: boolean }) => setAccountProduct(id, code, enabled),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }),
   })
 }

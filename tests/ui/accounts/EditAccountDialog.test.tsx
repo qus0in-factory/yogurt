@@ -9,7 +9,7 @@ import { EditAccountDialog } from '../../../src/ui/accounts/EditAccountDialog'
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const updateAccount = vi.mocked(client.updateAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderDialog = () => {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
@@ -45,7 +45,7 @@ describe('EditAccountDialog', () => {
   })
 
   it('저장 성공 시 닫고 목록을 무효화하며 성공 toast를 표시한다', async () => {
-    updateAccount.mockResolvedValueOnce({ ...account, alias: '연금', owner: '이영희' })
+    updateAccount.mockResolvedValueOnce({ ...account, alias: '연금', owner: '이영희', products: []})
     const { onClose, invalidate } = renderDialog()
     fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '연금' } })
     fireEvent.change(screen.getByLabelText('소유자'), { target: { value: '이영희' } })

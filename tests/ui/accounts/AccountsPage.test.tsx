@@ -7,10 +7,11 @@ import { AccountsPage } from '../../../src/ui/accounts/AccountsPage'
 
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
+vi.mock('../../../src/ui/accounts/useKisStatus', () => ({ useKisStatus: () => new Map([['a1', { status: 'connected', expiresAt: Date.UTC(2026, 0, 1, 3, 5) }]]) }))
 
 const listAccounts = vi.mocked(client.listAccounts)
 const createAccount = vi.mocked(client.createAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -34,6 +35,7 @@ describe('AccountsPage', () => {
     expect(screen.getByText('김철수')).toBeInTheDocument()
     expect(screen.getByText('김철수').compareDocumentPosition(screen.getByText('주계좌')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.getByText('12345678')).toBeInTheDocument()
+    expect(screen.getByText('연결됨 · 만료 12:05')).toBeInTheDocument()
     expect(screen.getByLabelText('계좌 목록')).toBeInTheDocument()
     const cards = screen.getAllByRole('group')
     expect(cards).toHaveLength(1)

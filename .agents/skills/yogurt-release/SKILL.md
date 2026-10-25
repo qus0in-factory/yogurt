@@ -18,13 +18,14 @@ description: Tag a yogurt release with a reproducible script and verify the depl
 3. 태그 생성·push와 배포 확인을 한 스크립트로 실행한다(저장소 루트에서):
    `python3 .agents/skills/yogurt-release/scripts/app/release.py --health-url https://yogurt.qus0in.dev/health`
 4. 계획만 볼 때는 `--dry-run`을 붙인다: tag·push와 health 조회 없이 계획만 출력하고 exit 0.
-5. 마지스톤을 닫는다.
+5. 원격 D1 마이그레이션(production)은 사용자가 직접 `pnpm db:migrate:main`으로 실행했는지 병합 전 확인한다.
+6. 마무리한다.
 
 ## 스크립트 동작
 
 - `package.json`의 version을 X.Y.Z로 검증해 `vX.Y.Z` annotated 태그를 origin/main에 만들고 `git push origin vX.Y.Z`를 한다.
 - 태그가 이미 있으면 exit 1로 중단한다.
-- health를 최대 12회×10초 간격으로 조회해 `version` 필드가 package.json과 일치하면 exit 0, 12회 후에도 불일치면 exit 1로 끝난다.
+- health를 최대 30회×10초 간격(약 5분)으로 조회해 `version` 필드가 package.json과 일치하면 exit 0, 30회 후에도 불일치면 exit 1로 끝난다.
 - 인자 오류는 exit 2, git 실패나 버전 불명은 exit 1이다.
 
 ## 검증

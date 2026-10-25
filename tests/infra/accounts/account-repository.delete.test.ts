@@ -12,9 +12,11 @@ function fakeDb(changes: number) {
 it.each([[0, false], [1, true], [2, true]] as const)('remove는 삭제 행 수 %i에 대해 %s를 반환한다', async (changes, expected) => {
   const { db, prepare, bind, run } = fakeDb(changes)
   expect(await createAccountRepository(db).remove('a1')).toBe(expected)
-  expect(prepare).toHaveBeenCalledExactlyOnceWith('DELETE FROM accounts WHERE id = ?')
-  expect(bind).toHaveBeenCalledExactlyOnceWith('a1')
-  expect(run).toHaveBeenCalledOnce()
+  expect(prepare).toHaveBeenNthCalledWith(1, 'DELETE FROM account_products WHERE account_id = ?')
+  expect(prepare).toHaveBeenNthCalledWith(2, 'DELETE FROM accounts WHERE id = ?')
+  expect(bind).toHaveBeenNthCalledWith(1, 'a1')
+  expect(bind).toHaveBeenNthCalledWith(2, 'a1')
+  expect(run).toHaveBeenCalledTimes(2)
 })
 
 it('D1 삭제 오류는 성공으로 처리하지 않고 전달한다', async () => {
