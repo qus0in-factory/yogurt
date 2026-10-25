@@ -8,6 +8,7 @@ import { loginRequestSchema } from '../domain/auth/auth-schema.ts'
 import { accountInputSchema, accountUpdateSchema } from '../domain/accounts/account.ts'
 import { createAccount, listAccounts, updateAccount, deleteAccount } from './accounts/accounts.ts'
 import { kisTokenHandler } from './kis/kis-token-handler.ts'
+import { kisStatusStream } from './kis/kis-status-stream.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -43,6 +44,7 @@ app.patch('/api/accounts/:id', zValidator('json', accountUpdateSchema, (result, 
 }), (c) => updateAccount(c, c.req.param('id'), c.req.valid('json')))
 app.delete('/api/accounts/:id', (c) => deleteAccount(c, c.req.param('id')))
 app.post('/api/accounts/:id/kis-token', (c) => kisTokenHandler(c))
+app.get('/api/kis/status', (c) => kisStatusStream(c))
 app.all('/api/*', (c) => c.notFound())
 app.onError((error, c) => {
   if (error instanceof HTTPException && error.status === 400) return c.json({ error: 'invalid request' }, 400)
