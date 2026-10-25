@@ -1,8 +1,10 @@
+import { profitTone } from '../overview/profit-tone'
+
 export const overviewText = {
   detail: 'IRP 잔고 상세',
   unavailable: 'IRP 계좌를 조회할 수 없습니다',
   emptyHoldings: '보유 종목이 없습니다',
-  totalEvaluation: '총평가',
+  totalEvaluation: '총평가금액',
   cash: '예수금',
   profitLoss: '평가손익',
   profitRate: '수익률',
@@ -13,6 +15,11 @@ export const overviewText = {
   won: (value: number) => `${new Intl.NumberFormat('ko-KR').format(value)}원`,
   percent: (value: number) => `${new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 }).format(value)}%`,
   number: (value: number) => new Intl.NumberFormat('ko-KR').format(value),
+  weight: '비중',
+  weightPercent: (value: number) => `${new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}%`,
+  signedWon: (value: number) => `${profitTone(value).sign}${new Intl.NumberFormat('ko-KR').format(Math.abs(value))}원`,
+  signedPercent: (value: number) => `${profitTone(value).sign}${new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 }).format(Math.abs(value))}%`,
+  pnlColor: (value: number) => profitTone(value).className,
   title: '현황',
   tabsLabel: '현황 탭',
   irp: 'IRP',

@@ -20,6 +20,6 @@ it('passes each account status to its card', () => {
   render(<QueryClientProvider client={new QueryClient()}>
     <AccountCarousel accounts={accounts} onEdit={vi.fn()} kisStatuses={statuses} />
   </QueryClientProvider>)
-  expect(screen.getByText('연결 실패')).toBeInTheDocument()
-  expect(screen.getByText('연결됨 · 만료 12:05')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '연결 실패 · 다시 확인' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '연결됨 · 만료 12:05' })).toBeInTheDocument()
 })
