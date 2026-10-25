@@ -21,6 +21,14 @@ class Preset:
     post_start: tuple[tuple[str, str], ...] | None = None
 
 
+def make_ga_preset(model_id: str | None = None) -> Preset:
+    target_id = model_id if model_id is not None else GA_MODEL_ID
+    args = ['--effort', 'medium']
+    if target_id:
+        args.extend(['--model', target_id])
+    return Preset(name='ga', kind='agy', args=args, sandboxed=False)
+
+
 PRESETS: dict[str, Preset] = {
     'sol': Preset(
         name='sol', kind='codex',
@@ -35,11 +43,7 @@ PRESETS: dict[str, Preset] = {
     'gf': Preset(
         name='gf', kind='agy', args=['--effort', 'high'], sandboxed=False,
     ),
-    'ga': Preset(
-        name='ga', kind='agy',
-        args=['--model', GA_MODEL_ID, '--effort', 'medium'],
-        sandboxed=False,
-    ),
+    'ga': make_ga_preset(),
     'ds': Preset(
         name='ds', kind='opencode', args=[], sandboxed=False,
         post_start=DS_POST_START,
@@ -53,4 +57,6 @@ NEED_TESTS_PRIORITY = ('gf', 'ga', 'ds', 'sol', 'luna')
 def get_preset(name: str) -> Preset:
     if name not in PRESETS:
         raise ValueError(f"Unknown preset: '{name}'. Choose from: {list(PRESETS.keys())}")
+    if name == 'ga' and not GA_MODEL_ID:
+        raise ValueError('모델 id 미확정: Gemini 4 Argon 모델 식별자가 설정되지 않았습니다')
     return PRESETS[name]

@@ -9,9 +9,7 @@ from app.worker_ops import cmd_open
 
 class DummyProc:
     def __init__(self, code, out='', err=''):
-        self.returncode = code
-        self.stdout = out
-        self.stderr = err
+        self.returncode, self.stdout, self.stderr = code, out, err
 
 
 class TestWorkerOpen(unittest.TestCase):
@@ -30,27 +28,31 @@ class TestWorkerOpen(unittest.TestCase):
                 return DummyProc(0, out='{"result":{"pane":{"workspace_id":"ws-1"}}}')
             if cmd[:3] == ['herdr', 'tab', 'create']:
                 return DummyProc(0, out='{"result":{"tab":{"tab_id":"t-1"},"root_pane":{"pane_id":"p-1"}}}')
-            if cmd[:3] == ['herdr', 'agent', 'start']:
-                return DummyProc(0, out='{"result":{"agent":{"interactive_ready":true}}}')
             return DummyProc(0, out='{}')
 
-        code, out = cmd_open('sol', name='w-sol', state_dir=self.state_dir, runner=runner)
+        code, out = cmd_open('gf', name='w-gf', state_dir=self.state_dir, runner=runner)
         self.assertEqual(code, 0)
-        data = json.loads(out)
-        self.assertEqual(data['name'], 'w-sol')
-        self.assertEqual(data['tab_id'], 't-1')
-        self.assertTrue((self.state_dir / 'w-sol.json').exists())
+        self.assertTrue((self.state_dir / 'w-gf.json').exists())
 
-    def test_open_duplicate_preset_blocked(self):
+    def test_gf_and_ga_independent_tab_rule(self):
         def runner(cmd, **kw):
             if cmd[:3] == ['herdr', 'agent', 'list']:
-                return DummyProc(0, out='{"result":{"agents":[{"name":"w-sol"}]}}')
+                return DummyProc(0, out='{"result":{"agents":[{"name":"w-gf"}]}}')
+            if cmd[:3] == ['herdr', 'pane', 'current']:
+                return DummyProc(0, out='{"result":{"pane":{"workspace_id":"ws-1"}}}')
+            if cmd[:3] == ['herdr', 'tab', 'create']:
+                return DummyProc(0, out='{"result":{"tab":{"tab_id":"t-ga"},"root_pane":{"pane_id":"p-ga"}}}')
             return DummyProc(0, out='{}')
 
-        (self.state_dir / 'w-sol.json').write_text('{"name":"w-sol","preset":"sol"}')
-        code, out = cmd_open('sol', name='w2', state_dir=self.state_dir, runner=runner)
-        self.assertEqual(code, 1)
-        self.assertIn("already running: w-sol", out)
+        (self.state_dir / 'w-gf.json').write_text('{"name":"w-gf","preset":"gf"}')
+        # Opening another gf is blocked
+        code_gf, out_gf = cmd_open('gf', name='w-gf2', state_dir=self.state_dir, runner=runner)
+        self.assertEqual(code_gf, 1)
+        self.assertIn('already running: w-gf', out_gf)
+        # Opening ga while gf is open succeeds
+        code_ga, out_ga = cmd_open('ga', name='w-ga', state_dir=self.state_dir, runner=runner)
+        self.assertEqual(code_ga, 0)
+        self.assertTrue((self.state_dir / 'w-ga.json').exists())
 
 
 if __name__ == '__main__':

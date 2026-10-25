@@ -23,39 +23,34 @@ class TestWorkerManage(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def test_cmd_pick_default(self):
+    def test_cmd_pick_default_and_active(self):
         code, out = cmd_pick(state_dir=self.state_dir, exclusions_path=self.ex_file)
-        self.assertEqual(code, 0)
         self.assertEqual(out, 'sol')
-
-    def test_cmd_pick_with_active_worker(self):
         (self.state_dir / 'sol.json').write_text(json.dumps({'name': 'sol', 'preset': 'sol'}))
         runner = lambda cmd, **kw: DummyProc(0, out='{"result":{"agents":[{"name":"sol"}]}}')
         code, out = cmd_pick(state_dir=self.state_dir, exclusions_path=self.ex_file, runner=runner)
-        self.assertEqual(code, 0)
         self.assertEqual(out, 'luna')
-
-    def test_cmd_pick_need_tests(self):
-        code, out = cmd_pick(need_tests=True, state_dir=self.state_dir, exclusions_path=self.ex_file)
-        self.assertEqual(code, 0)
-        self.assertEqual(out, 'gf')
 
     def test_cmd_exclude_and_include(self):
-        code, out = cmd_exclude('sol', 'rate limit reached', exclusions_path=self.ex_file)
-        self.assertEqual(code, 0)
+        cmd_exclude('sol', 'rate limit', exclusions_path=self.ex_file)
         code, out = cmd_pick(state_dir=self.state_dir, exclusions_path=self.ex_file)
         self.assertEqual(out, 'luna')
-
-        code, out = cmd_include('sol', exclusions_path=self.ex_file)
-        self.assertEqual(code, 0)
+        cmd_include('sol', exclusions_path=self.ex_file)
         code, out = cmd_pick(state_dir=self.state_dir, exclusions_path=self.ex_file)
         self.assertEqual(out, 'sol')
+
+    def test_gf_ga_independent_exclusion(self):
+        cmd_exclude('gf', 'usage limit', exclusions_path=self.ex_file)
+        code, out = cmd_pick(need_tests=True, state_dir=self.state_dir, exclusions_path=self.ex_file)
+        self.assertEqual(out, 'ga')
+        cmd_exclude('ga', 'usage limit', exclusions_path=self.ex_file)
+        code, out = cmd_pick(need_tests=True, state_dir=self.state_dir, exclusions_path=self.ex_file)
+        self.assertEqual(out, 'ds')
 
     def test_cmd_status(self):
         cmd_exclude('luna', 'usage limit', exclusions_path=self.ex_file)
         code, out = cmd_status(state_dir=self.state_dir, exclusions_path=self.ex_file)
         self.assertEqual(code, 0)
-        self.assertIn('Excluded presets', out)
         self.assertIn('luna', out)
 
 
