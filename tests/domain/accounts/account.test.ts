@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { accountInputSchema, accountSchema, accountUpdateSchema, accountProductSchema } from '../../../src/domain/accounts/account'
+import { accountInputSchema, accountSchema, accountUpdateSchema } from '../../../src/domain/accounts/account'
+import { accountProductSchema } from '../../../src/domain/accounts/products'
 import { productCodeSchema } from '../../../src/domain/accounts/products'
 
 const valid = { alias: '주식', owner: '홍길동', accountNumber: '12345678', accessKey: 'ak', secretKey: 'sk' }

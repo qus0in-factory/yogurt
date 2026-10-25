@@ -5,7 +5,9 @@ import { HTTPException } from 'hono/http-exception'
 import { createMiddleware } from 'hono/factory'
 import { isSessionValid, loginHandler, logoutHandler, readSessionCookie, sessionHandler } from './auth/auth.ts'
 import { loginRequestSchema } from '../domain/auth/auth-schema.ts'
-import { accountInputSchema, accountUpdateSchema, accountProductSchema, accountOrderSchema } from '../domain/accounts/account.ts'
+import { accountInputSchema, accountUpdateSchema, accountOrderSchema } from '../domain/accounts/account.ts'
+import { accountProductSchema } from '../domain/accounts/products.ts'
+import { replaceCredentials } from './accounts/credentials-handler.ts'
 import { productCodeSchema } from '../domain/accounts/products.ts'
 import { createAccount, listAccounts, updateAccount, deleteAccount, setAccountProduct, reorderAccounts } from './accounts/accounts.ts'
 import { kisTokenHandler } from './kis/kis-token-handler.ts'
@@ -50,6 +52,7 @@ app.patch('/api/accounts/:id', zValidator('json', accountUpdateSchema, (result, 
   if (!result.success) return c.json({ error: 'invalid request' }, 400)
 }), (c) => updateAccount(c, c.req.param('id'), c.req.valid('json')))
 app.delete('/api/accounts/:id', (c) => deleteAccount(c, c.req.param('id')))
+app.put('/api/accounts/:id/credentials', replaceCredentials)
 app.put('/api/accounts/:id/products/:code', zValidator('json', accountProductSchema, (result, c) => {
   if (!result.success) return c.json({ error: 'invalid request' }, 400)
 }) as any, (async (c: any) => {
