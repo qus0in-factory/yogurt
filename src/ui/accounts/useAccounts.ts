@@ -7,7 +7,6 @@ import { accountsText } from '../glossary/accounts'
 export function useAccounts() {
   return useQuery({ queryKey: ['accounts'], queryFn: listAccounts })
 }
-
 export function useReorderAccounts() {
   const client = useQueryClient()
   return useMutation({
@@ -28,21 +27,14 @@ export function useReorderAccounts() {
     onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }),
   })
 }
-
 export function useCreateAccount() {
   const client = useQueryClient()
-  return useMutation({
-    mutationFn: createAccount,
-    onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }),
-  })
+  return useMutation({ mutationFn: createAccount, onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }) })
 }
 
 export function useUpdateAccount() {
   const client = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: AccountUpdate }) => updateAccount(id, input),
-    onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }),
-  })
+  return useMutation({ mutationFn: ({ id, input }: { id: string; input: AccountUpdate }) => updateAccount(id, input), onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }) })
 }
 
 export function useDeleteAccount() {
@@ -59,8 +51,6 @@ export function useDeleteAccount() {
 
 export function useSetAccountProduct() {
   const client = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, code, enabled }: { id: string; code: string; enabled: boolean }) => setAccountProduct(id, code, enabled),
-    onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }),
-  })
+  return useMutation({ mutationFn: ({ id, code, enabled }: { id: string; code: string; enabled: boolean }) => setAccountProduct(id, code, enabled), onSuccess: () => client.invalidateQueries({ queryKey: ['accounts'] }) })
 }
+
