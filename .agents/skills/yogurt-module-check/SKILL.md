@@ -20,6 +20,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 .agents/skills/yogurt-module-check/scripts/app
 - `src/` 아래 `*.test.ts`와 `*.test.tsx`는 위반이며 루트 `tests/`로 옮긴다. `tests/`의 테스트에도 같은 레이어 디렉터리 규칙을 적용한다.
 - 성공은 종료 코드 0, 규칙 위반은 1, 실행·입력 오류는 2다. 실패한 파일과 이유를 출력한다.
 - Git ignore된 모듈은 검사되지 않는다. 준수 회피를 위해 ignore를 추가하지 않는다. 이 검사는 의존 방향·테스트 유무·TDD 과정·YAGNI/KISS/SOLID/DRY를 판정하지 않는다.
+- `--typography` 옵션을 주면 `src/ui/**/*.tsx`에서 `text-(xs|sm|base|lg|xl|2xl|3xl)` 직접 사용을 검출한다 (`src/ui/styles`와 `src/ui/components`는 허용). 기본값은 비활성이다.
 
 ## 검증기 자체 테스트
 

@@ -32,6 +32,19 @@ class ModuleRulesTest(unittest.TestCase):
         for name in ('src/app/test-helper.ts', 'tools/infra/value.test.ts'):
             self.assertEqual(violations(Path(name), ''), [])
 
+    def test_typography_violations_detects_hardcoded_text_sizes(self):
+        from domain.rules import typography_violations
+        path = Path('src/ui/overview/Card.tsx')
+        self.assertTrue(typography_violations(path, '<div className="text-sm font-bold" />'))
+        self.assertTrue(typography_violations(path, '<span className="text-2xl" />'))
+
+    def test_typography_violations_allows_styles_components_and_non_tsx(self):
+        from domain.rules import typography_violations
+        self.assertEqual(typography_violations(Path('src/ui/components/Button.tsx'), 'text-sm'), [])
+        self.assertEqual(typography_violations(Path('src/ui/styles/type-scale.ts'), 'text-sm'), [])
+        self.assertEqual(typography_violations(Path('src/ui/lib/utils.ts'), 'text-sm'), [])
+        self.assertEqual(typography_violations(Path('src/app/page.tsx'), 'text-sm'), [])
+
 
 if __name__ == '__main__':
     unittest.main()

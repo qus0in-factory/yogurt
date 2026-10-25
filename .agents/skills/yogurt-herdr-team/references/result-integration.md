@@ -43,7 +43,7 @@
 - **공통 계약 변경**: 도메인 타입 필드 추가·제거 같은 공통 계약 변경은 백엔드 담당이 프런트 fixture까지 정리하거나 프런트 담당을 순차 지정한다. '백엔드 verify만 통과' 보고는 완료가 아니다.
 - **전체 검증 보고**: 전체 `pnpm run verify` 결과 또는 범위 밖 실패 목록을 보고한다.
 - **WIP 보존**: 다른 에이전트의 WIP 파일을 stash·삭제·되돌리지 않는다. 커밋 시 WIP 경로는 `git add`에서 제외한다.
-- **codex 샌드박스**: codex 샌드박스에서 Vitest가 정지하면 실행하지 말고 callback으로 넘기고 조정자가 실행한다.
+- **codex 샌드박스**: codex 샌드박스에서 Vitest가 정지하면 실행하지 말고 callback으로 넘기고 조정자가 실행한다. codex 샌드박스 callback fallback 대응으로 조정자는 `scripts/app/watch.py`를 백그라운드로 실행하여 결과를 감지한다.
 - **단일 테스트 실행**: `pnpm vitest run --config infra/vitest.config.ts <path>`로 실행한다. 설정을 빠뜨리면 jsdom이 적용되지 않아 가짜 실패가 난다.
 - **외부 API 근거**: KIS 등 외부 API 규격은 공식 저장소(koreainvestment/open-trading-api `examples_llm`) 경로를 결과에 적는다. 확인할 수 없으면 blocked로 보고하고, 웹 접근이 없는 에이전트에게는 조정자가 규격을 계약에 직접 첨부한다.
 - **완료 callback 필수**: 작업 완료 시 callback을 반드시 실행하고, 조정자는 idle 전환 시 `read`로 확인한다.
