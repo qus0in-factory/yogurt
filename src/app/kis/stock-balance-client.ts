@@ -11,7 +11,15 @@ const holdingSchema = z.object({
   purchaseAmount: z.number(), currentPrice: z.number(), evaluationAmount: z.number(),
   profitLoss: z.number(), profitLossRate: z.number(),
 })
-const stockBalanceSchema = z.object({ summary: summarySchema, holdings: holdingSchema.array() })
+const stockBalanceSchema = z.object({
+  summary: summarySchema,
+  holdings: holdingSchema.array(),
+  holdingsSource: z.enum(['kis', 'kv']).nullable().optional(),
+  holdingsAsOf: z.string().nullable().optional(),
+  holdingsFallback: z.boolean().optional(),
+  holdingsUnavailable: z.boolean().optional(),
+  holdingsPartialWarning: z.boolean().optional(),
+})
 export type StockBalance = z.infer<typeof stockBalanceSchema>
 
 export async function getStockBalance(accountId: string, signal?: AbortSignal): Promise<StockBalance> {
