@@ -1,6 +1,6 @@
 # 결과 취합 절차
 
-조정자가 Herdr 에이전트(beam, glm, claude, agy, ds, codex)의 작업 결과를 취합하고 검증하는 절차다.
+요청을 직접 받은 조정자 pane이 계약 파일로 배정한 임시 워커 탭을 검증하고 종료하는 절차다.
 
 ## 1. 기본 원칙 및 시간 제한
 
@@ -10,7 +10,7 @@
 ## 2. 상태 전이 해석 및 완료 판단
 
 - **제출 응답만으로 완료 판단 금지**: `herdr agent prompt` 실행 성공 응답은 텍스트와 Enter 전송 성공만 뜻한다. 이후 실제 working 전환과 최종 산출물을 확인하며, 제출만으로 시작·완료를 판단하지 않는다.
-- **콜백 우선**: 조정자 pane에 도착하는 `[callback]` 메시지를 우선 기다리고, 콜백이 없을 때만 Herdr 상태를 폴링한다.
+- **콜백 우선**: 조정자 pane에 도착하는 `[callback]` 메시지를 우선 기다리고, 콜백이 없으면 fallback을 감시하고 파일도 없을 때만 Herdr 상태를 폴링한다.
 - **상태 해석**:
   - `working`: 작업 수행 중. 단일 대기(최대 60초)하며 상태 전이를 관찰한다.
   - `idle` / `done`: 입력 가능한 상태. 작업 정상 종료를 보장하지 않는다. 시작 후 활동이 관찰됐는지, 요청된 산출물과 검증 결과가 있는지 확인한다.
@@ -20,7 +20,7 @@
 ## 3. 결과 수집 및 출력 유실 대응
 
 - **결과 조회**: `herdr agent get <target>`으로 신원·상태를, `herdr agent read <target> --source recent-unwrapped --lines 50`으로 완료 보고와 변경 요약을 확인한다. working 중 alternate-screen 이력 조회가 거절되면 --source visible로 읽는다.
-- **콜백 fallback**: 콜백 미수신 시 `/tmp/herdr-callback/<조정자>/`의 최신 `.md` 파일을 먼저 확인한다. 파일이 없거나 터미널 버퍼 유실로 결과를 읽을 수 없을 때만 idle 에이전트의 recent-unwrapped 출력을 확인하고, 필요하면 임시 보고 파일을 요청한다.
+- **콜백 fallback**: 배정 시점 커서로 `python3 .agents/skills/yogurt-herdr-callback/scripts/app/watch.py --to <조정자> --since <파일명 또는 ISO 시각> --timeout 30`을 실행해 `/tmp/herdr-callback/<조정자>/`를 감시한다. 첫 결과 후 감시가 끝나므로 처리된 파일·커서를 기록하고 다음 결과 대기 시 다시 실행한다. 파일이 없거나 터미널 버퍼 유실로 결과를 읽을 수 없을 때만 idle 에이전트의 recent-unwrapped 출력을 확인하고, 필요하면 임시 보고 파일을 요청한다.
 
 ## 4. 타임아웃 및 재전송 방지
 
@@ -43,12 +43,22 @@
 - **공통 계약 변경**: 도메인 타입 필드 추가·제거 같은 공통 계약 변경은 백엔드 담당이 프런트 fixture까지 정리하거나 프런트 담당을 순차 지정한다. '백엔드 verify만 통과' 보고는 완료가 아니다.
 - **전체 검증 보고**: 전체 `pnpm run verify` 결과 또는 범위 밖 실패 목록을 보고한다.
 - **WIP 보존**: 다른 에이전트의 WIP 파일을 stash·삭제·되돌리지 않는다. 커밋 시 WIP 경로는 `git add`에서 제외한다.
-- **codex 샌드박스**: codex 샌드박스에서 Vitest가 정지하면 실행하지 말고 callback으로 넘기고 조정자가 실행한다. codex 샌드박스 callback fallback 대응으로 조정자는 `scripts/app/watch.py`를 백그라운드로 실행하여 결과를 감지한다.
+- **codex 샌드박스**: 프리셋 메타데이터가 `sandboxed: true`인 sol/luna는 Vitest를 실행하지 않는다. 미실행 사실과 권장 명령을 callback으로 넘기고 조정자가 테스트를 실행한다. agy/ds에는 이 제약을 일괄 적용하지 않는다.
 - **단일 테스트 실행**: `pnpm vitest run --config infra/vitest.config.ts <path>`로 실행한다. 설정을 빠뜨리면 jsdom이 적용되지 않아 가짜 실패가 난다.
 - **외부 API 근거**: KIS 등 외부 API 규격은 공식 저장소(koreainvestment/open-trading-api `examples_llm`) 경로를 결과에 적는다. 확인할 수 없으면 blocked로 보고하고, 웹 접근이 없는 에이전트에게는 조정자가 규격을 계약에 직접 첨부한다.
 - **완료 callback 필수**: 작업 완료 시 callback을 반드시 실행하고, 조정자는 idle 전환 시 `read`로 확인한다.
 
-## 6. 관찰·검증 함정
+## 6. 검증 후 탭 종료
+
+- `worker.py await`로 결과를 기다리고 계약·diff·검증을 확인한 조정자가 `worker.py close`한다. 해당 open에서 만든 탭만 닫는다. `worker.py run`도 조정자 검증 전 자동 close하지 않는다.
+- `worker.py close`는 레지스트리에 없는 워커를 닫지 못한다. 이름으로 `herdr agent list`에서 `tab_id`를 확인한 뒤 `herdr tab close <tab_id>`로 닫는다.
+- failed/blocked/unknown·타임아웃이면 먼저 탭을 유지한다. get/read와 변경 파일로 원인·중간 결과를 확보하고 인계·콜백을 남긴 뒤 close한다. 승인·질문 UI에 임의 응답하지 않는다.
+- 사용량 한도로 탭이 닫히면 사용자 새 지침을 기다린다. 다른 프리셋·모델로 임의 대체·재시작하지 않는다.
+- CLI 재시작으로 이름이 사라지면 기록된 pane ID로 실제 프로세스를 확인하고 신원 확인 후 이름을 복구한다. 새 탭을 맹목적으로 만들지 않는다.
+- 무편집·도구 미호출은 실측 후 1회만 재시도하고 재발하면 중간 파일을 기록해 기존 작업 종료 후 작성자를 이관한다. 사용량 한도에는 이관 규칙을 적용하지 않는다.
+- 전체 5분 경계에서는 blocked로 보고하고 멈춘다. 사용자 확인 없이 계속하지 않는다.
+
+## 7. 관찰·검증 함정
 
 - `pane wait-output`은 기존 화면 출력도 매칭한다. 재실행 시에는 visible 재독으로 새 출력만 판정한다.
 - 시간 제한 래퍼(`timeout` 등)는 실행 전에 해당 OS에 있는지 확인한다.
