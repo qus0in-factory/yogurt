@@ -9,6 +9,7 @@ import { EditAccountDialog } from './EditAccountDialog'
 import { AccountCarousel } from './AccountCarousel'
 import { AccountSearch } from './AccountSearch'
 import { useAccounts } from './useAccounts'
+import { useKisStatus } from './useKisStatus'
 import { accountsText } from '../glossary/accounts'
 
 const QUERY_KEY = 'yogurt:accounts-query'
@@ -25,6 +26,7 @@ export function AccountsPage() {
     sessionStorage.removeItem('yogurt:accounts-index')
   }, [])
   const { data, isPending, isError, refetch } = useAccounts()
+  const kisStatuses = useKisStatus()
   const accounts = data ?? []
   const filtered = filterAccounts(accounts, query)
   const search = (value: string) => {
@@ -54,7 +56,7 @@ export function AccountsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <p className="mt-4 text-stone-600">{query.replace(/\s/g, '') ? accountsText.noResults : accountsText.empty}</p>
-      ) : <AccountCarousel key={query} accounts={filtered} onEdit={setEditing} />}
+      ) : <AccountCarousel key={query} accounts={filtered} onEdit={setEditing} kisStatuses={kisStatuses} />}
       <AddAccountDialog open={addOpen} onClose={() => setAddOpen(false)} />
       {editing ? <EditAccountDialog account={editing} onClose={() => setEditing(null)} /> : null}
     </section>

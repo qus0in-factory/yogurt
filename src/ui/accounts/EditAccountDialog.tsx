@@ -22,7 +22,7 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
   const owners = ownerSuggestions(data ?? [])
   const [deleteOpen, setDeleteOpen] = useState(false)
   const { control, handleSubmit } = useForm<AccountUpdate>({
-    defaultValues: { alias: account.alias, owner: account.owner, productCode: account.productCode },
+    defaultValues: { alias: account.alias, owner: account.owner },
     resolver: zodResolver(accountUpdateSchema),
   })
   const field = (label: string, name: keyof AccountUpdate, extra: FieldExtra = {}, sanitize?: (value: string) => string) => (
@@ -56,7 +56,6 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
           {field(accountsText.owner, 'owner', { list: ownerListId, autoComplete: 'off' })}
           <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
           {field(accountsText.alias, 'alias')}
-          {field(accountsText.productCode, 'productCode', { maxLength: 2, inputMode: 'numeric', pattern: '[0-9]{2}', placeholder: accountsText.productCodeExample }, (value) => value.replace(/\D/g, ''))}
           <p className="text-sm text-stone-600">
             {accountsText.accountNumber}: <span>{account.accountNumber}</span>
           </p>

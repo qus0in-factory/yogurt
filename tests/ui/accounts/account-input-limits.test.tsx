@@ -39,35 +39,4 @@ describe('계좌 입력 제한', () => {
     fireEvent.change(input, { target: { value: '12a3-4567' } })
     expect(input).toHaveValue('1234567')
   })
-
-  it('상품코드는 숫자 2자리로 제한하고 기본값·예시를 적용한다', () => {
-    renderDialog()
-    const input = screen.getByLabelText('상품코드')
-    expect(input).toHaveValue('01')
-    expect(input).toHaveAttribute('maxLength', '2')
-    expect(input).toHaveAttribute('inputmode', 'numeric')
-    expect(input).toHaveAttribute('pattern', '[0-9]{2}')
-    expect(input).toHaveAttribute('placeholder', '01')
-  })
-
-  it('상품코드 입력에서 숫자 외 문자를 제거한다', () => {
-    renderDialog()
-    const input = screen.getByLabelText('상품코드')
-    fireEvent.change(input, { target: { value: 'a1b2' } })
-    expect(input).toHaveValue('12')
-  })
-
-  it('상품코드가 2자리가 아니면 저장하지 않고 오류를 표시한다', async () => {
-    renderDialog()
-    const form = screen.getByRole('button', { name: '저장' }).closest('form')!
-    fireEvent.change(screen.getByLabelText('소유자'), { target: { value: '김철수' } })
-    fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '주계좌' } })
-    fireEvent.change(screen.getByLabelText('계좌번호'), { target: { value: '12345678' } })
-    fireEvent.change(screen.getByLabelText('상품코드'), { target: { value: '1' } })
-    fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AK' } })
-    fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
-    fireEvent.submit(form)
-    await waitFor(() => expect(createAccount).not.toHaveBeenCalled())
-    expect(await screen.findByText('상품코드는 숫자 2자리로 입력하세요')).toBeInTheDocument()
-  })
 })

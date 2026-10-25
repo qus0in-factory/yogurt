@@ -11,7 +11,7 @@ import { useUiStore } from '../../../src/ui/state/ui-store'
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const deleteAccount = vi.mocked(client.deleteAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', productCode: '29', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
 
 function Harness({ onClose }: { onClose: () => void }) {
   const [editing, setEditing] = useState(true)

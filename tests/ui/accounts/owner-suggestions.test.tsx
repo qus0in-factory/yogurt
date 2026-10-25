@@ -10,7 +10,7 @@ vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), crea
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 
 const listAccounts = vi.mocked(client.listAccounts)
-const base = { alias: '주계좌', accountNumber: '12345678', productCode: '01', createdAt: '2026-01-01T00:00:00.000Z' }
+const base = { alias: '주계좌', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
 const accounts = [
   { ...base, id: '1', owner: '김철수' },
   { ...base, id: '2', owner: '김철수' },

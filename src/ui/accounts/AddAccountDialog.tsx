@@ -20,16 +20,16 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
   const ownerListId = useId()
   const { data } = useAccounts()
   const owners = ownerSuggestions(data ?? [])
-  const draft = readSessionJson<{ alias: string; owner: string; accountNumber: string; productCode: string }>(DRAFT_KEY)
+  const draft = readSessionJson<{ alias: string; owner: string; accountNumber: string }>(DRAFT_KEY)
   const { control, handleSubmit, reset, setError, watch } = useForm<AccountInput>({
-    defaultValues: { alias: draft?.alias ?? '', owner: draft?.owner ?? '', accountNumber: draft?.accountNumber ?? '', productCode: draft?.productCode ?? '01', accessKey: '', secretKey: '' },
+    defaultValues: { alias: draft?.alias ?? '', owner: draft?.owner ?? '', accountNumber: draft?.accountNumber ?? '', accessKey: '', secretKey: '' },
     resolver: zodResolver(accountInputSchema),
   })
   useEffect(() => {
-    const sub = watch(({ alias, owner, accountNumber, productCode }) => {
-      if (typeof alias !== 'string' || typeof owner !== 'string' || typeof accountNumber !== 'string' || typeof productCode !== 'string') return
+    const sub = watch(({ alias, owner, accountNumber }) => {
+      if (typeof alias !== 'string' || typeof owner !== 'string' || typeof accountNumber !== 'string') return
       if (alias === '' && owner === '' && accountNumber === '') removeSession(DRAFT_KEY)
-      else writeSessionJson(DRAFT_KEY, { alias, owner, accountNumber, productCode })
+      else writeSessionJson(DRAFT_KEY, { alias, owner, accountNumber })
     })
     return () => sub.unsubscribe()
   }, [watch])
@@ -48,7 +48,7 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
     createAccount.mutate(values, {
       onSuccess: () => {
         removeSession(DRAFT_KEY)
-        reset({ alias: '', owner: '', accountNumber: '', productCode: '01', accessKey: '', secretKey: '' })
+        reset({ alias: '', owner: '', accountNumber: '', accessKey: '', secretKey: '' })
         onClose()
         toast(accountsText.added)
       },
@@ -67,7 +67,6 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
         <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
         {field(accountsText.alias, 'alias', { maxLength: 8 })}
         {field(accountsText.accountNumber, 'accountNumber', { maxLength: 8, inputMode: 'numeric', pattern: '[0-9]{8}', placeholder: accountsText.accountNumberExample }, (value) => value.replace(/\D/g, ''))}
-        {field(accountsText.productCode, 'productCode', { maxLength: 2, inputMode: 'numeric', pattern: '[0-9]{2}', placeholder: accountsText.productCodeExample }, (value) => value.replace(/\D/g, ''))}
         {field(accountsText.accessKey, 'accessKey')}
         {field(accountsText.secretKey, 'secretKey', { type: 'password' })}
         <div className="sticky bottom-0 flex justify-end gap-2 bg-white">

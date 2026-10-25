@@ -8,7 +8,7 @@ import { useUiStore } from '../../../src/ui/state/ui-store'
 
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn() }))
 const listAccounts = vi.mocked(client.listAccounts)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', productCode: '01', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -28,9 +28,9 @@ afterEach(() => {
 describe('OverviewPage', () => {
   it('IRP 탭과 패널을 표시하고 IRP 계좌만 나열한다', async () => {
     listAccounts.mockResolvedValueOnce([
-      { ...account, id: 'a1', alias: 'IRP 연금', owner: '김철수', accountNumber: '12345678', productCode: '29' },
-      { ...account, id: 'a2', alias: '주계좌', owner: '박영수', accountNumber: '87654321' },
-      { ...account, id: 'a3', alias: 'irp 달러', owner: '이영희', accountNumber: '11112222', productCode: '29' },
+      { ...account, id: 'a1', alias: 'IRP 연금', owner: '김철수', accountNumber: '12345678', products: ['29']},
+      { ...account, id: 'a2', alias: '주계좌', owner: '박영수', accountNumber: '87654321', products: [] },
+      { ...account, id: 'a3', alias: 'irp 달러', owner: '이영희', accountNumber: '11112222', products: ['29']},
     ])
     renderPage()
     expect(screen.getByRole('tab', { name: 'IRP' })).toHaveAttribute('aria-selected', 'true')

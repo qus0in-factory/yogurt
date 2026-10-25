@@ -7,7 +7,7 @@ import { IrpTab } from '../../../src/ui/overview/IrpTab'
 
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn() }))
 const listAccounts = vi.mocked(client.listAccounts)
-const base = { owner: '김철수', accountNumber: '12345678', productCode: '29', createdAt: '2026-01-01T00:00:00.000Z' }
+const base = { owner: '김철수', accountNumber: '12345678', products: ['29'], createdAt: '2026-01-01T00:00:00.000Z' }
 const accounts = Array.from({ length: 4 }, (_, index) => ({ ...base, id: String(index), alias: `IRP${index + 1}` }))
 let wide = false
 

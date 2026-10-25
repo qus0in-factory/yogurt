@@ -9,7 +9,7 @@ import { EditAccountDialog } from '../../../src/ui/accounts/EditAccountDialog'
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 const updateAccount = vi.mocked(client.updateAccount)
-const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', productCode: '29', createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: [], createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderDialog = () => {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
@@ -23,12 +23,11 @@ beforeEach(() => vi.clearAllMocks())
 afterEach(cleanup)
 
 describe('EditAccountDialog', () => {
-  it('소유자→별칭→상품코드 순서로 기존 값을 채우고 계좌번호는 읽기 전용으로 표시한다', () => {
+  it('소유자→별칭 순서로 기존 값을 채우고 계좌번호는 읽기 전용으로 표시한다', () => {
     renderDialog()
-    expect(screen.getAllByLabelText(/소유자|별칭|상품코드/).map((el) => el.getAttribute('name'))).toEqual(['owner', 'alias', 'productCode'])
+    expect(screen.getAllByLabelText(/소유자|별칭/).map((el) => el.getAttribute('name'))).toEqual(['owner', 'alias'])
     expect(screen.getByLabelText('별칭')).toHaveValue('주계좌')
     expect(screen.getByLabelText('소유자')).toHaveValue('김철수')
-    expect(screen.getByLabelText('상품코드')).toHaveValue('29')
     expect(screen.getByLabelText('별칭')).toHaveAttribute('maxLength', '8')
     expect(screen.getByLabelText('소유자')).toHaveAttribute('maxLength', '8')
     expect(screen.getByText('12345678')).toBeInTheDocument()
@@ -46,13 +45,12 @@ describe('EditAccountDialog', () => {
   })
 
   it('저장 성공 시 닫고 목록을 무효화하며 성공 toast를 표시한다', async () => {
-    updateAccount.mockResolvedValueOnce({ ...account, alias: '연금', owner: '이영희', productCode: '12' })
+    updateAccount.mockResolvedValueOnce({ ...account, alias: '연금', owner: '이영희', products: []})
     const { onClose, invalidate } = renderDialog()
     fireEvent.change(screen.getByLabelText('별칭'), { target: { value: '연금' } })
     fireEvent.change(screen.getByLabelText('소유자'), { target: { value: '이영희' } })
-    fireEvent.change(screen.getByLabelText('상품코드'), { target: { value: '12' } })
     fireEvent.click(screen.getByRole('button', { name: '저장' }))
-    await waitFor(() => expect(updateAccount).toHaveBeenCalledWith('a1', { alias: '연금', owner: '이영희', productCode: '12' }))
+    await waitFor(() => expect(updateAccount).toHaveBeenCalledWith('a1', { alias: '연금', owner: '이영희' }))
     await waitFor(() => expect(onClose).toHaveBeenCalled())
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['accounts'] })
     expect(toast).toHaveBeenCalledWith('계좌를 수정했습니다')

@@ -4,12 +4,13 @@ import { Carousel } from '../components/Carousel'
 import { accountsText } from '../glossary/accounts'
 import { useUiStore } from '../state/ui-store'
 import { AccountCard } from './AccountCard'
+import type { KisStatuses } from './useKisStatus'
 
-type Props = { accounts: Account[]; onEdit: (account: Account) => void }
+type Props = { accounts: Account[]; onEdit: (account: Account) => void; kisStatuses?: KisStatuses }
 const PAGE_KEY = 'yogurt:accounts-page'
 const labels = { list: accountsText.listLabel, previous: accountsText.previous, next: accountsText.next, goTo: accountsText.goTo, position: accountsText.position }
 
-export function AccountCarousel({ accounts, onEdit }: Props) {
+export function AccountCarousel({ accounts, onEdit, kisStatuses = new Map() }: Props) {
   const selectAccount = useUiStore((state) => state.selectAccount)
   const change = useCallback((page: number, pageSize: number) => {
     sessionStorage.removeItem('yogurt:accounts-index')
@@ -18,6 +19,8 @@ export function AccountCarousel({ accounts, onEdit }: Props) {
   }, [accounts, selectAccount])
   return (
     <Carousel items={accounts} labels={labels} pageKey={PAGE_KEY} onPageChange={change} className="mt-4"
-      renderItem={(account) => <AccountCard key={account.id} account={account} onSelect={() => selectAccount(account.id)} onEdit={() => onEdit(account)} />} />
+      renderItem={(account) => (
+        <AccountCard key={account.id} account={account} onSelect={() => selectAccount(account.id)} onEdit={() => onEdit(account)} kisStatus={kisStatuses.get(account.id)} />
+      )} />
   )
 }

@@ -9,9 +9,9 @@ import { createFakeKv } from './fakes/kv.ts'
 let secret = ''
 let token = ''
 const fakeSessions = createFakeKv()
-const row = { id: 'a1', alias: '수정', owner: '김철수', account_number: '12345678', product_code: '01', created_at: '2026-01-01T00:00:00.000Z' }
-const db = (found = true) => ({ prepare: () => ({ bind: (..._args: unknown[]) => ({ first: async () => found ? row : null }) }) }) as unknown as D1Database
-const input = { alias: '수정', owner: '김철수', productCode: '29' }
+const row = { id: 'a1', alias: '수정', owner: '김철수', account_number: '12345678', created_at: '2026-01-01T00:00:00.000Z' }
+const db = (found = true) => ({ prepare: (sql: string) => ({ bind: (..._args: unknown[]) => ({ first: async () => (found ? row : null), all: async () => ({ results: sql.includes('account_products') ? [] : (found ? [row] : []) }) }), all: async () => ({ results: sql.includes('account_products') ? [] : (found ? [row] : []) }) }) }) as unknown as D1Database
+const input = { alias: '수정', owner: '김철수' }
 const call = (body: unknown, DB: D1Database | undefined, authenticated = true) => app.fetch(
   new Request('https://example.com/api/accounts/a1', {
     method: 'PATCH', body: JSON.stringify(body),
@@ -28,7 +28,7 @@ beforeAll(async () => {
 it('PATCH는 키 설정 없이 200과 수정 계좌를 반환한다', async () => {
   const res = await call(input, db())
   expect(res.status).toBe(200)
-  expect(await res.json()).toEqual({ id: 'a1', ...input, accountNumber: row.account_number, productCode: row.product_code, createdAt: row.created_at })
+  expect(await res.json()).toEqual({ id: 'a1', ...input, accountNumber: row.account_number, products: [], createdAt: row.created_at })
 })
 
 it.each([{ alias: '', owner: '김철수' }, { alias: '수정', owner: '' }])('PATCH 검증 실패는 400이다', async body => {
