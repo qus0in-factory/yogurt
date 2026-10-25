@@ -38,7 +38,11 @@ def push_tag(tag, runner=None):
 
 def fetch_health(url, opener=None):
     opener = opener or urllib.request.urlopen
-    with opener(url, timeout=10) as response:
+    request = urllib.request.Request(url, headers={
+        'User-Agent': 'yogurt-release/1 (+https://github.com/usagi-ai-kr/yogurt)',
+        'Cache-Control': 'no-cache',
+    })
+    with opener(request, timeout=10) as response:
         return json.loads(response.read().decode('utf-8'))
 
 

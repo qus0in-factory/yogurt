@@ -10,7 +10,6 @@ from infra.ops import create_tag, fetch_health, list_tags, push_tag, read_versio
 POLL_ATTEMPTS = 30
 POLL_INTERVAL = 10
 
-
 class ReleaseParser(argparse.ArgumentParser):
     def error(self, message): raise ValueError(message)
 
@@ -53,15 +52,18 @@ def _parse(argv):
 
 
 def _verify_deployment(url, version, health, wake):
+    reason = f'health version did not match {version}'
     for attempt in range(1, POLL_ATTEMPTS + 1):
         try: payload = health(url)
-        except Exception: payload = None  # 조회 실패는 미일치로 본다
+        except Exception as error:
+            payload = None
+            detail = f'HTTP {error.code}' if hasattr(error, 'code') else str(error)
+            reason = f'health fetch failed: {detail}'
         if health_matches(payload, version):
             print(f'deployed health version {version} verified'); return 0
         if attempt < POLL_ATTEMPTS:
             wake(POLL_INTERVAL)
-    print(f'health version did not match {version} after {POLL_ATTEMPTS} attempts', file=sys.stderr)
-    return 1
+    return _fail(f'{reason} after {POLL_ATTEMPTS} attempts')
 
 
 def _print_plan(tag, sha):

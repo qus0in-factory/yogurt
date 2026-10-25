@@ -2,9 +2,9 @@ import contextlib
 import io
 import unittest
 from app.release import main
+from urllib.error import HTTPError, URLError
 
 ARGV = ['--health-url', 'https://yogurt.qus0in.dev/health']
-
 
 class FakeOps:
     def __init__(self, tags=(), version='1.2.3', health=None):
@@ -20,6 +20,7 @@ class FakeOps:
     def fetch(self, _url):
         self.polled.append(1)
         if self.health is None: raise OSError('health unavailable')
+        if isinstance(self.health, Exception): raise self.health
         return self.health
 
     def wake(self, seconds): self.slept.append(seconds)
@@ -57,16 +58,19 @@ class ReleaseCommandTest(unittest.TestCase):
         self.assertEqual((ops.created, ops.pushed), (['v1.2.3'], ['v1.2.3']))
         self.assertEqual(ops.slept, [])
 
-    def test_unmatched_health_polls_thirty_times_with_ten_second_gaps(self):
-        ops = FakeOps(health={'version': '9.9.9'})
-        with contextlib.redirect_stderr(io.StringIO()):
-            self.assertEqual(self.run_main(ops), 1)
-        self.assertEqual((len(ops.polled), ops.slept), (30, [10] * 29))
-
-    def test_health_fetch_errors_count_as_unmatched(self):
-        ops = FakeOps()
-        self.assertEqual(self.run_main(ops), 1)
-        self.assertEqual((len(ops.polled), ops.slept), (30, [10] * 29))
+    def test_polling_distinguishes_version_mismatch_from_last_fetch_error(self):
+        cases = [({'version': '9.9.9'}, 'health version did not match 1.2.3'),
+                 (None, 'health fetch failed: health unavailable'),
+                 (HTTPError('https://x', 403, 'Forbidden', {}, None), 'HTTP 403'),
+                 (URLError('offline'), 'offline')]
+        for health, expected in cases:
+            with self.subTest(expected=expected):
+                ops, err = FakeOps(health=health), io.StringIO()
+                with contextlib.redirect_stderr(err):
+                    self.assertEqual(self.run_main(ops), 1)
+                self.assertIn(expected, err.getvalue())
+                if health is None or isinstance(health, Exception): self.assertNotIn('version did not match', err.getvalue())
+                self.assertEqual((len(ops.polled), ops.slept), (30, [10] * 29))
 
     def test_resolve_or_tag_failure_stops_before_push(self):
         for overrides in ({'resolve': lambda: (1, '', 'fetch failed')}, {'create': lambda tag, sha: (1, 'cannot tag')}):
@@ -74,7 +78,3 @@ class ReleaseCommandTest(unittest.TestCase):
             with contextlib.redirect_stderr(io.StringIO()):
                 self.assertEqual(self.run_main(ops, **overrides), 1)
             self.assertEqual((ops.created, ops.pushed), ([], []))
-
-
-if __name__ == '__main__':
-    unittest.main()
