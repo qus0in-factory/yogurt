@@ -1,4 +1,5 @@
 export const commonText = {
+  pagePosition: (page: number, total: number) => `${total}페이지 중 ${page}페이지`,
   appName: 'YOGURT',
   logout: '로그아웃',
   save: '저장',

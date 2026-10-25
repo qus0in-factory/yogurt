@@ -15,7 +15,7 @@ vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
 
 const checkSession = vi.mocked(auth.checkSession)
 const listAccounts = vi.mocked(accounts.listAccounts)
-const account = { id: 'a1', alias: 'IRP 연금', owner: '김철수', accountNumber: '12345678', products: ['29'], createdAt: '2026-01-01T00:00:00.000Z' }
+const account = { id: 'a1', alias: 'IRP 연금', owner: '김철수', accountNumber: '12345678', products: ['01', '29'], createdAt: '2026-01-01T00:00:00.000Z' }
 
 const renderApp = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
@@ -36,7 +36,7 @@ describe('현황 화면', () => {
     await screen.findByRole('heading', { name: '계좌' })
     fireEvent.click(screen.getByRole('button', { name: '현황' }))
     expect(await screen.findByRole('heading', { name: '현황' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'IRP' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'ISA' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('총 1개')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '현황' })).toHaveAttribute('aria-current', 'page')
   })

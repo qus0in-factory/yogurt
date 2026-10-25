@@ -9,17 +9,15 @@ import { PensionLoan } from './PensionLoan'
 import { PensionAssets } from './PensionAssets'
 import { PensionHoldings } from './PensionHoldings'
 
-const PRODUCT_CODE = '22'
-
-export function PensionDetail({ accountId }: { accountId: string }) {
+export function PensionDetail({ accountId, productCode = '22', includeLoan = true }: { accountId: string; productCode?: string; includeLoan?: boolean }) {
   const assets = useQuery({
-    queryKey: ['account-assets', accountId, PRODUCT_CODE],
-    queryFn: () => getAccountAssets(accountId, PRODUCT_CODE),
+    queryKey: ['account-assets', accountId, productCode],
+    queryFn: () => getAccountAssets(accountId, productCode),
     retry: false,
   })
   const balance = useQuery({
-    queryKey: ['product-balance', accountId, PRODUCT_CODE],
-    queryFn: ({ signal }) => getProductBalance(accountId, PRODUCT_CODE, signal),
+    queryKey: ['product-balance', accountId, productCode],
+    queryFn: ({ signal }) => getProductBalance(accountId, productCode, signal),
     retry: false,
   })
   const [wide, setWide] = useState(() => window.matchMedia?.('(min-width: 768px)').matches ?? false)
@@ -30,12 +28,12 @@ export function PensionDetail({ accountId }: { accountId: string }) {
     return () => media?.removeEventListener('change', resize)
   }, [])
   if (assets.isPending || balance.isPending) return <p role="status">{accountsText.loading}</p>
-  if (assets.isError || balance.isError) return <p role="alert">{text.pensionUnavailable}</p>
+  if (assets.isError || balance.isError) return <p role="alert">{productCode === '01' ? text.isaUnavailable : text.pensionUnavailable}</p>
   const fundAmount = fundEvaluation(assets.data.rows)
   return (
     <section aria-label={text.detail} className={`${spacing.section} mb-8 rounded-lg border border-primary-200 bg-white p-4`}>
       <h2 className={typeScale.sectionTitle}>{text.detail}</h2>
-      {fundAmount > 0 ? <PensionLoan loanAmount={assets.data.summary.loanAmount} collateralAmount={fundAmount} /> : null}
+      {includeLoan && fundAmount > 0 ? <PensionLoan loanAmount={assets.data.summary.loanAmount} collateralAmount={fundAmount} /> : null}
       <PensionAssets rows={assets.data.rows} />
       <PensionHoldings summary={balance.data.summary} holdings={balance.data.holdings} wide={wide} />
     </section>

@@ -3,6 +3,7 @@ import { InfoTooltip } from '../components/InfoTooltip'
 import { overviewText as text } from '../glossary/overview'
 import { typeScale } from '../styles/type-scale'
 import { PensionLoanNotice } from './PensionLoanNotice'
+import { SectionHeading } from '../components/SectionHeading'
 
 export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: number; collateralAmount: number }) {
   const ratios = loanRatios({ loanAmount, collateralAmount })
@@ -12,7 +13,7 @@ export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: numb
   if (loanAmount === 0) {
     return (
       <section aria-label={text.loanStatus}>
-        <h3 className={typeScale.cardTitle}>{text.loanStatus}</h3>
+        <SectionHeading>{text.loanStatus}</SectionHeading>
         {notice}
         <div className="mt-3 flex items-center gap-1">
           <span className={typeScale.label}>{text.loanAmount}</span>
@@ -27,7 +28,7 @@ export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: numb
   const collateralClass = ratios.collateralOk ? 'text-emerald-600' : 'text-red-600'
   return (
     <section aria-label={text.loanStatus}>
-      <h3 className={typeScale.cardTitle}>{text.loanStatus}</h3>
+      <SectionHeading>{text.loanStatus}</SectionHeading>
       {notice}
       <dl className="mt-3 grid grid-cols-2 gap-4">
         <div>

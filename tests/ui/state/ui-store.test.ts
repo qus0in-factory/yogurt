@@ -3,20 +3,20 @@ import { useUiStore } from '../../../src/ui/state/ui-store'
 
 beforeEach(() => {
   localStorage.clear()
-  useUiStore.setState({ screen: 'accounts', drawerOpen: false, selectedAccountId: null, selectedIrpAccountId: null, selectedProductAccountIds: {}, overviewTab: 'irp' })
+  useUiStore.setState({ screen: 'accounts', drawerOpen: false, selectedAccountId: null, selectedIrpAccountId: null, selectedProductAccountIds: {}, overviewTab: useUiStore.getInitialState().overviewTab })
   useUiStore.persist.clearStorage()
 })
 
 describe('ui store', () => {
-  it('기본 화면은 accounts이고 overviewTab 기본은 irp, 알 수 없는 값은 irp다', () => {
+  it('기본 화면은 accounts이고 overviewTab 기본은 isa, 알 수 없는 값은 isa다', () => {
     const state = useUiStore.getState()
     expect(state.screen).toBe('accounts')
     expect(state.drawerOpen).toBe(false)
-    expect(state.overviewTab).toBe('irp')
+    expect(state.overviewTab).toBe('isa')
     state.setOverviewTab('pension')
     expect(useUiStore.getState().overviewTab).toBe('pension')
     state.setOverviewTab('unknown' as any)
-    expect(useUiStore.getState().overviewTab).toBe('irp')
+    expect(useUiStore.getState().overviewTab).toBe('isa')
   })
 
   it('selectAccount는 selectedAccountId를 바꾼다', () => {

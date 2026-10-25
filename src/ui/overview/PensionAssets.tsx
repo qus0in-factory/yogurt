@@ -3,12 +3,13 @@ import { classifyAssetRows } from '../../app/kis/asset-classes'
 import { overviewText as text } from '../glossary/overview'
 import { typeScale } from '../styles/type-scale'
 import { WeightBar } from '../components/WeightBar'
+import { SectionHeading } from '../components/SectionHeading'
 
 export function PensionAssets({ rows }: { rows: AccountAssets['rows'] }) {
   const { items, total } = classifyAssetRows(rows)
   return (
     <section aria-label={text.assetGroups}>
-      <h3 className={typeScale.cardTitle}>{text.assetGroups}</h3>
+      <SectionHeading>{text.assetGroups}</SectionHeading>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead><tr>

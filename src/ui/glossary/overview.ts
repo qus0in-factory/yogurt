@@ -19,6 +19,8 @@ export const overviewText = {
   riskClass: '위험/안전',
   cashRow: '현금/예수금/RP',
   pensionUnavailable: '연금저축 계좌를 조회할 수 없습니다',
+  isaUnavailable: 'ISA 계좌를 조회할 수 없습니다',
+  isa: 'ISA',
   loanStatus: '대출현황',
   loanAmount: '대출금액',
   collateralRatio: '담보비율',

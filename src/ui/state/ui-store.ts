@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { ScreenId } from '../layout/menu'
-import type { ProductKey } from '../../domain/accounts/products'
+import { ACCOUNT_PRODUCTS, type ProductKey } from '../../domain/accounts/products'
 
 export type OverviewTab = ProductKey
 
@@ -20,7 +20,7 @@ type UiState = {
   setOverviewTab: (tab: OverviewTab) => void
 }
 
-const normalizeTab = (tab: unknown): OverviewTab => (tab === 'pension' ? 'pension' : 'irp')
+const normalizeTab = (tab: unknown): OverviewTab => ACCOUNT_PRODUCTS.find(product => product.key === tab)?.key ?? ACCOUNT_PRODUCTS[0].key
 
 export const useUiStore = create<UiState>()(
   persist(
@@ -30,7 +30,7 @@ export const useUiStore = create<UiState>()(
       selectedAccountId: null,
       selectedProductAccountIds: {},
       selectedIrpAccountId: null,
-      overviewTab: 'irp',
+      overviewTab: ACCOUNT_PRODUCTS[0].key,
       navigate: (id) => set({ screen: id, drawerOpen: false }),
       setDrawerOpen: (open) => set({ drawerOpen: open }),
       selectAccount: (id) => set({ selectedAccountId: id }),
@@ -53,7 +53,12 @@ export const useUiStore = create<UiState>()(
         if (persisted.selectedIrpAccountId && !ids.irp) ids.irp = persisted.selectedIrpAccountId
         return { ...persisted, selectedProductAccountIds: ids, selectedIrpAccountId: ids.irp ?? null }
       },
+      merge: (persisted, current) => {
+        const saved = persisted as Partial<UiState> | undefined
+        return { ...current, ...saved, overviewTab: normalizeTab(saved?.overviewTab) }
+      },
       partialize: (s) => ({
+        overviewTab: s.overviewTab,
         selectedAccountId: s.selectedAccountId,
         selectedProductAccountIds: s.selectedProductAccountIds,
       }),

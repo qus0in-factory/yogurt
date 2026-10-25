@@ -1,8 +1,9 @@
 import { z } from 'zod'
 
 export const ACCOUNT_PRODUCTS = [
-  { code: '29', key: 'irp', label: 'IRP' },
+  { code: '01', key: 'isa', label: 'ISA' },
   { code: '22', key: 'pension', label: '연금저축' },
+  { code: '29', key: 'irp', label: 'IRP' },
 ] as const
 
 export type ProductKey = (typeof ACCOUNT_PRODUCTS)[number]['key']

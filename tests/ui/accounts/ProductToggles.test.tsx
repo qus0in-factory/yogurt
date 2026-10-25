@@ -43,3 +43,17 @@ it('reports failure without changing pressed state', async () => {
   await waitFor(() => expect(toast.error).toHaveBeenCalledWith('상품 설정을 변경하지 못했습니다'))
   expect(button).toHaveAttribute('aria-pressed', 'false')
 })
+it.each([false, true])('상품 활성화 %s와 무관하게 탭과 동일한 아이콘을 순서대로 표시한다', enabled => {
+  show(enabled ? ['01', '22', '29'] : [])
+  const buttons = screen.getAllByRole('button')
+  expect(buttons.map(button => button.textContent)).toEqual(['ISA', '연금저축', 'IRP'])
+  const icons = ['trending-up', 'piggy-bank', 'armchair']
+  buttons.forEach((button, index) => {
+    const icon = button.querySelector('svg')
+    expect(button).toHaveAttribute('aria-pressed', String(enabled))
+    expect(button).toHaveClass('gap-2')
+    expect(icon).toHaveClass('h-4', 'w-4', `lucide-${icons[index]}`)
+    expect(icon).toHaveAttribute('aria-hidden', 'true')
+    expect(button.firstChild).toBe(icon)
+  })
+})
