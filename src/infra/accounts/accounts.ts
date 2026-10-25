@@ -52,3 +52,10 @@ export async function setAccountProduct(c: AppContext, id: string, code: string,
   if (!account) return c.json({ error: 'account not found' }, 404)
   return c.json(account)
 }
+
+export async function reorderAccounts(c: AppContext, input: { ids: string[] }): Promise<Response> {
+  if (!c.env.DB) return c.json(CONFIG_ERROR, 503)
+  const accounts = await createAccountRepository(c.env.DB).reorder(input.ids)
+  if (!accounts) return c.json({ error: 'invalid request' }, 400)
+  return c.json(accounts, 200)
+}

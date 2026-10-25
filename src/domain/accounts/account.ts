@@ -11,6 +11,8 @@ export const accountInputSchema = z.object({
   secretKey: z.string().trim().min(1, { error: 'Secret Key를 입력하세요' }),
 })
 
+export const accountOrderSchema = z.object({ ids: z.array(z.string()).min(1) })
+
 export const accountUpdateSchema = z.object({ alias, owner })
 
 import { accountProductSchema } from './products'
