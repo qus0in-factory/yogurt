@@ -40,7 +40,7 @@ export const overviewText = {
   newLoanAvailable: '신규 대출 가능',
   newLoanUnavailable: '신규 대출 불가',
   assetGroups: '투자자산 현황',
-  assetClass: { stock: '주식', fund: '펀드', cash: '현금/예수금', total: '합계' },
+  assetClass: { stock: '주식', fund: '펀드', rp: 'RP', cash: '현금/예수금', total: '합계' },
   assetGroupColumn: '자산군',
   assetGroup: (index: number) => `자산군 ${index + 1}`,
   depositStocks: '예수금·주식',

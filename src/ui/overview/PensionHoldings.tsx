@@ -9,10 +9,11 @@ import { IrpCashCard, IrpCashRow } from './IrpCash'
 import { holdingColumns } from './holding-columns'
 
 
-export function PensionHoldings({ summary, holdings, wide }: {
-  summary: ProductBalance['summary']; holdings: ProductBalance['holdings']; wide: boolean
+export function PensionHoldings({ summary, holdings, wide, rp = 0 }: {
+  summary: ProductBalance['summary']; holdings: ProductBalance['holdings']; wide: boolean; rp?: number
 }) {
-  const { holdings: weighted, cashWeight } = withWeights(holdings, summary.cash)
+  const cash = summary.cash + rp
+  const { holdings: weighted, cashWeight } = withWeights(holdings, cash)
   const summaryProps = {
     totalEvaluation: summary.totalEvaluation, cash: summary.cash,
     profitLoss: summary.profitLoss, purchaseAmount: summary.purchaseAmount,
@@ -27,14 +28,14 @@ export function PensionHoldings({ summary, holdings, wide }: {
             <thead><tr>{holdingColumns(false).map((column) => <th key={column.id} scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 pr-4 ${column.align === 'left' ? 'text-left' : 'text-right'}`}>{column.label}</th>)}</tr></thead>
             <tbody className="divide-y divide-stone-100">
               {weighted.map((holding) => <IrpHoldingRow key={holding.code} holding={holding} showRiskToggle={false} />)}
-              <IrpCashRow cash={summary.cash} weight={cashWeight} showRiskColumn={false} />
+              <IrpCashRow cash={cash} weight={cashWeight} showRiskColumn={false} />
             </tbody>
           </table>
         </div>
       ) : (
         <ul className="flex flex-col gap-4">
           {weighted.map((holding) => <IrpHoldingCard key={holding.code} holding={holding} showRiskToggle={false} />)}
-          <IrpCashCard cash={summary.cash} weight={cashWeight} />
+          <IrpCashCard cash={cash} weight={cashWeight} />
         </ul>
       )}
     </section>

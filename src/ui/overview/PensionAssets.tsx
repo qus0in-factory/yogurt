@@ -5,8 +5,8 @@ import { typeScale } from '../styles/type-scale'
 import { WeightBar } from '../components/WeightBar'
 import { SectionHeading } from '../components/SectionHeading'
 
-export function PensionAssets({ rows }: { rows: AccountAssets['rows'] }) {
-  const { items, total } = classifyAssetRows(rows)
+export function PensionAssets({ rows, productCode = '22' }: { rows: AccountAssets['rows']; productCode?: string }) {
+  const { items, total } = classifyAssetRows(rows, productCode)
   return (
     <section aria-label={text.assetGroups}>
       <SectionHeading>{text.assetGroups}</SectionHeading>
