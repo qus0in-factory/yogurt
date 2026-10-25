@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { Hono, type Context } from 'hono'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { seoulDateTime } from '../../../src/domain/accounts/snapshot-month.ts'
 import { encryptText } from '../../../src/infra/accounts/account-crypto.ts'
 import { kisBalanceHandler } from '../../../src/infra/kis/kis-balance-handler.ts'
 import { createFakeKv } from '../fakes/kv.ts'
@@ -8,7 +9,7 @@ import { createFakeKv } from '../fakes/kv.ts'
 type Summary = { cash: number; cashSource: 'kis' | 'user' | null; cashAsOf: string | null; cashFallback: boolean; cashUnavailable: boolean }
 const KEY = 'cash-last:a1:29'
 const envKey = btoa(String.fromCharCode(...new Uint8Array(32).fill(9)))
-const cached = { cashWon: 5000, asOf: '2026-10-24 15:40', source: 'kis' }
+const cached = { cashWon: 5000, asOf: seoulDateTime(new Date(Date.now() - 86400000)), source: 'kis' }
 const holding = { pdno: '005930', prdt_name: '삼성전자', hldg_qty: '10', pchs_avg_pric: '70,000', pchs_amt: '700,000', prpr: '80,000', evlu_amt: '800,000', evlu_pfls_amt: '100,000', evlu_pfls_rt: '14.28' }
 const summary = { dnca_tot_amt: '1,900,000', scts_evlu_amt: '800,000', tot_evlu_amt: '2,700,000', nass_amt: '2,700,000', pchs_amt_smtl_amt: '700,000', evlu_amt_smtl_amt: '800,000', evlu_pfls_smtl_amt: '100,000', asst_icdc_amt: '100,000', asst_icdc_erng_rt: '3.84' }
 const bodyWith = (cash?: string) => {
@@ -34,7 +35,6 @@ const summaryOf = async (response: Response) => (await response.json() as { summ
 beforeEach(() => {
   vi.clearAllMocks(); cache = createFakeKv(); kisBody = bodyWith('1,900,000')
 })
-
 describe('kis 잔고 현금 대체', () => {
   it('KIS 현금이 있으면 응답에 쓰고 cash-last 캐시에 저장한다', async () => {
     const put = vi.spyOn(cache, 'put')
@@ -46,10 +46,10 @@ describe('kis 잔고 현금 대체', () => {
     const stored = JSON.parse((await cache.get(KEY))!)
     expect(stored).toMatchObject({ cashWon: 1900000, source: 'kis' })
     expect(stored.asOf).toBe(summary.cashAsOf)
-    expect(put.mock.calls.find(([key]) => key === KEY)).toHaveLength(2)
+    expect(put.mock.calls.find(([key]) => key === KEY)?.[2]).toEqual({ expirationTtl: 604800 })
   })
   it.each([
-    ['저장된 현금', JSON.stringify(cached), { cash: 5000, cashSource: 'kis', cashAsOf: '2026-10-24 15:40', cashFallback: true, cashUnavailable: false }],
+    ['저장된 현금', JSON.stringify(cached), { cash: 5000, cashSource: 'kis', cashAsOf: cached.asOf, cashFallback: true, cashUnavailable: false }],
     ['캐시 없음', null, { cash: 0, cashSource: null, cashAsOf: null, cashFallback: false, cashUnavailable: true }],
     ['깨진 캐시', '{"cashWon":', { cash: 0, cashSource: null, cashAsOf: null, cashFallback: false, cashUnavailable: true }],
   ] as Array<[string, string | null, Partial<Summary>]>)('dnca_tot_amt 누락 + %s이면 200으로 응답한다', async (_label, raw, expected) => {

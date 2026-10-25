@@ -15,6 +15,14 @@ export type CashResolution = {
 }
 
 const AS_OF = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/
+const WEEK_MS = 7 * 86400000
+
+export function isCashFresh(asOf: string, now: Date): boolean {
+  const saved = Date.parse(`${asOf.replace(' ', 'T')}:00+09:00`)
+  if (!Number.isFinite(saved)) return false
+  const age = now.getTime() - saved
+  return age >= 0 && age <= WEEK_MS
+}
 
 export function parseCachedCash(raw: string): CachedCash | null {
   try {

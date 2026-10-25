@@ -2,7 +2,9 @@ import type { Context } from 'hono'
 import { productCodeSchema } from '../../domain/accounts/products.ts'
 import { seoulDateTime } from '../../domain/accounts/snapshot-month.ts'
 import { resolveCash } from '../../domain/kis/cash-fallback.ts'
+import { activeHoldings, resolveHoldings } from '../../domain/kis/holdings-fallback.ts'
 import { readCashLast, writeCashLast } from './cash-last-store.ts'
+import { readHoldingsLast, writeHoldingsLast } from './holdings-last-store.ts'
 import { kisClientFromEnv } from './kis-context.ts'
 import { KisApiError, fetchStockBalance, type KisAccountClient } from './kis-stock-balance.ts'
 
@@ -16,13 +18,23 @@ export function kisBalanceHandler(c: AppContext, fetchFn: typeof fetch = fetch):
     const accountId = c.req.param('id') as string
     const observed = balance.summary.cash
     const current = Number.isSafeInteger(observed) && observed > 0
-    const cached = current ? null : await readCashLast(cache, accountId, code)
-    const asOf = seoulDateTime(new Date())
-    const resolved = resolveCash(observed, cached, asOf)
+    const now = new Date()
+    const asOf = seoulDateTime(now)
+    const cachedCash = current ? null : await readCashLast(cache, accountId, code, now)
+    const resolved = resolveCash(observed, cachedCash, asOf)
     if (current) {
       await writeCashLast(cache, accountId, code, { cashWon: observed, asOf, source: 'kis' })
     }
-    return { ...balance, summary: { ...balance.summary, ...resolved } }
+    const stockValue = Math.max(balance.summary.stockEvaluation, balance.summary.evaluationAmount)
+    const missing = activeHoldings(balance.holdings).length === 0 && stockValue > 0
+    const cachedHoldings = missing ? await readHoldingsLast(cache, accountId, code, now) : null
+    const resolvedHoldings = resolveHoldings(balance.holdings, stockValue, cachedHoldings, asOf)
+    if (resolvedHoldings.holdingsSource === 'kis' && resolvedHoldings.holdings.length > 0 && !resolvedHoldings.holdingsPartialWarning && stockValue > 0) {
+      await writeHoldingsLast(cache, accountId, code, {
+        holdings: resolvedHoldings.holdings, stockEvaluationWon: stockValue, asOf,
+      })
+    }
+    return { ...balance, ...resolvedHoldings, summary: { ...balance.summary, ...resolved } }
   })
 }
 
