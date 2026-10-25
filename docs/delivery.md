@@ -27,7 +27,7 @@ Workers & Pages → Create application → Import a repository에서 GitHub와 `
 
 배포 완료 후 Worker의 workers.dev URL과 `/health` 응답을 확인한다. dev에서는 environment=dev, 운영에서는 environment=production이어야 한다. 이 초기 진입점은 배포 연결 확인용이며 대시보드는 후속 이슈에서 구현한다.
 
-고정 dev 미리보기를 사용하며 PR별 버전 URL은 이번 구성에 포함하지 않는다. 향후 D1·비밀 값을 도입할 때도 두 Worker에 별도로 연결한다.
+고정 dev 미리보기를 사용하며 PR별 버전 URL은 이번 구성에 포함하지 않는다. D1·KV·비밀 값은 두 Worker에 각각 별도로 연결한다.
 
 ## 로컬 검증
 
@@ -48,7 +48,7 @@ pnpm-workspace.yaml에서 esbuild·workerd의 설치 스크립트를 허용한�
 
 애플리케이션 semver의 단일 출처는 `package.json`의 `version`이다. 마일스톤 시작 시 `pnpm run version:minor`, 작은 수정은 `pnpm run version:patch`로 버전을 올린다. 두 명령은 파일의 버전만 변경하며 Git 태그나 커밋은 만들지 않는다.
 
-main 병합 시 조정자가 해당 버전의 `vX.Y.Z` 태그를 만든다. 배포 후 `/health` 또는 `/api/health` 응답의 `version`으로 실제 배포 버전을 확인한다.
+릴리스는 `package.json` 버전 갱신 → dev push → main 대상 PR 생성 → 검증 후 merge commit 순서로 진행한다. 병합 후 조정자가 `python3 .agents/skills/yogurt-release/scripts/app/release.py --health-url https://yogurt.qus0in.dev/health`를 실행해 `vX.Y.Z` 태그를 만들고 push하며, `/health` 또는 `/api/health`의 `version`이 `package.json`과 일치할 때까지 확인한다(10초 간격 최대 30회). 태그가 이미 있으면 스크립트는 중단한다.
 
 Vite는 같은 버전을 `import.meta.env.VITE_APP_VERSION`에 주입한다. 이 값은 쿼리 캐시 buster로 사용되므로 버전 변경 후 기존 IndexedDB 쿼리 캐시는 폐기된다.
 
@@ -84,6 +84,16 @@ pnpm run secret:setup -- main
   - 운영(main) 환경: `pnpm run secret:main -- LOGIN_PASSWORD`, `pnpm run secret:main -- SESSION_SECRET`
   - 각 명령을 실행한 후 터미널 안내에 따라 실제 비밀 값을 입력한다.
 
+## Cloudflare 바인딩
+
+| 바인딩 | 종류 | dev | production | 용도 |
+| --- | --- | --- | --- | --- |
+| `DB` | D1 | `yogurt-dev` | `yogurt` | 계좌 저장소 |
+| `SESSIONS` | KV | `yogurt-dev-sessions` | `yogurt-sessions` | 세션 저장(7일 TTL) |
+| `CACHE` | KV | `yogurt-dev-cache` | `yogurt-cache` | KIS 접근토큰 캐시 |
+
+각 리소스의 id는 `infra/wrangler.jsonc`를 참조한다. `SESSIONS`는 로그인 세션을 7일(604800초) TTL로 저장하고, `CACHE`는 계좌별 KIS 접근토큰을 캐시한다.
+
 ## 계좌 저장소(D1)와 암호화 키
 
 - 계좌 데이터는 D1에 저장한다. `infra/wrangler.jsonc`에서 `env.dev`는 D1 데이터베이스 `yogurt-dev`, `env.production`은 `yogurt`에 binding `DB`로 연결하며, 마이그레이션 디렉터리는 `migrations`(저장소 경로 `infra/migrations`)다. 마이그레이션 SQL 파일은 `infra/migrations`에 번호 순으로 둔다.
@@ -94,6 +104,7 @@ pnpm run secret:setup -- main
 | `pnpm run db:migrate:dev` | dev(`yogurt-dev`) 원격 D1에 마이그레이션 적용 |
 | `pnpm run db:migrate:main` | 운영(`yogurt`) 원격 D1에 마이그레이션 적용 |
 
+- 운영 D1 마이그레이션(`pnpm run db:migrate:main`)은 main 병합 전에 사용자가 직접 실행하며, 조정자는 병합 전에 실행 여부를 확인한다.
 - 계좌 암호화 키 `ACCOUNT_ENCRYPTION_KEY`는 AES-256용 32바이트 무작위 값의 base64 문자열이며, Worker secret으로 관리한다. 실제 키 값은 코드나 문서에 쓰지 않는다.
 - 키 생성은 `pnpm run keygen:account`(stdout에 키 한 줄, stderr에 백업 안내). 로컬 개발은 `infra/.dev.vars`에 `ACCOUNT_ENCRYPTION_KEY`로 둔다(`infra/.dev.vars`는 `.gitignore`로 제외됨). 원격 환경에서는 Worker secret으로 등록하라는 프롬프트가 표시되며, 이 절 안내는 등록 실행 자체를 대신하지 않는다.
 - 이 키를 분실하면 저장된 계좌 키를 복구할 수 없다. 사용자는 이 분실 리스크를 감수하기로 하였으며, 키를 재발급하면 기존 계좌 키는 다시 등록해야 한다.
