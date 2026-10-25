@@ -10,4 +10,5 @@ export const commonText = {
   retry: '다시 시도',
   loggedOut: '로그아웃했습니다',
   tryAgainLater: '잠시 후 다시 시도하세요',
+  objectParticle: { consonant: '을', vowel: '를' },
 } as const

@@ -1,3 +1,5 @@
+import { commonText } from '../glossary/common'
+
 export function withObjectParticle(word: string): string {
   if (!word) return ''
 
@@ -7,5 +9,6 @@ export function withObjectParticle(word: string): string {
     ? (code - 0xAC00) % 28 !== 0
     : /^[LMNR013678]$/i.test(last)
 
-  return `${word}${hasFinal ? '을' : '를'}`
+  const particle = hasFinal ? commonText.objectParticle.consonant : commonText.objectParticle.vowel
+  return `${word}${particle}`
 }
