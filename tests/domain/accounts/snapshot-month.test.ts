@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import {
-  isaExpiryMonth, seoulYearMonth, shouldRecordSnapshotMonth,
+  daysBefore, isaExpiryMonth, previousMonthEnd, seoulYearMonth, shouldRecordSnapshotMonth,
 } from '../../../src/domain/accounts/snapshot-month'
 
 it('서울 시간 자정 경계에서 연월이 바뀐다', () => {
@@ -24,4 +24,11 @@ it('윤일 시작도 달력 기준 만기 월을 쓴다', () => {
 it('시작일이 없으면 기존처럼 기록한다', () => {
   expect(isaExpiryMonth(null)).toBeNull()
   expect(shouldRecordSnapshotMonth('2027-03', null)).toBe(true)
+})
+
+it('서울 월 경계에서 직전 월 마지막 날을 계산한다', () => {
+  expect(previousMonthEnd(new Date('2025-12-31T14:59:00.000Z'))).toBe('2025-11-30')
+  expect(previousMonthEnd(new Date('2025-12-31T15:00:00.000Z'))).toBe('2025-12-31')
+  expect(previousMonthEnd(new Date('2028-03-15T00:00:00.000Z'))).toBe('2028-02-29')
+  expect(daysBefore('2026-01-01', 1)).toBe('2025-12-31')
 })
