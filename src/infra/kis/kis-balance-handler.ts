@@ -1,12 +1,29 @@
 import type { Context } from 'hono'
 import { productCodeSchema } from '../../domain/accounts/products.ts'
+import { seoulDateTime } from '../../domain/accounts/snapshot-month.ts'
+import { resolveCash } from '../../domain/kis/cash-fallback.ts'
+import { readCashLast, writeCashLast } from './cash-last-store.ts'
 import { kisClientFromEnv } from './kis-context.ts'
 import { KisApiError, fetchStockBalance, type KisAccountClient } from './kis-stock-balance.ts'
 
 type AppContext = Context<{ Bindings: Env }>
 
 export function kisBalanceHandler(c: AppContext, fetchFn: typeof fetch = fetch): Promise<Response> {
-  return kisQueryHandler(c, fetchFn, fetchStockBalance)
+  return kisQueryHandler(c, fetchFn, async (account, code) => {
+    const balance = await fetchStockBalance(account, code)
+    const cache = c.env.CACHE
+    if (!cache) return balance
+    const accountId = c.req.param('id') as string
+    const observed = balance.summary.cash
+    const current = Number.isSafeInteger(observed) && observed > 0
+    const cached = current ? null : await readCashLast(cache, accountId, code)
+    const asOf = seoulDateTime(new Date())
+    const resolved = resolveCash(observed, cached, asOf)
+    if (current) {
+      await writeCashLast(cache, accountId, code, { cashWon: observed, asOf, source: 'kis' })
+    }
+    return { ...balance, summary: { ...balance.summary, ...resolved } }
+  })
 }
 
 export async function kisQueryHandler<T extends object>(
