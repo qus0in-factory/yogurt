@@ -48,6 +48,7 @@ export function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => void }) {
                 label={authText.passwordLabel}
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 value={field.value}
                 onChange={field.onChange}
                 error={

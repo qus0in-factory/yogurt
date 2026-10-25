@@ -1,4 +1,5 @@
 export const layoutText = {
+  version: (version: string) => `v${version}`,
   menu: '메뉴',
   closeMenu: '메뉴 닫기',
   mainMenu: '주 메뉴',

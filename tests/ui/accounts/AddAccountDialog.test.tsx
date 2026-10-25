@@ -29,15 +29,15 @@ describe('AddAccountDialog', () => {
     const names = screen.getAllByLabelText(/소유자|별칭|계좌번호|Access Key|Secret Key/).map((el) => el.getAttribute('name'))
     expect(names).toEqual(['owner', 'alias', 'accountNumber', 'accessKey', 'secretKey'])
   })
-
   it('Secret Key는 password 입력이고 빈 값이면 저장하지 않는다', async () => {
     renderDialog()
     expect(screen.getByLabelText('Secret Key')).toHaveAttribute('type', 'password')
+    expect(screen.getByLabelText('Access Key')).toHaveAttribute('autocomplete', 'off')
+    expect(screen.getByLabelText('Secret Key')).toHaveAttribute('autocomplete', 'off')
     fireEvent.click(screen.getByRole('button', { name: '저장' }))
     await waitFor(() => expect(createAccount).not.toHaveBeenCalled())
     expect(await screen.findByText('소유자를 입력하세요')).toBeInTheDocument()
   })
-
   it('409는 계좌번호 필드 오류로 표시하고 toast를 띄우지 않는다', async () => {
     createAccount.mockRejectedValueOnce(Object.assign(new Error('dup'), { response: { status: 409 } }))
     renderDialog()

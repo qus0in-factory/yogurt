@@ -27,6 +27,7 @@ describe('LoginForm', () => {
     expect(screen.getByRole('heading', { name: '로그인' })).toHaveClass(...typeScale.pageTitle.split(' '))
     const input = screen.getByLabelText('비밀번호')
     expect(input).toHaveAttribute('type', 'password')
+    expect(input).toHaveAttribute('autocomplete', 'current-password')
   })
   it('빈 값이면 클라이언트 오류를 표시하고 요청하지 않는다', async () => {
     renderForm()
