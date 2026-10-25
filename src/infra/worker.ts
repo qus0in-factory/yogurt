@@ -10,7 +10,9 @@ import { productCodeSchema } from '../domain/accounts/products.ts'
 import { createAccount, listAccounts, updateAccount, deleteAccount, setAccountProduct } from './accounts/accounts.ts'
 import { kisTokenHandler } from './kis/kis-token-handler.ts'
 import { kisBalanceHandler } from './kis/kis-balance-handler.ts'
+import { kisAssetsHandler } from './kis/kis-assets-handler.ts'
 import { kisStatusStream } from './kis/kis-status-stream.ts'
+import { getRiskClassesHandler, setRiskClassHandler } from './holdings/risk-class-handlers.ts'
 
 const app = new Hono<{ Bindings: Env }>()
 
@@ -55,6 +57,9 @@ app.put('/api/accounts/:id/products/:code', zValidator('json', accountProductSch
 app.post('/api/accounts/:id/kis-token', (c) => kisTokenHandler(c))
 app.get('/api/kis/status', (c) => kisStatusStream(c))
 app.get('/api/accounts/:id/products/:code/balance', (c) => kisBalanceHandler(c))
+app.get('/api/accounts/:id/products/:code/assets', (c) => kisAssetsHandler(c))
+app.get('/api/accounts/:id/products/:code/risk-classes', getRiskClassesHandler)
+app.put('/api/accounts/:id/products/:code/risk-classes/:stockCode', setRiskClassHandler)
 app.all('/api/*', (c) => c.notFound())
 app.onError((error, c) => {
   if (error instanceof HTTPException && error.status === 400) return c.json({ error: 'invalid request' }, 400)

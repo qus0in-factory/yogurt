@@ -35,8 +35,12 @@ export function createAccountRepository(db: D1Database) {
       return account
     },
     async remove(id: string): Promise<boolean> {
-      await db.prepare('DELETE FROM account_products WHERE account_id = ?').bind(id).run()
-      const result = await db.prepare('DELETE FROM accounts WHERE id = ?').bind(id).run()
+      const results = await db.batch([
+        db.prepare('DELETE FROM account_products WHERE account_id = ?').bind(id),
+        db.prepare('DELETE FROM holding_risk_classes WHERE account_id = ?').bind(id),
+        db.prepare('DELETE FROM accounts WHERE id = ?').bind(id),
+      ])
+      const result = results[2]
       return result.meta.changes > 0
     },
     async update(id: string, input: AccountUpdate): Promise<Account | null> {
