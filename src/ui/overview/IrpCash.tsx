@@ -23,8 +23,8 @@ export function IrpCashCard({ cash, weight }: { cash: number; weight: number }) 
     <li className="rounded-lg border border-stone-200 border-t-2 bg-stone-50 p-4">
       <p className={`font-medium ${typeScale.body}`}>{text.cashRow}</p>
       <dl className="mt-3 grid grid-cols-2 gap-4">
-        <div><dt className={typeScale.label}>{text.evaluation}</dt><dd className={`text-right ${typeScale.number}`}>{text.won(cash)}</dd></div>
-        <div><dt className={typeScale.label}>{text.weight}</dt><dd><WeightBar weight={weight} /></dd></div>
+        <div className="min-w-0"><dt className={typeScale.label}>{text.evaluation}</dt><dd className={`text-right ${typeScale.number}`}>{text.won(cash)}</dd></div>
+        <div className="min-w-0"><dt className={typeScale.label}>{text.weight}</dt><dd className="min-w-0"><WeightBar weight={weight} /></dd></div>
       </dl>
     </li>
   )

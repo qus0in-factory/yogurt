@@ -10,33 +10,33 @@ export function IrpHoldingCard({ holding, riskClass = 'risk', onToggle = () => {
 }) {
   return (
     <li className="rounded-lg border border-stone-200 p-4">
-      <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-2">
           {holding.code ? <span className="font-mono text-xs text-stone-500">{holding.code}</span> : null}
-          <span className={`font-medium ${typeScale.body}`}>{holding.name}</span>
+          <span className={`min-w-0 break-words font-medium ${typeScale.body}`}>{holding.name}</span>
         </span>
         {showRiskToggle && holding.code ? <RiskToggle riskClass={riskClass} onToggle={onToggle} disabled={disabled} /> : null}
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-4">
-        <div>
+        <div className="min-w-0">
           <dt className={typeScale.label}>{text.quantity}</dt>
           <dd className={`text-right ${typeScale.number}`}>{text.number(holding.quantity)}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className={typeScale.label}>{text.evaluation}</dt>
           <dd className={`text-right ${typeScale.number}`}>{text.won(holding.evaluationAmount)}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className={typeScale.label}>{text.profitLoss}</dt>
           <dd className={`text-right ${typeScale.number}`}><span className={`tabular-nums ${text.pnlColor(holding.profitLoss)}`}>{text.signedWon(holding.profitLoss)}</span></dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className={typeScale.label}>{text.profitRate}</dt>
           <dd className={`text-right ${typeScale.number}`}><span className={`tabular-nums ${text.pnlColor(holding.profitLossRate)}`}>{text.signedPercent(holding.profitLossRate)}</span></dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className={typeScale.label}>{text.weight}</dt>
-          <dd className={`text-right ${typeScale.number}`}><WeightBar weight={holding.weight} /></dd>
+          <dd className={`min-w-0 text-right ${typeScale.number}`}><WeightBar weight={holding.weight} /></dd>
         </div>
       </dl>
     </li>
