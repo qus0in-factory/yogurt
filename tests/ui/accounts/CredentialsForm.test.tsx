@@ -30,6 +30,8 @@ it('비밀번호 입력을 새 키로 받고 성공 시 닫기·toast·KIS 쿼�
   const { invalidate, onClose } = show()
   expect(screen.getByLabelText('Access Key')).toHaveValue('')
   expect(screen.getByLabelText('Secret Key')).toHaveAttribute('type', 'password')
+  expect(screen.getByLabelText('Access Key')).toHaveAttribute('autocomplete', 'new-password')
+  expect(screen.getByLabelText('Secret Key')).toHaveAttribute('autocomplete', 'new-password')
   fireEvent.change(screen.getByLabelText('Access Key'), { target: { value: 'AK' } })
   fireEvent.change(screen.getByLabelText('Secret Key'), { target: { value: 'SK' } })
   fireEvent.click(screen.getByRole('button', { name: '교체' }))

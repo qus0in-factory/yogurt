@@ -1,3 +1,4 @@
+import { AppVersion } from './AppVersion'
 import { useRef } from 'react'
 import { X } from 'lucide-react'
 import { useFocusTrap } from '../lib/useFocusTrap'
@@ -59,6 +60,7 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
             </Button>
           })}
         </nav>
+        <AppVersion />
       </div>
     </div>
   )

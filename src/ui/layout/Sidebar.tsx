@@ -1,3 +1,4 @@
+import { AppVersion } from './AppVersion'
 import { Button } from '../components/Button'
 import { cn } from '../lib/cn'
 import { MENU_ITEMS, type ScreenId } from './menu'
@@ -39,6 +40,7 @@ export function Sidebar(props: SidebarProps) {
           </Button>
         })}
       </nav>
+      <AppVersion />
     </aside>
   )
 }

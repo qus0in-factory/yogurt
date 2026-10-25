@@ -67,8 +67,8 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
         <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
         {field(accountsText.alias, 'alias', { maxLength: 8 })}
         {field(accountsText.accountNumber, 'accountNumber', { maxLength: 8, inputMode: 'numeric', pattern: '[0-9]{8}', placeholder: accountsText.accountNumberExample }, (value) => value.replace(/\D/g, ''))}
-        {field(accountsText.accessKey, 'accessKey')}
-        {field(accountsText.secretKey, 'secretKey', { type: 'password' })}
+        {field(accountsText.accessKey, 'accessKey', { autoComplete: 'off' })}
+        {field(accountsText.secretKey, 'secretKey', { type: 'password', autoComplete: 'off' })}
         <div className="sticky bottom-0 flex justify-end gap-2 bg-white">
           <Button type="button" variant="ghost" onClick={onClose}>{accountsText.cancel}</Button>
           <Button type="submit" disabled={createAccount.isPending}>{accountsText.save}</Button>
