@@ -1,6 +1,6 @@
 import { TZDate } from '@date-fns/tz'
 import { format } from 'date-fns'
-import { CircleAlert, Link2, LoaderCircle, Pencil } from 'lucide-react'
+import { Check, LoaderCircle, Pencil, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ProductToggles } from './ProductToggles'
 import { useKisToken } from './useKisToken'
@@ -10,13 +10,6 @@ import { Button } from '../components/Button'
 import { accountsText } from '../glossary/accounts'
 
 type AccountCardProps = { account: Account; onSelect: () => void; onEdit: () => void; kisStatus?: KisStatusInfo }
-
-const badgeText = (kisStatus: KisStatusInfo | undefined) => {
-  if (!kisStatus) return accountsText.kisChecking
-  if (kisStatus.status === 'error') return accountsText.kisError
-  if (kisStatus.expiresAt === undefined) return accountsText.kisConnected
-  return accountsText.kisConnectedExpiry(format(new TZDate(kisStatus.expiresAt, 'Asia/Seoul'), 'HH:mm'))
-}
 
 export function AccountCard({ account, onSelect, onEdit, kisStatus }: AccountCardProps) {
   const kisToken = useKisToken()
@@ -29,8 +22,17 @@ export function AccountCard({ account, onSelect, onEdit, kisStatus }: AccountCar
       onError: () => toast.error(accountsText.kisFailed),
     })
   }
-  const Icon = !kisStatus ? LoaderCircle : kisStatus.status === 'error' ? CircleAlert : Link2
-  const className = kisStatus?.status === 'error' ? 'text-red-600' : 'text-stone-600'
+  const isChecking = !kisStatus || kisToken.isPending
+  const isError = kisStatus?.status === 'error'
+  const Icon = isChecking ? LoaderCircle : isError ? X : Check
+  const iconClass = isChecking ? 'text-stone-400' : isError ? 'text-red-600' : 'text-green-600'
+  const ariaLabel = isChecking
+    ? accountsText.kisStatusChecking
+    : isError
+      ? accountsText.kisStatusFailed
+      : kisStatus?.expiresAt === undefined
+        ? accountsText.kisConnectedExpiry('--:--')
+        : accountsText.kisConnectedExpiry(format(new TZDate(kisStatus.expiresAt, 'Asia/Seoul'), 'HH:mm'))
   return (
     <div
       role="group"
@@ -41,33 +43,38 @@ export function AccountCard({ account, onSelect, onEdit, kisStatus }: AccountCar
       onFocus={onSelect}
       className="relative w-full shrink-0 rounded-lg border border-primary-200 bg-white p-6 shadow-sm"
     >
-      <div className="flex flex-col gap-2 pr-10">
+      <div className="flex flex-col gap-2 pr-20">
         <p className="text-sm text-stone-600">{account.owner}</p>
         <p className="text-xl font-semibold text-stone-900">{account.alias}</p>
         <p className="text-sm text-stone-600">{account.accountNumber}</p>
-        <span data-testid="kis-status" role="status" className={`flex items-center gap-2 text-sm ${className}`}>
-          <Icon aria-hidden="true" className="h-4 w-4" />
-          {badgeText(kisStatus)}
-        </span>
         <ProductToggles account={account} />
-        <Button size="sm" variant="outline" className="w-full gap-2" disabled={kisToken.isPending}
-          onClick={(event) => { event.stopPropagation(); checkKis() }}>
-          <Link2 aria-hidden="true" className="h-4 w-4" />
-          {accountsText.kisCheck}
+      </div>
+      <div className="absolute right-2 top-2 flex items-center gap-2">
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={ariaLabel}
+          title={ariaLabel}
+          disabled={kisToken.isPending}
+          onClick={(event) => {
+            event.stopPropagation()
+            checkKis()
+          }}
+        >
+          <Icon aria-hidden="true" className={`h-4 w-4 ${iconClass} ${isChecking ? 'animate-spin' : ''}`} />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={accountsText.editLabel(account.alias)}
+          onClick={(event) => {
+            event.stopPropagation()
+            onEdit()
+          }}
+        >
+          <Pencil aria-hidden="true" className="h-4 w-4" />
         </Button>
       </div>
-      <Button
-        size="icon"
-        variant="ghost"
-        aria-label={accountsText.editLabel(account.alias)}
-        className="absolute right-2 top-2"
-        onClick={(event) => {
-          event.stopPropagation()
-          onEdit()
-        }}
-      >
-        <Pencil aria-hidden="true" className="h-4 w-4" />
-      </Button>
     </div>
   )
 }

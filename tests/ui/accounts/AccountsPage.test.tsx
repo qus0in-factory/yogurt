@@ -35,7 +35,7 @@ describe('AccountsPage', () => {
     expect(screen.getByText('김철수')).toBeInTheDocument()
     expect(screen.getByText('김철수').compareDocumentPosition(screen.getByText('주계좌')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.getByText('12345678')).toBeInTheDocument()
-    expect(screen.getByText('연결됨 · 만료 12:05')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '연결됨 · 만료 12:05' })).toBeInTheDocument()
     expect(screen.getByLabelText('계좌 목록')).toBeInTheDocument()
     const cards = screen.getAllByRole('group')
     expect(cards).toHaveLength(1)

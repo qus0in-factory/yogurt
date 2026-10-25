@@ -69,7 +69,10 @@ class HealthIoTest(unittest.TestCase):
         opened = []
         opener = lambda url, timeout=None: opened.append((url, timeout)) or Response()
         self.assertEqual(ops.fetch_health('https://x/health', opener), {'version': '1.2.3'})
-        self.assertEqual(opened, [('https://x/health', 10)])
+        request, timeout = opened[0]
+        self.assertEqual((request.full_url, timeout), ('https://x/health', 10))
+        self.assertEqual(request.get_header('User-agent'), 'yogurt-release/1 (+https://github.com/usagi-ai-kr/yogurt)')
+        self.assertEqual(request.get_header('Cache-control'), 'no-cache')
 
 
 if __name__ == '__main__':

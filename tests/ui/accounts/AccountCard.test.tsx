@@ -1,9 +1,12 @@
 import '@testing-library/jest-dom/vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { KisStatusInfo } from '../../../src/ui/accounts/useKisStatus'
 import { AccountCard } from '../../../src/ui/accounts/AccountCard'
+import * as kisToken from '../../../src/ui/accounts/useKisToken'
+
+vi.mock('../../../src/ui/accounts/useKisToken', () => ({ useKisToken: vi.fn() }))
 
 const account = { id: 'a1', alias: '주계좌', owner: '김철수', accountNumber: '12345678', products: ['29'], createdAt: '2026-01-01T00:00:00.000Z' }
 
@@ -17,43 +20,48 @@ const renderCard = (kisStatus?: KisStatusInfo) => {
 beforeEach(() => vi.clearAllMocks())
 afterEach(cleanup)
 
-describe('계좌 카드 KIS 상태 배지', () => {
-  it('기존 KIS 연결 확인 버튼을 유지한다', () => {
+describe('AccountCard KIS 상태 아이콘', () => {
+  it('확인 중에는 스피너 아이콘과 연결 확인 중 레이블을 표시한다', () => {
+    vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: false, mutate: vi.fn() } as never)
     renderCard()
-    expect(screen.getByRole('button', { name: 'KIS 연결 확인' })).toHaveClass('gap-2')
+    const button = screen.getByRole('button', { name: '연결 확인 중' })
+    expect(button).toHaveAttribute('title', '연결 확인 중')
+    expect(button.querySelector('svg')).toHaveClass('animate-spin')
   })
 
-  it('상태가 없으면 확인 중 배지를 표시한다', () => {
-    renderCard()
-    expect(screen.getByText('확인 중')).toBeInTheDocument()
-  })
-
-  it('연결됨이면 서울 시간 만료를 아이콘과 표시한다', () => {
+  it('연결됨이면 Check 아이콘과 만료 시각 레이블을 표시한다', () => {
+    vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: false, mutate: vi.fn() } as never)
     renderCard({ status: 'connected', expiresAt: Date.UTC(2026, 0, 1, 3, 5) })
-    expect(screen.getByText('연결됨 · 만료 12:05')).toBeInTheDocument()
+    const button = screen.getByRole('button', { name: '연결됨 · 만료 12:05' })
+    expect(button).toHaveAttribute('title', '연결됨 · 만료 12:05')
   })
 
-  it('만료 정보가 없는 연결은 시각 없이 표시한다', () => {
-    renderCard({ status: 'connected' })
-    expect(screen.getByText('연결됨')).toBeInTheDocument()
-  })
-
-  it('연결 실패면 경고를 표시한다', () => {
+  it('연결 실패면 X 아이콘과 다시 확인 레이블을 표시한다', () => {
+    vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: false, mutate: vi.fn() } as never)
     renderCard({ status: 'error' })
-    expect(screen.getByText('연결 실패')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '연결 실패 · 다시 확인' })).toBeInTheDocument()
   })
 
-  it('배지는 aria-hidden 아이콘과 텍스트를 gap-2로 표시한다', () => {
+  it('클릭하면 KIS 토큰을 재확인한다', () => {
+    const mutate = vi.fn()
+    vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: false, mutate } as never)
+    renderCard()
+    fireEvent.click(screen.getByRole('button', { name: '연결 확인 중' }))
+    expect(mutate).toHaveBeenCalledWith(account.id, expect.any(Object))
+  })
+
+  it('진행 중에는 disabled이고 스피너를 표시한다', () => {
+    vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: true, mutate: vi.fn() } as never)
     renderCard({ status: 'connected', expiresAt: Date.UTC(2026, 0, 1, 3, 5) })
-    const badge = screen.getByTestId('kis-status')
-    expect(badge).toHaveClass('gap-2')
-    expect(badge.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
-    expect(badge).not.toHaveTextContent('accessKey')
+    const button = screen.getByRole('button', { name: '연결 확인 중' })
+    expect(button).toBeDisabled()
+    expect(button.querySelector('svg')).toHaveClass('animate-spin')
   })
 })
 
 describe('계좌 카드 표시', () => {
   it('계좌번호를 표시한다', () => {
+    vi.mocked(kisToken.useKisToken).mockReturnValue({ isPending: false, mutate: vi.fn() } as never)
     renderCard()
     expect(screen.getByText('12345678')).toBeInTheDocument()
   })
