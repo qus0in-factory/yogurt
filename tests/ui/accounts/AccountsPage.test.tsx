@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as client from '../../../src/app/accounts/client'
 import { AccountsPage } from '../../../src/ui/accounts/AccountsPage'
+import { spacing, typeScale } from '../../../src/ui/styles/type-scale'
 
 vi.mock('../../../src/app/accounts/client', () => ({ listAccounts: vi.fn(), createAccount: vi.fn(), updateAccount: vi.fn(), deleteAccount: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
@@ -31,6 +32,8 @@ describe('AccountsPage', () => {
   it('계좌 목록에 카드로 별칭·소유자·계좌번호와 수정 버튼을 표시한다', async () => {
     listAccounts.mockResolvedValueOnce([account])
     renderPage()
+    expect(await screen.findByRole('heading', { name: '계좌' })).toHaveClass(...typeScale.pageTitle.split(' '))
+    expect(screen.getByRole('region', { name: '계좌' })).toHaveClass(...spacing.section.split(' '))
     expect(await screen.findByText('주계좌')).toBeInTheDocument()
     expect(screen.getByText('김철수')).toBeInTheDocument()
     expect(screen.getByText('김철수').compareDocumentPosition(screen.getByText('주계좌')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()

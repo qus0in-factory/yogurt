@@ -1,4 +1,7 @@
 import { overviewText as text } from '../glossary/overview'
+import type { RiskClass } from '../../app/kis/risk-class-client'
+import { typeScale } from '../styles/type-scale'
+import { RiskToggle } from './RiskToggle'
 
 export type IrpHolding = {
   code: string; name: string; quantity: number; averagePrice: number; purchaseAmount: number
@@ -16,11 +19,13 @@ export function IrpWeightBar({ weight }: { weight: number }) {
   )
 }
 
-export function IrpHoldingRow({ holding }: { holding: IrpHolding }) {
-  const cell = 'py-3 pr-4 text-right tabular-nums last:pr-0'
+export function IrpHoldingRow({ holding, riskClass = 'risk', onToggle = () => {}, disabled = false, showRiskToggle = true }: {
+  holding: IrpHolding; riskClass?: RiskClass; onToggle?: () => void; disabled?: boolean; showRiskToggle?: boolean
+}) {
+  const cell = `py-3 pr-4 text-right last:pr-0 ${typeScale.number}`
   return (
     <tr>
-      <th scope="row" className="whitespace-nowrap py-3 pr-4 text-left">
+      <th scope="row" className={`whitespace-nowrap py-3 pr-4 text-left ${typeScale.body}`}>
         <span className="flex items-center gap-2">
           {holding.code ? <span className="font-mono text-xs text-stone-500">{holding.code}</span> : null}
           <span className="font-medium">{holding.name}</span>
@@ -28,9 +33,10 @@ export function IrpHoldingRow({ holding }: { holding: IrpHolding }) {
       </th>
       <td className={cell}>{text.number(holding.quantity)}</td>
       <td className={cell}>{text.won(holding.evaluationAmount)}</td>
-      <td className={`${cell} ${text.pnlColor(holding.profitLoss)}`}>{text.signedWon(holding.profitLoss)}</td>
-      <td className={`${cell} ${text.pnlColor(holding.profitLossRate)}`}>{text.signedPercent(holding.profitLossRate)}</td>
+      <td className={cell}><span className={text.pnlColor(holding.profitLoss)}>{text.signedWon(holding.profitLoss)}</span></td>
+      <td className={cell}><span className={text.pnlColor(holding.profitLossRate)}>{text.signedPercent(holding.profitLossRate)}</span></td>
       <td className={cell}><IrpWeightBar weight={holding.weight} /></td>
+      <td className={cell}>{showRiskToggle && holding.code ? <RiskToggle riskClass={riskClass} onToggle={onToggle} disabled={disabled} /> : null}</td>
     </tr>
   )
 }

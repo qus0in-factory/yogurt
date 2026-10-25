@@ -62,7 +62,7 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
 
   return (
     <Dialog open={open} onClose={onClose} title={accountsText.addTitle}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {field(accountsText.owner, 'owner', { maxLength: 8, list: ownerListId, autoComplete: 'off' })}
         <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
         {field(accountsText.alias, 'alias', { maxLength: 8 })}

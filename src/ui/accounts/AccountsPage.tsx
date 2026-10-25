@@ -11,6 +11,7 @@ import { AccountSearch } from './AccountSearch'
 import { useAccounts } from './useAccounts'
 import { useKisStatus } from './useKisStatus'
 import { accountsText } from '../glossary/accounts'
+import { spacing, typeScale } from '../styles/type-scale'
 
 const QUERY_KEY = 'yogurt:accounts-query'
 
@@ -36,11 +37,11 @@ export function AccountsPage() {
   }
 
   return (
-    <section>
+    <section aria-labelledby="accounts-title" className={spacing.section}>
       <div className="flex items-center justify-between">
         <div className="flex items-baseline gap-2">
-          <h1 className="text-2xl font-semibold text-stone-900">{accountsText.title}</h1>
-          {!isPending && !isError && <span className="text-sm text-stone-600">{accountsText.total(accounts.length)}</span>}
+          <h1 id="accounts-title" className={typeScale.pageTitle}>{accountsText.title}</h1>
+          {!isPending && !isError && <span className={typeScale.number}>{accountsText.total(accounts.length)}</span>}
         </div>
         <Button size="icon" aria-label={accountsText.add} onClick={() => setAddOpen(true)}>
           <Plus aria-hidden="true" className="h-5 w-5" />
@@ -48,14 +49,14 @@ export function AccountsPage() {
       </div>
       {!isPending && !isError && <AccountSearch query={query} total={accounts.length} matched={filtered.length} onChange={search} />}
       {isPending ? (
-        <p className="mt-4 text-stone-600">{accountsText.loading}</p>
+        <p className={typeScale.body}>{accountsText.loading}</p>
       ) : isError ? (
-        <div className="mt-4 flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <p role="alert" className="text-rose-600">{accountsText.loadError}</p>
           <Button variant="outline" size="sm" onClick={() => void refetch()}>{accountsText.retry}</Button>
         </div>
       ) : filtered.length === 0 ? (
-        <p className="mt-4 text-stone-600">{query.replace(/\s/g, '') ? accountsText.noResults : accountsText.empty}</p>
+        <p className={typeScale.body}>{query.replace(/\s/g, '') ? accountsText.noResults : accountsText.empty}</p>
       ) : <AccountCarousel key={query} accounts={filtered} onEdit={setEditing} kisStatuses={kisStatuses} />}
       <AddAccountDialog open={addOpen} onClose={() => setAddOpen(false)} />
       {editing ? <EditAccountDialog account={editing} onClose={() => setEditing(null)} /> : null}

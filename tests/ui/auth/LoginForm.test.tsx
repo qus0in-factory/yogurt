@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as authClient from '../../../src/app/auth/client'
 import { toast } from 'sonner'
 import { LoginForm } from '../../../src/ui/auth/LoginForm'
+import { typeScale } from '../../../src/ui/styles/type-scale'
 
 vi.mock('../../../src/app/auth/client', () => ({ checkSession: vi.fn(), login: vi.fn(), logout: vi.fn() }))
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn() }) }))
@@ -23,6 +24,7 @@ afterEach(() => {
 describe('LoginForm', () => {
   it('비밀번호 레이블과 입력창을 표시한다', () => {
     renderForm()
+    expect(screen.getByRole('heading', { name: '로그인' })).toHaveClass(...typeScale.pageTitle.split(' '))
     const input = screen.getByLabelText('비밀번호')
     expect(input).toHaveAttribute('type', 'password')
   })

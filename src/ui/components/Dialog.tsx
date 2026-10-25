@@ -2,6 +2,7 @@ import { useRef, useId } from 'react'
 import { useFocusTrap } from '../lib/useFocusTrap'
 import { useBodyScrollLock } from '../lib/useBodyScrollLock'
 import { cn } from '../lib/cn'
+import { typeScale } from '../styles/type-scale'
 
 type DialogProps = {
   open: boolean
@@ -37,10 +38,10 @@ export function Dialog({ open, onClose, title, children, className }: DialogProp
         )}
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id={titleId} className="shrink-0 text-lg font-semibold">
+        <h2 id={titleId} className={cn('shrink-0', typeScale.sectionTitle)}>
           {title}
         </h2>
-        <div data-testid="dialog-body" className="mt-3 min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div data-testid="dialog-body" className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain p-6">
           {children}
         </div>
       </div>

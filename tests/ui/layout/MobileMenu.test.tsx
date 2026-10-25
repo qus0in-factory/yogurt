@@ -50,6 +50,7 @@ describe('MobileMenu', () => {
     const onNavigate = vi.fn()
     render(<MobileMenu onNavigate={onNavigate} />)
     openMenu()
+    expect(screen.getByRole('button', { name: '계좌' })).toHaveClass('py-2.5', 'px-3')
     fireEvent.click(screen.getByRole('button', { name: '계좌' }))
     expect(onNavigate).toHaveBeenCalledWith('accounts')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

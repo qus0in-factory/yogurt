@@ -24,6 +24,7 @@ it.each([false, true])('toggles enabled=%s, stops propagation and refreshes acco
   expect(button).toHaveAttribute('aria-pressed', String(enabled))
   expect(button).toHaveClass('gap-2')
   expect(button.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+  expect(screen.getByRole('button', { name: '연금저축' })).toBeInTheDocument()
   fireEvent.click(button)
   await waitFor(() => expect(setAccountProduct).toHaveBeenCalledWith('a', '29', !enabled))
   await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['accounts'] }))

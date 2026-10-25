@@ -36,4 +36,19 @@ describe('IrpSummary', () => {
     expect(screen.getByText('0원')).toHaveClass('text-stone-500')
     expect(screen.getByText('0%')).toHaveClass('text-stone-500')
   })
+
+  it('위험자산 비중을 예수금 포함 소수 두 자리로 표시한다', () => {
+    render(<IrpSummary summary={summary} risk={{ ratio: 70, exceeds: false }} />)
+    expect(screen.getByText('위험자산 비중 70.00% (예수금 포함)')).toBeInTheDocument()
+    expect(screen.getByText('13,000원').closest('div')).toHaveClass('bg-primary-50')
+    expect(screen.queryByText('위험자산 70% 초과')).not.toBeInTheDocument()
+  })
+
+  it('70%를 초과하면 카드와 배지를 강조한다', () => {
+    render(<IrpSummary summary={summary} risk={{ ratio: 92.31, exceeds: true }} />)
+    expect(screen.getByText('13,000원').closest('div')).toHaveClass('border-red-300', 'bg-red-50', 'text-red-700')
+    const badge = screen.getByText('위험자산 70% 초과')
+    expect(badge).toHaveClass('bg-red-100', 'text-red-700')
+    expect(badge.parentElement?.querySelector('svg')).toBeInTheDocument()
+  })
 })

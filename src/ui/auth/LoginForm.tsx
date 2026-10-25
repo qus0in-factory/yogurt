@@ -6,6 +6,8 @@ import { Button } from '../components/Button'
 import { TextField } from '../components/TextField'
 import { useLogin } from './useSession'
 import { authText } from '../glossary/auth'
+import { cn } from '../lib/cn'
+import { spacing, typeScale } from '../styles/type-scale'
 
 type LoginValues = { password: string }
 
@@ -33,11 +35,11 @@ export function LoginForm({ onLoginSuccess }: { onLoginSuccess: () => void }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-primary-50 p-4">
-      <div className="w-full max-w-sm rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-bold text-stone-900">{authText.loginTitle}</h1>
-        <p className="mt-1 text-sm text-stone-600">{authText.loginDescription}</p>
+      <div className={cn('w-full max-w-sm border border-stone-200 bg-white shadow-sm', spacing.card)}>
+        <h1 className={typeScale.pageTitle}>{authText.loginTitle}</h1>
+        <p className={cn(typeScale.body, 'mt-1')}>{authText.loginDescription}</p>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6">
-          <fieldset disabled={loading} className="space-y-4">
+          <fieldset disabled={loading} className={spacing.stack}>
             <Controller
             name="password"
             control={control}

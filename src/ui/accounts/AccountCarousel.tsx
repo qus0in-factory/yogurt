@@ -18,7 +18,7 @@ export function AccountCarousel({ accounts, onEdit, kisStatuses = new Map() }: P
     if (accounts[page * pageSize]) selectAccount(accounts[page * pageSize].id)
   }, [accounts, selectAccount])
   return (
-    <Carousel items={accounts} labels={labels} pageKey={PAGE_KEY} onPageChange={change} className="mt-4"
+    <Carousel items={accounts} labels={labels} pageKey={PAGE_KEY} onPageChange={change}
       renderItem={(account) => (
         <AccountCard key={account.id} account={account} onSelect={() => selectAccount(account.id)} onEdit={() => onEdit(account)} kisStatus={kisStatuses.get(account.id)} />
       )} />

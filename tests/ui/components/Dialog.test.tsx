@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Dialog } from '../../../src/ui/components/Dialog'
+import { typeScale } from '../../../src/ui/styles/type-scale'
 
 afterEach(cleanup)
 
@@ -14,7 +15,7 @@ describe('Dialog', () => {
   it('open이 true이면 dialog와 제목을 렌더링한다', () => {
     render(<Dialog open onClose={vi.fn()} title="제목">내용</Dialog>)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('제목')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '제목' })).toHaveClass(...typeScale.sectionTitle.split(' '))
   })
 
   it('Escape 키를 누르면 onClose를 호출한다', () => {
@@ -58,7 +59,7 @@ describe('Dialog', () => {
 
   it('본문 영역만 스크롤되고 모바일 바텀시트·데스크톱 중앙 배치를 적용한다', () => {
     render(<Dialog open onClose={vi.fn()} title="제목">내용</Dialog>)
-    expect(screen.getByTestId('dialog-body')).toHaveClass('flex-1', 'overflow-y-auto', 'overscroll-contain')
+    expect(screen.getByTestId('dialog-body')).toHaveClass('p-6', 'flex-1', 'overflow-y-auto', 'overscroll-contain')
     expect(screen.getByTestId('dialog-backdrop')).toHaveClass('items-end', 'p-0', 'md:items-center', 'md:p-4')
     expect(screen.getByRole('dialog')).toHaveClass('flex', 'flex-col', 'max-h-[90dvh]', 'md:max-h-[calc(100dvh-2rem)]', 'rounded-t-2xl')
   })

@@ -1,7 +1,8 @@
-export function withWeights<T extends { evaluationAmount: number }>(holdings: T[]): (T & { weight: number })[] {
-  const total = holdings.reduce((sum, holding) => sum + holding.evaluationAmount, 0)
-  return holdings.map((holding) => ({
-    ...holding,
-    weight: total === 0 ? 0 : Math.round(holding.evaluationAmount / total * 10000) / 100,
-  }))
+export function withWeights<T extends { evaluationAmount: number }>(holdings: T[], cash = 0) {
+  const total = holdings.reduce((sum, holding) => sum + holding.evaluationAmount, 0) + cash
+  const percent = (amount: number) => total === 0 ? 0 : Math.round(amount / total * 10000) / 100
+  return {
+    holdings: holdings.map((holding) => ({ ...holding, weight: percent(holding.evaluationAmount) })),
+    cashWeight: percent(cash),
+  }
 }

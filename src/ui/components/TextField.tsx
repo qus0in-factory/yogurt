@@ -1,4 +1,6 @@
 import { useId } from 'react'
+import { cn } from '../lib/cn'
+import { spacing, typeScale } from '../styles/type-scale'
 
 type TextFieldProps = {
   label: string
@@ -21,8 +23,8 @@ export function TextField({ label, name, value, onChange, type = 'text', error, 
   const errorId = useId()
 
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={inputId} className="text-sm font-medium">
+    <div className={spacing.field}>
+      <label htmlFor={inputId} className={typeScale.label}>
         {label}
       </label>
       <input
@@ -43,7 +45,7 @@ export function TextField({ label, name, value, onChange, type = 'text', error, 
         className="rounded-md border border-stone-300 px-3 py-2"
       />
       {error ? (
-        <p id={errorId} className="text-sm text-red-600">
+        <p id={errorId} className={cn(typeScale.caption, 'text-red-600')}>
           {error}
         </p>
       ) : null}
