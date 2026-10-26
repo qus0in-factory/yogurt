@@ -1,5 +1,8 @@
+import { STOCK_CODE_PATTERN } from '../../domain/portfolio/item.ts'
+
 const PREFIX = 'stock-name:'
-export const STOCK_NAME_TTL_SECONDS = 2592000
+const MAX_STOCK_NAME_LENGTH = 80
+export const STOCK_NAME_TTL_SECONDS = 604800
 
 export type StoredStockName = {
   name: string
@@ -40,12 +43,28 @@ export async function writeStockName(
   code: string,
   value: StoredStockName,
 ): Promise<void> {
-  if (!value.name.trim()) return
+  const name = value.name.trim().slice(0, MAX_STOCK_NAME_LENGTH)
+  if (!name) return
   try {
-    await cache.put(stockNameKey(code), JSON.stringify(value), {
+    await cache.put(stockNameKey(code), JSON.stringify({ name, asOf: value.asOf }), {
       expirationTtl: STOCK_NAME_TTL_SECONDS,
     })
   } catch {
     // A cache failure must not fail a successful KIS response.
+  }
+}
+
+export async function writeHoldingStockNames(
+  cache: KVNamespace,
+  holdings: ReadonlyArray<{ code: string; name: string }>,
+  asOf: string,
+): Promise<void> {
+  for (const holding of holdings) {
+    const code = holding.code.trim().toUpperCase()
+    const name = holding.name.trim().slice(0, MAX_STOCK_NAME_LENGTH)
+    if (!STOCK_CODE_PATTERN.test(code) || !name) continue
+    const existing = await readStockName(cache, code)
+    if (existing?.name === name) continue
+    await writeStockName(cache, code, { name, asOf })
   }
 }

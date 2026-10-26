@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { MAX_PORTFOLIO_ITEMS } from '../../../src/domain/portfolio/limits'
 import { portfolioDraftSchema } from '../../../src/domain/portfolio/portfolio'
 
 const security = (code: string, bps: number) => ({ kind: 'security', stockCode: code, stockName: `종목${code}`, targetWeightBps: bps })
@@ -24,10 +25,17 @@ describe('portfolio draft', () => {
     expect(messages(portfolioDraftSchema.safeParse(draft([cash(10000)], 'a'.repeat(41))))).toContain('INVALID_NAME')
   })
 
-  it('항목은 1~100개만 허용한다', () => {
-    const many = Array.from({ length: 100 }, () => security('123456', 100))
-    expect(portfolioDraftSchema.safeParse(draft(many)).success).toBe(false)
-    expect(messages(portfolioDraftSchema.safeParse(draft([...many, security('999999', 100)])))).toContain('TOO_MANY_ITEMS')
+  it('항목은 최대 7개까지 허용한다', () => {
+    expect(MAX_PORTFOLIO_ITEMS).toBe(7)
+    const seven = [...Array.from({ length: 6 }, (_, i) => security(`10000${i}`, 1000)), security('200000', 4000)]
+    expect(portfolioDraftSchema.safeParse(draft(seven)).success).toBe(true)
+    const eight = [...Array.from({ length: 7 }, (_, i) => security(`10000${i}`, 1000)), security('200000', 3000)]
+    expect(messages(portfolioDraftSchema.safeParse(draft(eight)))).toContain('TOO_MANY_ITEMS')
+  })
+
+  it('현금을 포함해 8개면 거부한다', () => {
+    const items = [...Array.from({ length: 7 }, (_, i) => security(`10000${i}`, 1000)), cash(3000)]
+    expect(messages(portfolioDraftSchema.safeParse(draft(items)))).toContain('TOO_MANY_ITEMS')
   })
 
   it('비중 합계는 정확히 10000bp만 통과한다', () => {

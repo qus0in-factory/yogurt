@@ -1,6 +1,5 @@
 import type { Context } from 'hono'
-import { productCodeSchema } from '../../domain/accounts/products.ts'
-import { portfolioAssignmentRequestSchema } from '../../domain/portfolio/assignment'
+import { portfolioAssignmentRequestSchema, portfolioProductCodeSchema } from '../../domain/portfolio/assignment'
 import { assignTarget, listAssignments, portfolioExists, targetExists, unassignTarget } from './assignment-repository.ts'
 import { issuesOf } from './errors.ts'
 
@@ -20,7 +19,8 @@ export async function assignTargetHandler(c: Ctx): Promise<Response> {
   if (!db) return c.json(NO_STORAGE, 503)
   const accountId = c.req.param('accountId') ?? ''
   const productCode = c.req.param('productCode') ?? ''
-  if (!productCodeSchema.safeParse(productCode).success) {
+  const code = portfolioProductCodeSchema.safeParse(productCode)
+  if (!code.success) {
     return c.json({ error: 'invalid request', code: 'INVALID_ASSIGNMENT', issues: INVALID_CODE }, 400)
   }
   const parsed = portfolioAssignmentRequestSchema.safeParse(await c.req.json())
@@ -28,10 +28,10 @@ export async function assignTargetHandler(c: Ctx): Promise<Response> {
   if (!(await portfolioExists(db, parsed.data.portfolioId))) {
     return c.json({ error: 'portfolio not found', code: 'PORTFOLIO_NOT_FOUND' }, 404)
   }
-  if (!(await targetExists(db, accountId, productCode))) {
+  if (!(await targetExists(db, accountId, code.data))) {
     return c.json({ error: 'target not found', code: 'TARGET_NOT_FOUND' }, 404)
   }
-  return c.json(await assignTarget(db, accountId, productCode, parsed.data.portfolioId), 200)
+  return c.json(await assignTarget(db, accountId, code.data, parsed.data.portfolioId), 200)
 }
 
 export async function unassignTargetHandler(c: Ctx): Promise<Response> {
@@ -39,9 +39,10 @@ export async function unassignTargetHandler(c: Ctx): Promise<Response> {
   if (!db) return c.json(NO_STORAGE, 503)
   const accountId = c.req.param('accountId') ?? ''
   const productCode = c.req.param('productCode') ?? ''
-  if (!productCodeSchema.safeParse(productCode).success) {
+  const code = portfolioProductCodeSchema.safeParse(productCode)
+  if (!code.success) {
     return c.json({ error: 'invalid request', code: 'INVALID_ASSIGNMENT', issues: INVALID_CODE }, 400)
   }
-  await unassignTarget(db, accountId, productCode)
+  await unassignTarget(db, accountId, code.data)
   return c.body(null, 204)
 }

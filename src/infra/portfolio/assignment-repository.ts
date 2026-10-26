@@ -1,4 +1,5 @@
-import type { PortfolioAssignment } from '../../domain/portfolio/assignment'
+import type { PortfolioAssignment, PortfolioProductCode } from '../../domain/portfolio/assignment'
+import { portfolioAssignmentSchema } from '../../domain/portfolio/assignment'
 import { toAssignment, type AssignmentRow } from './rows.ts'
 
 const LIST = 'SELECT account_id, product_code, portfolio_id FROM portfolio_assignments ORDER BY account_id ASC, product_code ASC'
@@ -8,10 +9,15 @@ const UPSERT = `INSERT INTO portfolio_assignments (account_id, product_code, por
 
 export async function listAssignments(db: D1Database): Promise<PortfolioAssignment[]> {
   const { results = [] } = await db.prepare(LIST).all<AssignmentRow>()
-  return results.map(toAssignment)
+  const assignments: PortfolioAssignment[] = []
+  for (const row of results) {
+    const parsed = portfolioAssignmentSchema.safeParse(toAssignment(row))
+    if (parsed.success) assignments.push(parsed.data)
+  }
+  return assignments
 }
 
-export async function targetExists(db: D1Database, accountId: string, productCode: string): Promise<boolean> {
+export async function targetExists(db: D1Database, accountId: string, productCode: PortfolioProductCode): Promise<boolean> {
   const row = await db.prepare(TARGET).bind(accountId, productCode).first<{ account_id: string }>()
   return Boolean(row)
 }
@@ -24,13 +30,13 @@ export async function portfolioExists(db: D1Database, portfolioId: string): Prom
 export async function assignTarget(
   db: D1Database,
   accountId: string,
-  productCode: string,
+  productCode: PortfolioProductCode,
   portfolioId: string,
 ): Promise<PortfolioAssignment> {
   await db.prepare(UPSERT).bind(accountId, productCode, portfolioId).run()
   return { accountId, productCode, portfolioId }
 }
 
-export async function unassignTarget(db: D1Database, accountId: string, productCode: string): Promise<void> {
+export async function unassignTarget(db: D1Database, accountId: string, productCode: PortfolioProductCode): Promise<void> {
   await db.prepare('DELETE FROM portfolio_assignments WHERE account_id = ? AND product_code = ?').bind(accountId, productCode).run()
 }

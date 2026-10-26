@@ -37,6 +37,16 @@ describe('portfolio API 목록·저장', () => {
     expect(body.issues[0]).toHaveProperty('path')
   })
 
+  it('8개 항목은 400 TOO_MANY_ITEMS로 거부하고 저장하지 않는다', async () => {
+    const securities = Array.from({ length: 7 }, (_, i) => ({ kind: 'security', stockCode: `10000${i}`, stockName: `종목${i}`, targetWeightBps: 1000 }))
+    const items = [...securities, { kind: 'cash', stockCode: null, stockName: '현금/예수금', targetWeightBps: 3000 }]
+    const res = await call('/api/portfolios', 'POST', { name: '8개', items })
+    expect(res.status).toBe(400)
+    const body = await res.json() as { issues: Array<{ reason: string }> }
+    expect(body.issues.map((issue) => issue.reason)).toContain('TOO_MANY_ITEMS')
+    expect(vi.mocked(createPortfolio)).not.toHaveBeenCalled()
+  })
+
   it('없는 포트폴리오는 404, 연결 중 삭제는 409다', async () => {
     vi.mocked(getPortfolio).mockResolvedValueOnce(null)
     expect((await call('/api/portfolios/p1', 'PUT', draft)).status).toBe(404)

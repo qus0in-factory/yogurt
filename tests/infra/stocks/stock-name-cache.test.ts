@@ -49,12 +49,12 @@ describe('종목명 KV 캐시 (stock-name:{CODE})', () => {
     expect(fetchFn).not.toHaveBeenCalled()
   })
 
-  it('미적중 조회 성공(200) 시 TTL 2592000초로 {name, asOf}를 KV에 저장한다', async () => {
+  it('미적중 조회 성공(200) 시 TTL 604800초(1주일)로 {name, asOf}를 KV에 저장한다', async () => {
     const cache = createFakeKv()
     const putSpy = vi.spyOn(cache, 'put')
     expect((await callWithKv('/api/stocks/005930', cache)).status).toBe(200)
-    expect(putSpy).toHaveBeenCalledWith('stock-name:005930', expect.any(String), { expirationTtl: STOCK_NAME_TTL_SECONDS })
-    expect(STOCK_NAME_TTL_SECONDS).toBe(2592000)
+    expect(putSpy).toHaveBeenCalledWith('stock-name:005930', expect.any(String), { expirationTtl: 604800 })
+    expect(STOCK_NAME_TTL_SECONDS).toBe(604800)
     const saved = JSON.parse(await cache.get('stock-name:005930') ?? '{}') as { name?: string; asOf?: string }
     expect(saved.name).toBe('삼성전자')
     expect(typeof saved.asOf).toBe('string')

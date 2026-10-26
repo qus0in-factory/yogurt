@@ -1,5 +1,8 @@
 import { z } from 'zod'
-import { productCodeSchema } from '../accounts/products.ts'
+
+export const portfolioProductCodeSchema = z.enum(['01', '22'])
+
+export type PortfolioProductCode = z.infer<typeof portfolioProductCodeSchema>
 
 export const portfolioAssignmentRequestSchema = z.object({
   portfolioId: z.string().trim().min(1, { error: 'REQUIRED' }),
@@ -7,7 +10,7 @@ export const portfolioAssignmentRequestSchema = z.object({
 
 export const portfolioAssignmentSchema = z.object({
   accountId: z.string().min(1, { error: 'REQUIRED' }),
-  productCode: productCodeSchema,
+  productCode: portfolioProductCodeSchema,
   portfolioId: z.string().min(1, { error: 'REQUIRED' }),
 }).strict()
 
