@@ -6,6 +6,7 @@ import { Button } from './components/Button'
 import { MaskToggle } from './layout/MaskToggle'
 import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
+import { RecentVisitTracker } from './layout/RecentVisitTracker'
 import { AccountsPage } from './accounts/AccountsPage'
 import { OverviewPage } from './overview/OverviewPage'
 import { OperationsPage } from './operations/OperationsPage'
@@ -40,6 +41,7 @@ export function App() {
 
   return (
     <div className="flex min-h-screen bg-primary-50 break-keep">
+      <RecentVisitTracker />
       <Sidebar current={active} onNavigate={navigate} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 bg-white p-4">

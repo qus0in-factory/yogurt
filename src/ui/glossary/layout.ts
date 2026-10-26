@@ -6,4 +6,7 @@ export const layoutText = {
   appName: 'YOGURT',
   account: '계좌',
   maskMode: '가리기',
+  recentVisits: '최근 방문',
+  recentAccountsHome: '계좌 홈',
+  recentVisitLabel: (title: string, detail?: string) => detail ? `${title} · ${detail}` : title,
 } as const

@@ -3,6 +3,7 @@ import { del } from 'idb-keyval'
 import { queryClient } from '../../../src/ui/state/query-client'
 import { clearClientStorage } from '../../../src/ui/state/clear-client-storage'
 import { useUiStore } from '../../../src/ui/state/ui-store'
+import { useRecentVisitsStore, RECENT_VISITS_STORAGE_KEY } from '../../../src/ui/state/recent-visits'
 import { LAST_PAGE_STORAGE_KEY } from '../../../src/infra/navigation/last-page-storage'
 
 vi.mock('idb-keyval', () => ({ del: vi.fn(), get: vi.fn(), set: vi.fn() }))
@@ -51,4 +52,12 @@ it.each([true, false])('clear(%s) 호출 시 메모리 screen을 accounts로 초
   expect(useUiStore.getState().drawerOpen).toBe(false)
   expect(localStorage.getItem(LAST_PAGE_STORAGE_KEY)).toBeNull()
   expect(localStorage.getItem('other-app:key')).toBe('preserved')
+})
+
+it('최근 방문 저장과 메모리 상태를 함께 지운다', async () => {
+  localStorage.setItem(RECENT_VISITS_STORAGE_KEY, JSON.stringify([{ screen: 'accounts', label: '계좌' }]))
+  useRecentVisitsStore.setState({ visits: [{ screen: 'accounts', label: '계좌' }] })
+  await clearClientStorage()
+  expect(localStorage.getItem(RECENT_VISITS_STORAGE_KEY)).toBeNull()
+  expect(useRecentVisitsStore.getState().visits).toEqual([])
 })
