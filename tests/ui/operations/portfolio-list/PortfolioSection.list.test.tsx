@@ -22,7 +22,9 @@ describe('PortfolioSection 목록/상태/반응형', () => {
     renderWithQuery(<PortfolioSection onCreate={onCreate} />)
 
     expect(screen.getByText('포트폴리오를 불러오는 중...')).toBeInTheDocument()
-    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('포트폴리오를 불러오지 못했습니다'))
+    // HTTP 500 재시도 대기(300ms + 600ms) 뒤 오류 상태를 확인한다.
+    const alert = await screen.findByRole('alert', {}, { timeout: 3000 })
+    expect(alert).toHaveTextContent('포트폴리오를 불러오지 못했습니다')
 
     fail = false
     fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
