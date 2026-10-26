@@ -14,7 +14,7 @@ export function kisBalanceHandler(c: AppContext, fetchFn: typeof fetch = fetch):
   return kisQueryHandler(c, fetchFn, async (account, code) => {
     const balance = await fetchStockBalance(account, code)
     const cache = c.env.CACHE
-    if (!cache) return balance
+    if (!cache) return { ...balance, holdings: activeHoldings(balance.holdings) }
     const accountId = c.req.param('id') as string
     const observed = balance.summary.cash
     const current = Number.isSafeInteger(observed) && observed > 0
