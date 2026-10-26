@@ -41,7 +41,7 @@ it('대출현황·자산군·예수금·주식을 구역별로 표시한다', as
   expect(loan.getByText('대출금액').nextElementSibling).toHaveTextContent('500원')
   expect(loan.getByText('담보비율').nextElementSibling).toHaveTextContent('400.00%')
   expect(loan.getByText('융자비율').nextElementSibling).toHaveTextContent('25.00%')
-  expect(loan.getByText('신규 대출 가능')).toBeInTheDocument()
+  expect(loan.getByText('신규 대출 불가')).toBeInTheDocument()
   expect(loan.queryByText('자산군 대출 합계')).not.toBeInTheDocument()
 
   const fund = within(screen.getByRole('region', { name: '투자자산 현황' }))

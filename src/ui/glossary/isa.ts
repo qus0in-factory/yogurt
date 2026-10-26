@@ -58,6 +58,7 @@ export const isaText = {
   targetMax: '최대',
   manUnit: '만',
   monthUnit: '월',
+  year: (n: number) => `${n}년차`,
   daysLeft: (days: number) => `D-${days}`,
   date: (value: string) => value.replaceAll('-', '.'),
   amount: (manwon: number) => `${manwon.toLocaleString('ko-KR')}만원`,
