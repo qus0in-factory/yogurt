@@ -45,7 +45,7 @@ describe('PortfolioSection 목록/상태/반응형', () => {
     expect(screen.getByText('3개 항목')).toBeInTheDocument()
     expect(screen.getByText('연결 1곳')).toBeInTheDocument()
     expect(screen.getByText(/TIGER 미국S&P500 50\.00%/)).toBeInTheDocument()
-    expect(screen.getByText(/현금 20\.00%/)).toBeInTheDocument()
+    expect(screen.getByText(/현금\/예수금 20\.00%/)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '배당 성장형 편집' }))
     expect(onEdit).toHaveBeenCalledWith(samplePortfolios[0])

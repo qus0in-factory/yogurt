@@ -53,7 +53,7 @@ describe('PortfolioSection 삭제 및 409 PORTFOLIO_IN_USE 처리', () => {
     await waitFor(() =>
       expect(within(dialog).getByRole('alert')).toHaveTextContent('먼저 연결을 해제하세요'),
     )
-    expect(within(dialog).getByText(/홍길동 · 주계좌 · ISA/)).toBeInTheDocument()
+    expect(within(dialog).getByText(/12345678\(주계좌\) ISA/)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '배당 성장형' })).toBeInTheDocument()
   })
 })

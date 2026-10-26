@@ -12,7 +12,6 @@ import { useAdaptiveWidth } from '../../lib/useAdaptiveWidth'
 import { typeScale } from '../../styles/type-scale'
 import { PortfolioEditorDialog } from '../portfolio/PortfolioEditorDialog'
 import { DeletePortfolioDialog } from './DeletePortfolioDialog'
-import { PortfolioAssignmentSection } from './PortfolioAssignmentSection'
 import { PortfolioCard } from './PortfolioCard'
 import { buildActiveProductTargets } from './portfolio-list-model'
 import { usePortfolioEditorController } from './usePortfolioEditorController'
@@ -54,17 +53,10 @@ export function PortfolioSection({ onCreate, onEdit }: PortfolioSectionProps) {
       ) : (
         <div data-testid="portfolio-card-grid" className={cn('grid gap-4', width === 'desktop' ? 'grid-cols-2' : 'grid-cols-1')}>
           {portfolios.map((item) => (
-            <PortfolioCard key={item.id} portfolio={item} assignedCount={assignments.filter((a) => a.portfolioId === item.id).length} onEdit={editor.openEdit} onDelete={setDeleting} />
+            <PortfolioCard key={item.id} portfolio={item} assignedCount={assignments.filter((a) => a.portfolioId === item.id).length} onDuplicate={editor.openDuplicate} onEdit={editor.openEdit} onDelete={setDeleting} />
           ))}
         </div>
       )}
-      <PortfolioAssignmentSection
-        portfolios={portfolios}
-        targets={targets}
-        isLoading={accountsQuery.isPending || assignmentsQuery.isPending}
-        isError={accountsQuery.isError || assignmentsQuery.isError}
-        onRefresh={() => { void accountsQuery.refetch(); void assignmentsQuery.refetch() }}
-      />
       {editor.open ? (
         <PortfolioEditorDialog key={editor.editorKey} open onClose={editor.closeEditor} onSubmit={editor.submitEditor} initialValue={editor.initialValue} assignedCount={editor.assignedCount} serverError={editor.serverError} />
       ) : null}

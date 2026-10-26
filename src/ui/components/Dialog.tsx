@@ -7,7 +7,7 @@ import { typeScale } from '../styles/type-scale'
 type DialogProps = {
   open: boolean
   onClose: () => void
-  title: string
+  title: React.ReactNode
   children: React.ReactNode
   className?: string
 }

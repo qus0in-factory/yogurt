@@ -43,7 +43,7 @@ export const sampleAccounts: Account[] = [
     alias: '주계좌',
     owner: '홍길동',
     accountNumber: '12345678',
-    products: ['01', '22'],
+    products: ['01', '22', '29'],
     productPlans: {},
     createdAt: '2026-10-01T00:00:00Z',
   },

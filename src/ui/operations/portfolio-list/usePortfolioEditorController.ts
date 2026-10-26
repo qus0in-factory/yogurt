@@ -3,8 +3,12 @@ import { useCreatePortfolio, useUpdatePortfolio } from '../../../app/portfolio/q
 import type { PortfolioAssignment } from '../../../domain/portfolio/assignment'
 import type { Portfolio, PortfolioDraft } from '../../../domain/portfolio/portfolio'
 import { portfolioListText } from '../../glossary/portfolio-list'
+import { buildDuplicatePortfolioDraft } from './portfolio-list-model'
 
-type EditorMode = { type: 'create' } | { type: 'edit'; portfolio: Portfolio } | null
+type EditorMode =
+  | { type: 'create'; initialValue?: PortfolioDraft; key: string }
+  | { type: 'edit'; portfolio: Portfolio }
+  | null
 
 export function usePortfolioEditorController(
   assignments: PortfolioAssignment[],
@@ -18,7 +22,13 @@ export function usePortfolioEditorController(
 
   const openCreate = () => {
     setServerError(undefined)
-    setMode({ type: 'create' })
+    setMode({ type: 'create', key: 'create' })
+    onCreate?.()
+  }
+
+  const openDuplicate = (portfolio: Portfolio) => {
+    setServerError(undefined)
+    setMode({ type: 'create', initialValue: buildDuplicatePortfolioDraft(portfolio), key: `duplicate-${portfolio.id}` })
     onCreate?.()
   }
 
@@ -36,10 +46,7 @@ export function usePortfolioEditorController(
   const submitEditor = (draft: PortfolioDraft) => {
     if (!mode) return
     setServerError(undefined)
-    const callbacks = {
-      onSuccess: () => closeEditor(),
-      onError: () => setServerError(portfolioListText.saveFailedError),
-    }
+    const callbacks = { onSuccess: () => closeEditor(), onError: () => setServerError(portfolioListText.saveFailedError) }
     if (mode.type === 'create') {
       createPortfolio.mutate(draft, callbacks)
       return
@@ -47,14 +54,10 @@ export function usePortfolioEditorController(
     updatePortfolio.mutate({ id: mode.portfolio.id, input: draft }, callbacks)
   }
 
-  const editingPortfolio = mode?.type === 'edit' ? mode.portfolio : undefined
-  const assignedCount = editingPortfolio
-    ? assignments.filter((a) => a.portfolioId === editingPortfolio.id).length
-    : 0
-  const initialValue: PortfolioDraft | undefined = editingPortfolio
-    ? { name: editingPortfolio.name, items: editingPortfolio.items }
-    : undefined
-  const editorKey = editingPortfolio ? `edit-${editingPortfolio.id}` : 'create'
+  const assignedCount = mode?.type === 'edit' ? assignments.filter((a) => a.portfolioId === mode.portfolio.id).length : 0
+  const initialValue: PortfolioDraft | undefined =
+    mode?.type === 'edit' ? { name: mode.portfolio.name, items: mode.portfolio.items } : mode?.initialValue
+  const editorKey = mode?.type === 'edit' ? `edit-${mode.portfolio.id}` : (mode?.key ?? 'create')
 
   return {
     open: mode !== null,
@@ -63,6 +66,7 @@ export function usePortfolioEditorController(
     assignedCount,
     serverError,
     openCreate,
+    openDuplicate,
     openEdit,
     closeEditor,
     submitEditor,
