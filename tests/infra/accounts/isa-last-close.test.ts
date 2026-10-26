@@ -40,3 +40,15 @@ it('깨진 값·음수·비정수는 기록 없음으로 보고 더 과거를 �
 it('키가 없으면 null이다(ISA가 아닌 계좌 포함)', async () => {
   expect(await findIsaLastClose(createFakeKv(), 'irp', now)).toBeNull()
 })
+
+it('7일 전 기록이 있으면 그 날짜를 돌려준다(경계 포함)', async () => {
+  const kv = createFakeKv()
+  await seed(kv, '2026-09-23', { totalAssetsWon: 500, recordedAt: '' })
+  expect(await findIsaLastClose(kv, 'acct', now)).toEqual({ date: '2026-09-23', totalAssetsWon: 500 })
+})
+
+it('0원 기록은 손상이 아니라 유효한 값이다', async () => {
+  const kv = createFakeKv()
+  await seed(kv, '2026-09-30', { totalAssetsWon: 0, recordedAt: '' })
+  expect(await findIsaLastClose(kv, 'acct', now)).toEqual({ date: '2026-09-30', totalAssetsWon: 0 })
+})

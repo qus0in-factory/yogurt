@@ -2,14 +2,19 @@ import type { PathPoint } from '../../app/accounts/isa-progress-path'
 import { isaText } from '../glossary/isa'
 import { typeScale } from '../styles/type-scale'
 
-interface Props {
-  points: PathPoint[]
-  hasMid: boolean
+interface Props { points: PathPoint[]; hasMid: boolean }
+
+function AmountCell({ val }: { val: number | null }) {
+  if (val === null) return <td className={`p-2 ${typeScale.caption}`}>-</td>
+  const man = Math.round(val / 10_000).toLocaleString('ko-KR')
+  return (
+    <td className="p-2">
+      <span className={typeScale.number}>{man}<span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span></span>
+    </td>
+  )
 }
 
 export function IsaProgressTable({ points, hasMid }: Props) {
-  const toManwon = (val: number | null) => (val !== null ? isaText.amount(Math.round(val / 10_000)) : '-')
-
   return (
     <details className="mt-2 text-primary-600">
       <summary className={`cursor-pointer ${typeScale.caption}`}>{isaText.progressTableToggle}</summary>
@@ -23,13 +28,13 @@ export function IsaProgressTable({ points, hasMid }: Props) {
               <th className="p-2">{isaText.maxTarget}</th>
             </tr>
           </thead>
-          <tbody className={typeScale.caption}>
+          <tbody>
             {points.map((pt) => (
               <tr key={pt.month} className="border-t border-primary-50">
-                <td className="p-2">{pt.month.replace('-', '.')}</td>
-                <td className="p-2">{toManwon(pt.min)}</td>
-                {hasMid ? <td className="p-2">{toManwon(pt.mid)}</td> : null}
-                <td className="p-2">{toManwon(pt.max)}</td>
+                <td className={`p-2 ${typeScale.caption}`}>{pt.month.replace('-', '.')}</td>
+                <AmountCell val={pt.min} />
+                {hasMid ? <AmountCell val={pt.mid} /> : null}
+                <AmountCell val={pt.max} />
               </tr>
             ))}
           </tbody>

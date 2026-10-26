@@ -18,7 +18,7 @@ export function EmptyState({ icon: Icon, title, description, action, className }
         <div className="rounded-full bg-primary-100 p-3">
           <Icon aria-hidden="true" className="h-8 w-8 text-primary-600" />
         </div>
-        <p className={typeScale.cardTitle}>{title}</p>
+        <p className={typeScale.title}>{title}</p>
         {description ? <p className={typeScale.caption}>{description}</p> : null}
       </div>
       {action}

@@ -29,7 +29,7 @@ describe('AccountCard KIS', () => {
     renderCard()
     const card = screen.getByRole('group', { name: '주계좌' })
     expect(card).toHaveClass(...spacing.card.split(' '))
-    expect(screen.getByText('주계좌')).toHaveClass(...typeScale.cardTitle.split(' '))
+    expect(screen.getByText('주계좌')).toHaveClass(...typeScale.title.split(' '))
     expect(screen.getByText('김철수')).toHaveClass(...typeScale.caption.split(' '))
     expect(screen.getByText('12345678')).toHaveClass(...typeScale.number.split(' '))
   })

@@ -5,6 +5,7 @@ import { cn } from '../lib/cn'
 import { commonText } from '../glossary/common'
 import { typeScale } from '../styles/type-scale'
 import { readSessionJson, writeSessionJson } from '../lib/session-draft'
+import { DESKTOP_MEDIA_QUERY } from '../lib/breakpoints'
 
 export type CarouselLabels = { list: string; previous: string; next: string; goTo: (page: number) => string; position: (index: number, total: number) => string }
 
@@ -18,7 +19,7 @@ type CarouselProps<T> = {
 }
 
 export function Carousel<T>({ items, labels, renderItem, pageKey, onPageChange, className }: CarouselProps<T>) {
-  const [media] = useState(() => window.matchMedia?.('(min-width: 768px)'))
+  const [media] = useState(() => window.matchMedia?.(DESKTOP_MEDIA_QUERY))
   const [pageSize, setPageSize] = useState(media?.matches ? 3 : 1)
   const [page, setPage] = useState(() => {
     const saved = pageKey ? readSessionJson<number>(pageKey) : null
@@ -61,7 +62,7 @@ export function Carousel<T>({ items, labels, renderItem, pageKey, onPageChange, 
           if (touchX.current !== null && end !== undefined && Math.abs(touchX.current - end) >= 50) move(current + (touchX.current > end ? 1 : -1))
           touchX.current = null
         }}>
-        <div ref={grid} className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div ref={grid} className="grid grid-cols-1 gap-4 min-[769px]:grid-cols-3">
           {items.slice(current * pageSize, (current + 1) * pageSize).map(renderItem)}
         </div>
       </div>
@@ -71,7 +72,7 @@ export function Carousel<T>({ items, labels, renderItem, pageKey, onPageChange, 
           aria-current={position === current ? 'true' : undefined} onClick={() => move(position)}
           className={`h-2 w-2 rounded-full ${position === current ? 'bg-primary-500' : 'bg-stone-300'}`} />)}
         <span role="status" aria-live="polite" aria-atomic="true" aria-label={commonText.pagePosition(current + 1, pages)}
-          className={cn('rounded-full bg-stone-100 px-2.5 py-0.5 tabular-nums', typeScale.caption)}>{labels.position(current + 1, pages)}</span>
+          className={cn('inline-flex items-center justify-center min-w-16 whitespace-nowrap rounded-full bg-stone-100 px-2.5 py-0.5 text-center tabular-nums', typeScale.caption)}>{labels.position(current + 1, pages)}</span>
         <Button size="icon" variant="outline" aria-label={labels.next} disabled={current === pages - 1} onClick={() => move(current + 1)}><ChevronRight aria-hidden="true" className="h-5 w-5" /></Button>
       </div>}
     </div>

@@ -14,7 +14,7 @@ function SortableAccount({ account, onMove }: { account: Account; onMove: (id: s
     <button type="button" aria-label={accountsText.reorderHandle(account.alias)} className="touch-none cursor-grab rounded p-2" {...attributes} {...listeners} onKeyDown={(event) => {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); onMove(account.id, event.key === 'ArrowDown' ? 1 : -1) }
     }}><GripVertical aria-hidden="true" className="h-5 w-5" /></button>
-    <div className={spacing.stack}><span className={typeScale.caption}>{account.owner}</span><span className={typeScale.cardTitle}>{account.alias}</span><span className={typeScale.number}>{account.accountNumber}</span></div>
+    <div className={spacing.stack}><span className={typeScale.caption}>{account.owner}</span><span className={typeScale.title}>{account.alias}</span><span className={typeScale.number}>{account.accountNumber}</span></div>
   </li>
 }
 

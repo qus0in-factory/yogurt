@@ -48,7 +48,7 @@ describe('Sidebar', () => {
   it('브랜드 영역에 favicon 이미지와 YOGURT 텍스트를 함께 표시한다', () => {
     const { container } = render(<Sidebar current="accounts" />)
     expect(screen.getByText('YOGURT')).toBeInTheDocument()
-    expect(screen.getByText('YOGURT')).toHaveClass(...typeScale.sectionTitle.split(' '))
+    expect(screen.getByText('YOGURT')).toHaveClass(...typeScale.section.split(' '))
     const icon = container.querySelector('img[aria-hidden="true"]')
     expect(icon).toHaveAttribute('src', '/favicon.png')
     expect(icon).toHaveAttribute('alt', '')

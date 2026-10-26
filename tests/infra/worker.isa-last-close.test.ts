@@ -70,4 +70,9 @@ describe('ISA last close route', () => {
     await cache.put(`isa-snapshot:isa:${date}`, JSON.stringify({ totalAssetsWon: 1, recordedAt: '' }))
     expect((await call('isa', env(createFakeKv()))).status).toBe(404)
   })
+
+  it('CACHE 바인딩이 없거나 DB에 없는 계좌 ID도 404다', async () => {
+    expect((await call('acct', env(undefined))).status).toBe(404)
+    expect((await call('nope', env(createFakeKv()))).status).toBe(404)
+  })
 })

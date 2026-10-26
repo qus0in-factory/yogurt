@@ -38,7 +38,7 @@ export function Dialog({ open, onClose, title, children, className }: DialogProp
         )}
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id={titleId} className={cn('shrink-0', typeScale.sectionTitle)}>
+        <h2 id={titleId} className={cn('shrink-0', typeScale.section)}>
           {title}
         </h2>
         <div data-testid="dialog-body" className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain p-6">

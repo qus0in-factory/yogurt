@@ -34,7 +34,7 @@ it('대출현황·자산군·예수금·주식을 구역별로 표시한다', as
   show()
   expect(await screen.findByRole('heading', { name: '대출현황' })).toBeInTheDocument()
   const title = screen.getByRole('heading', { name: '잔고 상세' })
-  expect(title).toHaveClass(...typeScale.sectionTitle.split(' '))
+  expect(title).toHaveClass(...typeScale.section.split(' '))
   expect(screen.getByRole('region', { name: '잔고 상세' })).toHaveClass('mb-8', ...spacing.section.split(' '))
 
   const loan = within(screen.getByRole('region', { name: '대출현황' }))

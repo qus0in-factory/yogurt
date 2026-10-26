@@ -9,7 +9,7 @@ export function IrpHoldingCard({ holding, riskClass = 'risk', onToggle = () => {
   holding: IrpHolding; riskClass?: RiskClass; onToggle?: () => void; disabled?: boolean; showRiskToggle?: boolean
 }) {
   return (
-    <li className="rounded-lg border border-stone-200 p-4">
+    <li className="rounded-lg border border-stone-200 p-4 max-[768px]:p-3">
       <div className="flex min-w-0 items-center justify-between gap-2">
         <span className="flex min-w-0 items-center gap-2">
           {holding.code ? <span className="font-mono text-xs text-stone-500">{holding.code}</span> : null}
@@ -17,7 +17,7 @@ export function IrpHoldingCard({ holding, riskClass = 'risk', onToggle = () => {
         </span>
         {showRiskToggle && holding.code ? <RiskToggle riskClass={riskClass} onToggle={onToggle} disabled={disabled} /> : null}
       </div>
-      <dl className="mt-3 grid grid-cols-2 gap-4">
+      <dl className="mt-3 grid grid-cols-2 gap-4 max-[768px]:mt-2 max-[768px]:gap-3 max-[375px]:gap-2">
         <div className="min-w-0">
           <dt className={typeScale.label}>{text.quantity}</dt>
           <dd className={`text-right ${typeScale.number}`}>{text.number(holding.quantity)}</dd>

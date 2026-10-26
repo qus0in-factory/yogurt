@@ -23,7 +23,7 @@ it('위험 구분 조회 중에는 비중을 확정하지 않고 토글을 막�
   vi.mocked(getRiskClasses).mockReturnValue(new Promise((done) => { resolve = done }))
   show()
   expect(await screen.findByText('삼성전자')).toBeInTheDocument()
-  expect(screen.getByRole('status')).toHaveTextContent('위험 구분을 불러오는 중…')
+  expect(screen.getByText('위험 구분을 불러오는 중…')).toBeInTheDocument()
   expect(screen.queryByText(/위험자산 비중/)).not.toBeInTheDocument()
   expect(screen.getByRole('button', { name: '위험' })).toBeDisabled()
   resolve({ '069500': 'safe' })

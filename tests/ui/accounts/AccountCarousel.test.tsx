@@ -15,7 +15,7 @@ beforeEach(() => {
   reduced = false
   animate.mockClear()
   vi.stubGlobal('matchMedia', (query: string) => ({
-    matches: query.includes('768') ? wide : reduced,
+    matches: (query.includes('768') || query.includes('769')) ? wide : reduced,
     addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => listeners.add(listener),
     removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => listeners.delete(listener),
   }))

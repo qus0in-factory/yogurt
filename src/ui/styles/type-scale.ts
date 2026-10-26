@@ -1,12 +1,12 @@
 export const typeScale = {
-  pageTitle: 'text-2xl font-semibold tracking-tight text-stone-900',
-  sectionTitle: 'text-lg font-semibold text-stone-900',
-  cardTitle: 'text-base font-semibold text-stone-900',
-  body: 'text-sm text-stone-700',
-  label: 'text-xs font-medium text-stone-500',
-  caption: 'text-xs text-stone-500',
-  figure: 'text-2xl font-semibold tabular-nums text-stone-900',
-  number: 'text-sm tabular-nums text-stone-900',
+  pageTitle: 'text-xl md:text-2xl font-semibold md:tracking-tight text-stone-900',
+  section: 'text-lg font-semibold text-stone-900',
+  title: 'text-base font-semibold text-stone-900',
+  body: 'text-sm leading-[22px] md:leading-5 text-stone-700',
+  number: 'text-base md:text-sm font-semibold md:font-normal tabular-nums text-stone-900',
+  label: 'text-xs leading-[18px] md:leading-4 font-medium text-stone-500',
+  caption: 'text-xs leading-[18px] md:leading-4 text-stone-500',
+  figure: 'text-base md:text-2xl font-semibold tabular-nums text-stone-900',
 } as const
 
 export const spacing = {

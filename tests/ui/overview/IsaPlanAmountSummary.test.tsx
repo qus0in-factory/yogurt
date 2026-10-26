@@ -14,9 +14,10 @@ describe('IsaPlanAmountSummary 이번 달 목표 행 및 차이 표시', () => {
     render(<IsaPlanAmountSummary plan={plan24} totalAssets={25_200_000} today="2026-10-25" />)
     const monthBox = screen.getByTestId('isa-month-target-summary')
     expect(within(monthBox).getByText('이번 달 목표')).toBeInTheDocument()
-    expect(within(monthBox).getByText('2,400만원')).toBeInTheDocument()
-    expect(within(monthBox).getByText('3,600만원')).toBeInTheDocument()
-    expect(within(monthBox).getByText('4,800만원')).toBeInTheDocument()
+    expect(within(monthBox).getByText('2,400')).toBeInTheDocument()
+    expect(within(monthBox).getByText('3,600')).toBeInTheDocument()
+    expect(within(monthBox).getByText('4,800')).toBeInTheDocument()
+    expect(within(monthBox).getAllByText('만원')).toHaveLength(3)
   })
 
   it('차이 표시: 최소 대비 +120만, 중간 대비 -1,080만, 최대 대비 -2,280만 순서로 표시', () => {
@@ -53,5 +54,16 @@ describe('IsaPlanAmountSummary 이번 달 목표 행 및 차이 표시', () => {
     const plan = { startDate: '2026-11-01', minTargetAmountWon: 36_000_000, maxTargetAmountWon: 72_000_000 }
     render(<IsaPlanAmountSummary plan={plan} totalAssets={25_200_000} today="2026-10-25" />)
     expect(screen.getAllByText('시작 전')).toHaveLength(3)
+  })
+
+  it('모바일에서 이번 달 목표 행이 쌍(최소/50%/최대) 단위로 줄바꿈되고 데스크톱 클래스를 갖는다', () => {
+    render(<IsaPlanAmountSummary plan={plan24} totalAssets={25_200_000} today="2026-10-25" />)
+    const pairs = screen.getAllByTestId('month-target-pair')
+    expect(pairs).toHaveLength(3)
+    expect(screen.getByText('최소')).toBeInTheDocument()
+    expect(screen.getByText('50%')).toBeInTheDocument()
+    expect(screen.getByText('최대')).toBeInTheDocument()
+    const container = pairs[0].parentElement
+    expect(container).toHaveClass('flex-col', 'min-[769px]:flex-row', 'gap-2')
   })
 })
