@@ -1,6 +1,6 @@
 import { CalendarDays } from 'lucide-react'
 import { useState } from 'react'
-import { isaTerm, seoulToday, type IsaTermStatus } from '../../app/accounts/isa-term'
+import { isaTerm, isaYear, seoulToday, type IsaTermStatus } from '../../app/accounts/isa-term'
 import { useAccounts } from '../accounts/useAccounts'
 import { Button } from '../components/Button'
 import { EmptyState } from '../components/EmptyState'
@@ -24,7 +24,10 @@ export function IsaTermSection({ accountId }: { accountId: string }) {
   const { totalAssets } = useIsaProgress(accountId)
   const [open, setOpen] = useState(false)
   const plan = data?.find((account) => account.id === accountId)?.productPlans?.['01']
-  const term = plan ? isaTerm(plan.startDate, seoulToday()) : null
+  const today = seoulToday()
+  const term = plan ? isaTerm(plan.startDate, today) : null
+  const year = plan ? isaYear(plan.startDate, today) : null
+  const yearText = year === 'beforeStart' ? isaText.beforeStart : typeof year === 'number' ? isaText.year(year) : null
 
   return (
     <section aria-label={isaText.term} className={spacing.stack}>
@@ -46,9 +49,12 @@ export function IsaTermSection({ accountId }: { accountId: string }) {
                 {
                   label: <span className={typeScale.label}>{isaText.remaining}</span>,
                   value: (
-                    <span data-testid="isa-dday" data-status={term.status} className={`inline-flex rounded-full px-2 py-1 font-semibold ${typeScale.caption} ${chipTone[term.status]}`}>
-                      {term.status === 'expired' ? isaText.expired : isaText.daysLeft(term.daysLeft)}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span data-testid="isa-dday" data-status={term.status} className={`inline-flex rounded-full px-2 py-1 font-semibold ${typeScale.caption} ${chipTone[term.status]}`}>
+                        {term.status === 'expired' ? isaText.expired : isaText.daysLeft(term.daysLeft)}
+                      </span>
+                      {yearText ? <span data-testid="isa-year" className={typeScale.caption}>{yearText}</span> : null}
+                    </div>
                   ),
                 },
               ]}

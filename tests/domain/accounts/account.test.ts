@@ -10,13 +10,14 @@ describe('account schemas', () => {
   it('계좌 입력은 별칭·소유자·계좌번호·access key·secret key를 요구하고 공백을 정리한다', () => {
     const parsed = accountInputSchema.parse({ alias: ' 주식 ', owner: ' 홍길동 ', accountNumber: ' 12345678 ', accessKey: ' ak ', secretKey: ' sk ' })
     expect(parsed).toEqual(valid)
-    expect(accountInputSchema.safeParse({ ...valid, alias: 'a'.repeat(9) }).success).toBe(false)
+    expect(accountInputSchema.safeParse({ ...valid, alias: 'a'.repeat(16) }).success).toBe(true)
+    expect(accountInputSchema.safeParse({ ...valid, alias: 'a'.repeat(17) }).success).toBe(false)
     expect(accountInputSchema.safeParse({ ...valid, owner: 'a'.repeat(9) }).success).toBe(false)
   })
 
   it('검증 실패 메시지는 한글이다', () => {
     expect(messages({ ...valid, alias: '' })).toEqual(['별칭을 입력하세요'])
-    expect(messages({ ...valid, alias: 'a'.repeat(9) })).toEqual(['별칭은 8자 이하로 입력하세요'])
+    expect(messages({ ...valid, alias: 'a'.repeat(17) })).toEqual(['별칭은 16자 이하로 입력하세요'])
     expect(messages({ ...valid, owner: ' ' })).toEqual(['소유자를 입력하세요'])
     expect(messages({ ...valid, accountNumber: '12-a' })).toEqual(['계좌번호는 숫자 8자리로 입력하세요'])
     expect(messages({ ...valid, accessKey: '' })).toEqual(['Access Key를 입력하세요'])
@@ -29,9 +30,12 @@ describe('account schemas', () => {
     expect(accountInputSchema.safeParse({ ...valid, accountNumber: '1234-567' }).success).toBe(false)
   })
 
-  it('별칭·소유자는 8자까지 허용한다', () => {
-    expect(accountInputSchema.safeParse({ ...valid, alias: '가'.repeat(8), owner: '나'.repeat(8) }).success).toBe(true)
-    expect(accountUpdateSchema.safeParse({ alias: '가'.repeat(9), owner: '나' }).success).toBe(false)
+  it('별칭은 16자, 소유자는 8자까지 허용한다', () => {
+    expect(accountInputSchema.safeParse({ ...valid, alias: '가'.repeat(16), owner: '나'.repeat(8) }).success).toBe(true)
+    expect(accountInputSchema.safeParse({ ...valid, alias: '가'.repeat(17), owner: '나'.repeat(8) }).success).toBe(false)
+    expect(accountUpdateSchema.safeParse({ alias: '가'.repeat(16), owner: '나' }).success).toBe(true)
+    expect(accountUpdateSchema.safeParse({ alias: '가'.repeat(17), owner: '나' }).success).toBe(false)
+    expect(accountUpdateSchema.safeParse({ alias: '가', owner: '나'.repeat(9) }).success).toBe(false)
   })
 
   it('수정은 별칭·소유자만 받고 다른 필드는 버린다', () => {

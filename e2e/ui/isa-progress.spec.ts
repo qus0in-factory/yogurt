@@ -1,0 +1,20 @@
+import { test, expect, openProduct } from '../infra/fixtures'
+
+test('ISA 계획 저장·3열 기간·반응형 진척 월 칸을 확인한다', async ({ page }) => {
+  await openProduct(page, 'ISA')
+  const plan = page.getByRole('region', { name: 'ISA 계획', exact: true })
+  await expect(plan.getByTestId('isa-term-grid').locator('dl')).toHaveCSS('grid-template-columns', /\S+\s+\S+\s+\S+/)
+  await plan.getByRole('button', { name: '수정', exact: true }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('최소 목표금액', { exact: true }).fill('3700')
+  await dialog.getByLabel('최대 목표금액', { exact: true }).fill('7300')
+  await dialog.getByRole('button', { name: '저장', exact: true }).click()
+  await expect(dialog).toBeHidden()
+  await expect(plan.getByTestId('isa-amount-summary')).toContainText('이번 달 목표')
+  await expect(plan.getByTestId('isa-amount-summary')).toContainText('3,700')
+  await expect(plan.getByTestId('isa-amount-summary')).toContainText('7,300')
+  await expect(page.getByRole('img', { name: '월별 목표 진척' })).toBeVisible()
+  await expect(page.getByTestId('month-tick')).toHaveCount(7)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(page.getByTestId('month-tick')).toHaveCount(3)
+})

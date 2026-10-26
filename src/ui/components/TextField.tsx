@@ -7,6 +7,8 @@ type TextFieldProps = {
   name: string
   value: string
   onChange: (value: string) => void
+  onBlur?: () => void
+  readOnly?: boolean
   type?: 'text' | 'password' | 'number' | 'date'
   error?: string
   required?: boolean
@@ -18,7 +20,7 @@ type TextFieldProps = {
   autoComplete?: string
 }
 
-export function TextField({ label, name, value, onChange, type = 'text', error, required, maxLength, inputMode, pattern, placeholder, list, autoComplete }: TextFieldProps) {
+export function TextField({ label, name, value, onChange, onBlur, readOnly, type = 'text', error, required, maxLength, inputMode, pattern, placeholder, list, autoComplete }: TextFieldProps) {
   const inputId = useId()
   const errorId = useId()
 
@@ -33,6 +35,7 @@ export function TextField({ label, name, value, onChange, type = 'text', error, 
         type={type}
         value={value}
         required={required}
+        readOnly={readOnly}
         maxLength={maxLength}
         inputMode={inputMode}
         pattern={pattern}
@@ -40,9 +43,10 @@ export function TextField({ label, name, value, onChange, type = 'text', error, 
         list={list}
         autoComplete={autoComplete}
         onChange={(event) => onChange(event.target.value)}
+        onBlur={onBlur}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
-        className="rounded-md border border-stone-300 px-3 py-2"
+        className={cn('rounded-md border border-stone-300 px-3 py-2', readOnly && 'bg-stone-50 cursor-default')}
       />
       {error ? (
         <p id={errorId} className={cn(typeScale.caption, 'text-red-600')}>

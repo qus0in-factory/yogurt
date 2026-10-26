@@ -3,6 +3,7 @@ import { productCodeSchema } from '../../domain/accounts/products.ts'
 import { seoulDateTime } from '../../domain/accounts/snapshot-month.ts'
 import { resolveCash } from '../../domain/kis/cash-fallback.ts'
 import { activeHoldings, resolveHoldings } from '../../domain/kis/holdings-fallback.ts'
+import { writeHoldingStockNames } from '../stocks/stock-name-store.ts'
 import { readCashLast, writeCashLast } from './cash-last-store.ts'
 import { readHoldingsLast, writeHoldingsLast } from './holdings-last-store.ts'
 import { kisClientFromEnv } from './kis-context.ts'
@@ -14,7 +15,7 @@ export function kisBalanceHandler(c: AppContext, fetchFn: typeof fetch = fetch):
   return kisQueryHandler(c, fetchFn, async (account, code) => {
     const balance = await fetchStockBalance(account, code)
     const cache = c.env.CACHE
-    if (!cache) return balance
+    if (!cache) return { ...balance, holdings: activeHoldings(balance.holdings) }
     const accountId = c.req.param('id') as string
     const observed = balance.summary.cash
     const current = Number.isSafeInteger(observed) && observed > 0
@@ -33,6 +34,9 @@ export function kisBalanceHandler(c: AppContext, fetchFn: typeof fetch = fetch):
       await writeHoldingsLast(cache, accountId, code, {
         holdings: resolvedHoldings.holdings, stockEvaluationWon: stockValue, asOf,
       })
+    }
+    if (resolvedHoldings.holdingsSource === 'kis') {
+      await writeHoldingStockNames(cache, resolvedHoldings.holdings, asOf)
     }
     return { ...balance, ...resolvedHoldings, summary: { ...balance.summary, ...resolved } }
   })

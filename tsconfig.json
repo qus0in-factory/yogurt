@@ -11,5 +11,5 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "infra/**/*.ts", "tests/**/*.ts", "tests/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "infra/**/*.ts", "tests/**/*.ts", "tests/**/*.tsx", "e2e/**/*.ts"]
 }

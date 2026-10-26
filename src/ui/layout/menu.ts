@@ -1,5 +1,6 @@
-import { LayoutDashboard, Wallet, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, SlidersHorizontal, Wallet, type LucideIcon } from 'lucide-react'
 import { accountsText } from '../glossary/accounts'
+import { operationsText } from '../glossary/operations'
 import { overviewText } from '../glossary/overview'
 import type { PageId } from '../../domain/navigation/page'
 
@@ -13,5 +14,6 @@ export type MenuItem = {
 
 export const MENU_ITEMS: MenuItem[] = [
   { id: 'overview', label: overviewText.title, icon: LayoutDashboard },
+  { id: 'operations', label: operationsText.title, icon: SlidersHorizontal },
   { id: 'accounts', label: accountsText.title, icon: Wallet },
 ]

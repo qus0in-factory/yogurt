@@ -65,7 +65,7 @@ export function AddAccountDialog({ open, onClose }: AddAccountDialogProps) {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         {field(accountsText.owner, 'owner', { maxLength: 8, list: ownerListId, autoComplete: 'off' })}
         <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
-        {field(accountsText.alias, 'alias', { maxLength: 8 })}
+        {field(accountsText.alias, 'alias', { maxLength: 16 })}
         {field(accountsText.accountNumber, 'accountNumber', { maxLength: 8, inputMode: 'numeric', pattern: '[0-9]{8}', placeholder: accountsText.accountNumberExample }, (value) => value.replace(/\D/g, ''))}
         {field(accountsText.accessKey, 'accessKey', { autoComplete: 'off' })}
         {field(accountsText.secretKey, 'secretKey', { type: 'password', autoComplete: 'off' })}

@@ -50,3 +50,13 @@ export function isaK(startDate: string, targetDateOrMonth: string): number {
   if (diff < 0) return 0
   return Math.min(36, diff + 1)
 }
+
+export type IsaYear = number | 'beforeStart' | null
+
+export function isaYear(startDate: string, today: string): IsaYear {
+  const term = isaTerm(startDate, today)
+  if (term.status === 'expired') return null
+  const k = isaK(startDate, today)
+  if (k === 0) return 'beforeStart'
+  return Math.ceil(k / 12)
+}

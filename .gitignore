@@ -5,3 +5,10 @@ dist/
 .env*
 __pycache__/
 *.pyc
+
+e2e/artifacts/
+e2e/.local/
+*.spec.ts-snapshots/
+playwright-report/
+test-results/
+.env.e2e.local

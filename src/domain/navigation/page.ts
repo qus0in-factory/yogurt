@@ -1,4 +1,4 @@
-export const ALLOWED_PAGES = ['accounts', 'overview'] as const
+export const ALLOWED_PAGES = ['accounts', 'overview', 'operations'] as const
 
 export type PageId = (typeof ALLOWED_PAGES)[number]
 

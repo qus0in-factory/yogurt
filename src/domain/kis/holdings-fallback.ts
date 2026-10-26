@@ -13,7 +13,7 @@ export type HoldingsResolution = {
 }
 
 export function activeHoldings(holdings: Holding[]): Holding[] {
-  return holdings.filter((holding) => holding.quantity > 0 || holding.evaluationAmount > 0)
+  return holdings.filter((holding) => holding.quantity > 0)
 }
 
 function partialWarning(holdings: Holding[], stockValue: number): boolean {

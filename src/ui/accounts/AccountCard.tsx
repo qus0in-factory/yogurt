@@ -44,7 +44,7 @@ export function AccountCard({ account, onSelect, onEdit, kisStatus }: AccountCar
     >
       <div className={cn(spacing.stack, 'pr-20')}>
         <p className={typeScale.caption}>{account.owner}</p>
-        <p className={typeScale.title}>{account.alias}</p>
+        <p className={cn(typeScale.title, 'truncate')}>{account.alias}</p>
         <p className={typeScale.number}>{account.accountNumber}</p>
         <ProductToggles account={account} />
       </div>

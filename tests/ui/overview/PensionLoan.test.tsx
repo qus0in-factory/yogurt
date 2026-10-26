@@ -6,9 +6,9 @@ import { PensionLoan } from '../../../src/ui/overview/PensionLoan'
 afterEach(cleanup)
 
 it('담보비율과 융자비율을 계산해 가능 여부를 표시한다', () => {
-  render(<PensionLoan loanAmount={500} collateralAmount={4000} />)
+  render(<PensionLoan loanAmount={12_500} collateralAmount={100_000} />)
   const region = within(screen.getByRole('region', { name: '대출현황' }))
-  expect(region.getByText('대출금액').nextElementSibling).toHaveTextContent('500원')
+  expect(region.getByText('대출금액').nextElementSibling).toHaveTextContent('12,500원')
   expect(region.getByText('담보비율').nextElementSibling).toHaveTextContent('800.00%')
   expect(region.getByText('담보비율').nextElementSibling).toHaveClass('text-emerald-600')
   expect(region.getByText('융자비율').nextElementSibling).toHaveTextContent('12.50%')
@@ -32,11 +32,25 @@ it('담보비율이 140% 이하이면 경고하고 신규 대출 불가를 표�
   expect(region.getByText('신규 대출 불가')).toBeInTheDocument()
 })
 
-it('대출이 없으면 대출 없음을 표시한다', () => {
-  render(<PensionLoan loanAmount={0} collateralAmount={4000} />)
+it('대출이 없고 담보가 충분하면 신규 대출 가능을 표시한다', () => {
+  render(<PensionLoan loanAmount={0} collateralAmount={20_000} />)
   expect(screen.getByText('대출 없음')).toBeInTheDocument()
   expect(screen.getByText('신규 대출 가능')).toBeInTheDocument()
   expect(screen.queryByText('담보비율')).not.toBeInTheDocument()
+})
+
+it('대출이 0원이라도 담보가 없으면 신규 대출 불가를 표시한다', () => {
+  render(<PensionLoan loanAmount={0} collateralAmount={0} />)
+  expect(screen.getByText('대출 없음')).toBeInTheDocument()
+  expect(screen.getByText('신규 대출 불가')).toBeInTheDocument()
+  expect(screen.queryByText('신규 대출 가능')).not.toBeInTheDocument()
+})
+
+it('대출이 0원이라도 가능금액이 1만원 미만이면 신규 대출 불가를 표시한다', () => {
+  render(<PensionLoan loanAmount={0} collateralAmount={10_000} />)
+  expect(screen.getByText('대출 없음')).toBeInTheDocument()
+  expect(screen.getByText('신규 대출 불가')).toBeInTheDocument()
+  expect(screen.queryByText('신규 대출 가능')).not.toBeInTheDocument()
 })
 
 it('펀드 평가금액이 필요 담보를 넘으면 추가 인출 가능 알림을 표시한다', () => {
