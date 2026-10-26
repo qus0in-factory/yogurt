@@ -28,7 +28,7 @@ describe('EditAccountDialog', () => {
     expect(screen.getAllByLabelText(/소유자|별칭/).map((el) => el.getAttribute('name'))).toEqual(['owner', 'alias'])
     expect(screen.getByLabelText('별칭')).toHaveValue('주계좌')
     expect(screen.getByLabelText('소유자')).toHaveValue('김철수')
-    expect(screen.getByLabelText('별칭')).toHaveAttribute('maxLength', '8')
+    expect(screen.getByLabelText('별칭')).toHaveAttribute('maxLength', '16')
     expect(screen.getByLabelText('소유자')).toHaveAttribute('maxLength', '8')
     expect(screen.getByText('12345678')).toBeInTheDocument()
     expect(screen.queryByLabelText('계좌번호')).not.toBeInTheDocument()

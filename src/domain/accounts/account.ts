@@ -3,7 +3,7 @@ import { accountCredentialsSchema } from './credentials'
 import { productPlanSchema } from './product-plan'
 import type { accountProductSchema } from './products'
 
-const alias = z.string().trim().min(1, { error: '별칭을 입력하세요' }).max(8, { error: '별칭은 8자 이하로 입력하세요' })
+const alias = z.string().trim().min(1, { error: '별칭을 입력하세요' }).max(16, { error: '별칭은 16자 이하로 입력하세요' })
 const owner = z.string().trim().min(1, { error: '소유자를 입력하세요' }).max(8, { error: '소유자는 8자 이하로 입력하세요' })
 
 export const accountInputSchema = z.object({

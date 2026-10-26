@@ -31,7 +31,7 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
   })
   const field = (label: string, name: keyof AccountUpdate, extra: FieldExtra = {}, sanitize?: (value: string) => string) => (
     <Controller name={name} control={control} render={({ field: f, fieldState }) => (
-      <TextField label={label} name={name} maxLength={8} value={f.value} onChange={(value) => f.onChange(sanitize?.(value) ?? value)} error={fieldState.error?.message} {...extra} />
+      <TextField label={label} name={name} maxLength={extra.maxLength ?? (name === 'alias' ? 16 : 8)} value={f.value} onChange={(value) => f.onChange(sanitize?.(value) ?? value)} error={fieldState.error?.message} {...extra} />
     )} />
   )
 
@@ -53,9 +53,9 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
     <>
       <Dialog open onClose={close} title={keysOnly ? credentialsText.title : accountsText.editTitle}>
         {keysOnly ? <CredentialsForm accountId={account.id} onBack={() => setKeysOnly(false)} onClose={close} /> : <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          {field(accountsText.owner, 'owner', { list: ownerListId, autoComplete: 'off' })}
+          {field(accountsText.owner, 'owner', { maxLength: 8, list: ownerListId, autoComplete: 'off' })}
           <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
-          {field(accountsText.alias, 'alias')}
+          {field(accountsText.alias, 'alias', { maxLength: 16 })}
           <p className={typeScale.body}>
             {accountsText.accountNumber}: <span>{account.accountNumber}</span>
           </p>
