@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { daysUntil, isaExpiry, isaK, isaStatus, isaTerm, safeIsaExpiry } from '../../../src/app/accounts/isa-term'
+import { daysUntil, isaExpiry, isaK, isaStatus, isaTerm, isaYear, safeIsaExpiry } from '../../../src/app/accounts/isa-term'
 
 describe('isaExpiry', () => {
   it('시작일로부터 정확히 3년 후를 반환한다', () => {
@@ -50,5 +50,27 @@ describe('isaStatus', () => {
 describe('isaTerm', () => {
   it('만료일·남은 일수·상태를 함께 계산한다', () => {
     expect(isaTerm('2024-03-15', '2027-03-01')).toEqual({ expiry: '2027-03-15', daysLeft: 14, status: 'expiringSoon' })
+  })
+})
+
+describe('isaYear', () => {
+  it('시작 월부터 12개월 단위로 1년차·2년차·3년차를 계산한다', () => {
+    // k=1 (2024-03) -> 1
+    expect(isaYear('2024-03-15', '2024-03-15')).toBe(1)
+    // k=12 (2025-02) -> 1
+    expect(isaYear('2024-03-15', '2025-02-28')).toBe(1)
+    // k=13 (2025-03) -> 2
+    expect(isaYear('2024-03-15', '2025-03-01')).toBe(2)
+    // k=25 (2026-03) -> 3
+    expect(isaYear('2024-03-15', '2026-03-01')).toBe(3)
+  })
+
+  it('시작 이전이면 beforeStart 를 반환한다', () => {
+    expect(isaYear('2024-03-15', '2024-02-15')).toBe('beforeStart')
+  })
+
+  it('만기가 지나 expired 상태이면 null 을 반환한다', () => {
+    // 2024-03-15 만기는 2027-03-15, 2027-03-16은 만기 경과 (expired)
+    expect(isaYear('2024-03-15', '2027-03-16')).toBeNull()
   })
 })
