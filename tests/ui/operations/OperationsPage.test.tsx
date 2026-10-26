@@ -30,11 +30,11 @@ describe('OperationsPage', () => {
     expect(await screen.findByText('포트폴리오가 없습니다')).toBeInTheDocument()
   })
 
-  it('리밸런싱 탭을 클릭하면 리밸런싱 준비 중 화면이 보인다', () => {
+  it('리밸런싱 탭을 클릭하면 연결 포트폴리오가 없을 때 안내 화면이 보인다', async () => {
     renderOperationsPage()
     fireEvent.click(screen.getByRole('tab', { name: '리밸런싱' }))
     expect(screen.getByRole('tab', { name: '리밸런싱' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByRole('tab', { name: '포트폴리오' })).toHaveAttribute('aria-selected', 'false')
-    expect(screen.getByText('포트폴리오 기반 리밸런싱 기능을 준비하고 있습니다')).toBeInTheDocument()
+    expect(await screen.findByText('선택 가능한 연결 포트폴리오가 없습니다.')).toBeInTheDocument()
   })
 })

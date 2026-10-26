@@ -1,10 +1,9 @@
-import { Scale } from 'lucide-react'
-import { EmptyState } from '../components/EmptyState'
 import { SectionHeading } from '../components/SectionHeading'
 import { operationsText } from '../glossary/operations'
 import { useOperationsStore } from '../state/operations-store'
 import { OperationsTabs } from './OperationsTabs'
 import { PortfolioSection } from './portfolio-list/PortfolioSection'
+import { RebalanceSection } from './rebalance/RebalanceSection'
 
 export function OperationsPage() {
   const tab = useOperationsStore((state) => state.tab)
@@ -19,16 +18,7 @@ export function OperationsPage() {
         aria-labelledby={`operations-tab-${tab}`}
         className="mt-4"
       >
-        {tab === 'portfolio' ? (
-          <PortfolioSection />
-        ) : (
-          <EmptyState
-            icon={Scale}
-            title={operationsText.rebalancingEmptyTitle}
-            description={operationsText.rebalancingEmptyDescription}
-            className="mt-3"
-          />
-        )}
+        {tab === 'portfolio' ? <PortfolioSection /> : <RebalanceSection />}
       </div>
     </section>
   )
