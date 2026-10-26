@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { PortfolioAssignmentProduct } from './PortfolioAssignmentProduct'
 import { PortfolioAssignmentStatus } from './PortfolioAssignmentStatus'
 import { PORTFOLIOS_QUERY_KEY, useClearPortfolioAssignment, useSetPortfolioAssignment } from '../../../app/portfolio/queries'
+import { Sensitive } from '../../components/Sensitive'
 import { portfolioListText } from '../../glossary/portfolio-list'
 import { typeScale } from '../../styles/type-scale'
 import type { ActiveProductTarget } from './portfolio-list-model'
@@ -39,7 +40,8 @@ export function PortfolioAssignmentRow({ target, portfolioId, otherName, isaStar
         </label>
       </td>
       <td className="px-2 py-1">
-        {target.accountLabel}
+        <Sensitive>{target.accountNumber}</Sensitive>
+        <span>{target.alias ? `(${target.alias})` : ''}</span>
         {error ? <p role="alert" className="text-rose-600">{portfolioListText.assignmentFailed}</p> : null}
       </td>
       <td className="whitespace-normal px-2 py-1">

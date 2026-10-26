@@ -1,11 +1,11 @@
 import { calculateAxisRange, type PathPoint } from '../../app/accounts/isa-progress-path'
 import { formatPercent } from '../../app/accounts/isa-progress-position'
+import { Sensitive } from '../components/Sensitive'
 import { isaText } from '../glossary/isa'
 
 interface Props {
   currentAssets: number; points: PathPoint[]; hasMid: boolean
-  currentMonth?: string; expiryMonth?: string
-  lastClose?: { date: string; totalAssetsWon: number } | null
+  currentMonth?: string; expiryMonth?: string; lastClose?: { date: string; totalAssetsWon: number } | null
   isLoadingLastClose?: boolean; wide?: boolean
 }
 
@@ -61,7 +61,7 @@ export function IsaProgressChart({
             <text data-testid="closing-loading" x={getX(curIdx)} y={waitY} textAnchor="middle" className="text-xs font-semibold fill-slate-500">{isaText.progressClosingLoading}</text>
           ) : closedWon !== null && lastClose ? (
             <text x={getX(curIdx)} y={Math.max(12, (closedY ?? waitY) - 8)} textAnchor="middle" className="text-xs font-semibold fill-primary-700">
-              <tspan data-testid="last-close-value">{toMan(closedWon)}</tspan> <tspan data-testid="last-close-date" className="text-xs font-normal fill-slate-500">{lastClose.date}</tspan>
+              <tspan data-testid="last-close-value"><Sensitive as="tspan" className="text-xs">{toMan(closedWon)}</Sensitive></tspan> <tspan data-testid="last-close-date" className="text-xs font-normal fill-slate-500"><Sensitive as="tspan" className="text-xs">{lastClose.date}</Sensitive></tspan>
             </text>
           ) : (
             <text data-testid="closing-wait" x={getX(curIdx)} y={waitY} textAnchor="middle" className="text-xs font-semibold fill-amber-700">{isaText.progressWaitClosing}</text>
@@ -70,7 +70,7 @@ export function IsaProgressChart({
           <>
             <text x={getX(curIdx)} y={titleY} textAnchor="middle" className="text-xs font-semibold fill-primary-700">{isaText.progressCurrent}</text>
             {statusText && <text x={getX(curIdx)} y={statusY} textAnchor="middle" className="text-xs font-semibold fill-blue-700">{statusText}</text>}
-            {targetLabel && <text x={getX(curIdx)} y={targetY} textAnchor="middle" className="text-xs fill-slate-500">{targetLabel}</text>}
+            {targetLabel && <text x={getX(curIdx)} y={targetY} textAnchor="middle" className="text-xs fill-slate-500"><Sensitive as="tspan" className="text-xs">{targetLabel}</Sensitive></text>}
           </>
         )}
       </svg>

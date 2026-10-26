@@ -1,4 +1,5 @@
 import type { PathPoint } from '../../app/accounts/isa-progress-path'
+import { Sensitive } from '../components/Sensitive'
 import { isaText } from '../glossary/isa'
 import { typeScale } from '../styles/type-scale'
 
@@ -9,7 +10,7 @@ function AmountCell({ val }: { val: number | null }) {
   const man = Math.round(val / 10_000).toLocaleString('ko-KR')
   return (
     <td className="p-2">
-      <span className={typeScale.number}>{man}<span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span></span>
+      <Sensitive className={typeScale.number}>{man}</Sensitive><span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span>
     </td>
   )
 }
@@ -31,7 +32,7 @@ export function IsaProgressTable({ points, hasMid }: Props) {
           <tbody>
             {points.map((pt) => (
               <tr key={pt.month} className="border-t border-primary-50">
-                <td className={`p-2 ${typeScale.caption}`}>{pt.month.replace('-', '.')}</td>
+                <td className={`p-2 ${typeScale.caption}`}><Sensitive>{pt.month.replace('-', '.')}</Sensitive></td>
                 <AmountCell val={pt.min} />
                 {hasMid ? <AmountCell val={pt.mid} /> : null}
                 <AmountCell val={pt.max} />

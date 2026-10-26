@@ -7,6 +7,7 @@ import { useKisToken } from './useKisToken'
 import type { Account } from '../../domain/accounts/account'
 import type { KisStatusInfo } from './useKisStatus'
 import { Button } from '../components/Button'
+import { Sensitive } from '../components/Sensitive'
 import { accountsText } from '../glossary/accounts'
 import { cn } from '../lib/cn'
 import { spacing, typeScale } from '../styles/type-scale'
@@ -37,15 +38,14 @@ export function AccountCard({ account, onSelect, onEdit, kisStatus }: AccountCar
         : accountsText.kisConnectedExpiry(format(new TZDate(kisStatus.expiresAt, 'Asia/Seoul'), 'HH:mm'))
   return (
     <div
-      role="group" tabIndex={0}
-      aria-roledescription={accountsText.card} aria-label={account.alias}
+      role="group" tabIndex={0} aria-roledescription={accountsText.card} aria-label={account.alias}
       onClick={onSelect} onFocus={onSelect}
       className={cn('relative w-full shrink-0 border border-primary-200 bg-white shadow-sm', spacing.card)}
     >
       <div className={cn(spacing.stack, 'pr-20')}>
-        <p className={typeScale.caption}>{account.owner}</p>
+        <Sensitive as="p" className={typeScale.caption}>{account.owner}</Sensitive>
         <p className={cn(typeScale.title, 'truncate')}>{account.alias}</p>
-        <p className={typeScale.number}>{account.accountNumber}</p>
+        <Sensitive as="p" className={typeScale.number}>{account.accountNumber}</Sensitive>
         <ProductToggles account={account} />
       </div>
       <div className="absolute right-2 top-2 flex items-center gap-2">

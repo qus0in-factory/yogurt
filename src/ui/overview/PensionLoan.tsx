@@ -1,6 +1,7 @@
 import { COLLATERAL_MIN_PERCENT, MAX_LOAN_KRW, NEW_LOAN_MAX_PERCENT, loanRatios, requiredCollateral, withdrawableExcess } from '../../app/kis/loan-ratios'
 import { InfoTooltip } from '../components/InfoTooltip'
 import { overviewText as text } from '../glossary/overview'
+import { Sensitive } from '../components/Sensitive'
 import { typeScale } from '../styles/type-scale'
 import { PensionLoanNotice } from './PensionLoanNotice'
 import { SectionHeading } from '../components/SectionHeading'
@@ -28,7 +29,7 @@ export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: numb
           <span className={typeScale.label}>{text.loanAmount}</span>
           <InfoTooltip label={text.loanAmountTooltipLabel}>{help}</InfoTooltip>
         </div>
-        <p className={`mt-1 ${typeScale.number}`}>{text.won(0)}</p>
+        <p className={`mt-1 ${typeScale.number}`}><Sensitive>{text.won(0)}</Sensitive></p>
         <p className={`mt-1 ${typeScale.body}`}>{text.noLoan}</p>
         <LoanAvailableChip available={ratios.newLoanAvailable} />
       </section>
@@ -45,7 +46,7 @@ export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: numb
             {text.loanAmount}
             <InfoTooltip label={text.loanAmountTooltipLabel}>{help}</InfoTooltip>
           </dt>
-          <dd className={typeScale.number}>{text.won(loanAmount)}</dd>
+          <dd className={typeScale.number}><Sensitive>{text.won(loanAmount)}</Sensitive></dd>
         </div>
         <div>
           <dt className={`flex items-center gap-1 ${typeScale.label}`}>

@@ -1,5 +1,6 @@
 import { overviewText as text } from '../glossary/overview'
 import type { RiskClass } from '../../app/kis/risk-class-client'
+import { Sensitive } from '../components/Sensitive'
 import { typeScale } from '../styles/type-scale'
 import { RiskToggle } from './RiskToggle'
 import { WeightBar } from '../components/WeightBar'
@@ -20,15 +21,15 @@ export function IrpHoldingCard({ holding, riskClass = 'risk', onToggle = () => {
       <dl className="mt-3 grid grid-cols-2 gap-4 max-[768px]:mt-2 max-[768px]:gap-3 max-[375px]:gap-2">
         <div className="min-w-0">
           <dt className={typeScale.label}>{text.quantity}</dt>
-          <dd className={`text-right ${typeScale.number}`}>{text.number(holding.quantity)}</dd>
+          <dd className={`text-right ${typeScale.number}`}><Sensitive className={`text-right ${typeScale.number}`}>{text.number(holding.quantity)}</Sensitive></dd>
         </div>
         <div className="min-w-0">
           <dt className={typeScale.label}>{text.evaluation}</dt>
-          <dd className={`text-right ${typeScale.number}`}>{text.won(holding.evaluationAmount)}</dd>
+          <dd className={`text-right ${typeScale.number}`}><Sensitive className={`text-right ${typeScale.number}`}>{text.won(holding.evaluationAmount)}</Sensitive></dd>
         </div>
         <div className="min-w-0">
           <dt className={typeScale.label}>{text.profitLoss}</dt>
-          <dd className={`text-right ${typeScale.number}`}><span className={`tabular-nums ${text.pnlColor(holding.profitLoss)}`}>{text.signedWon(holding.profitLoss)}</span></dd>
+          <dd className={`text-right ${typeScale.number}`}><Sensitive className={`tabular-nums ${text.pnlColor(holding.profitLoss)}`}>{text.signedWon(holding.profitLoss)}</Sensitive></dd>
         </div>
         <div className="min-w-0">
           <dt className={typeScale.label}>{text.profitRate}</dt>

@@ -10,6 +10,8 @@ export type ActiveProductTarget = {
   key: string
   accountId: string
   productCode: '01' | '22'
+  accountNumber: string
+  alias: string
   accountLabel: string
   label: string
   assignedPortfolioId: string | null
@@ -35,6 +37,7 @@ export function buildActiveProductTargets(accounts: Account[], assignments: Port
       const key = `${account.id}:${product.code}`
       return {
         key, accountId: account.id, productCode: product.code,
+        accountNumber: account.accountNumber, alias: account.alias,
         accountLabel: portfolioListText.accountLabel(account.accountNumber, account.alias),
         label: portfolioListText.targetLabel(account.accountNumber, account.alias, portfolioListText.productNames[product.code]),
         assignedPortfolioId: assignmentMap.get(key) ?? null,

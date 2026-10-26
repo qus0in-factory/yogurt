@@ -1,5 +1,6 @@
 import type { IsaPositionResult } from '../../app/accounts/isa-progress-position'
 import { formatPercent } from '../../app/accounts/isa-progress-position'
+import { Sensitive } from '../components/Sensitive'
 import { isaText } from '../glossary/isa'
 import { typeScale } from '../styles/type-scale'
 
@@ -25,7 +26,7 @@ export function IsaProgressSummary({ currentAssets, position }: Props) {
 
   return (
     <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-      <span className={typeScale.number}>{manwon.toLocaleString('ko-KR')}<span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span></span>
+      <Sensitive className={typeScale.number}>{manwon.toLocaleString('ko-KR')}</Sensitive><span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span>
       {posPct && statusLabel ? (
         <span className="inline-flex items-baseline gap-1">
           <span className={typeScale.caption}>{isaText.progressRangePosition}</span>

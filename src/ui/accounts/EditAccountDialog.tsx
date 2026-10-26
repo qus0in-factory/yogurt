@@ -7,9 +7,9 @@ import { ownerSuggestions } from '../../app/accounts/owner-suggestions'
 import { accountUpdateSchema, type Account, type AccountUpdate } from '../../domain/accounts/account'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
+import { Sensitive } from '../components/Sensitive'
 import { TextField } from '../components/TextField'
-import { accountsText } from '../glossary/accounts'
-import { credentialsText } from '../glossary/credentials'
+import { accountsText } from '../glossary/accounts'; import { credentialsText } from '../glossary/credentials'
 import { typeScale } from '../styles/type-scale'
 import { CredentialsForm } from './CredentialsForm'
 import { DeleteAccountDialog } from './DeleteAccountDialog'
@@ -57,7 +57,7 @@ export function EditAccountDialog({ account, onClose }: EditAccountDialogProps) 
           <datalist id={ownerListId}>{owners.map((owner) => <option key={owner} value={owner} />)}</datalist>
           {field(accountsText.alias, 'alias', { maxLength: 16 })}
           <p className={typeScale.body}>
-            {accountsText.accountNumber}: <span>{account.accountNumber}</span>
+            {accountsText.accountNumber}: <Sensitive>{account.accountNumber}</Sensitive>
           </p>
           <Button type="button" variant="outline" className="gap-2" onClick={() => setKeysOnly(true)}>
             <KeyRound className="h-4 w-4" aria-hidden />{credentialsText.replace}
