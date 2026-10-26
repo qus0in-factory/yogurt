@@ -6,14 +6,22 @@ import { StatGrid } from '../components/StatGrid'
 import { isaText } from '../glossary/isa'
 import { typeScale } from '../styles/type-scale'
 
-interface Props {
-  plan?: Partial<ProductPlan>
-  totalAssets?: number | null
-  today?: string
+interface Props { plan?: Partial<ProductPlan>; totalAssets?: number | null; today?: string }
+
+const display = (m: number | null) => (m === null ? isaText.unset : isaText.amount(m))
+
+function TargetVal({ man }: { man: number | null }) {
+  if (man === null) return <span>{isaText.noTarget}</span>
+  return <span className="inline-flex items-baseline whitespace-nowrap"><span className={typeScale.number}>{man.toLocaleString('ko-KR')}</span><span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span></span>
 }
 
-function display(manwon: number | null): string {
-  return manwon === null ? isaText.unset : isaText.amount(manwon)
+function TargetPair({ label, man }: { label: string; man: number | null }) {
+  return (
+    <div data-testid="month-target-pair" className="flex items-center gap-1.5">
+      <span className={typeScale.caption}>{label}</span>
+      <TargetVal man={man} />
+    </div>
+  )
 }
 
 export function IsaPlanAmountSummary({ plan, totalAssets, today = seoulToday() }: Props) {
@@ -21,18 +29,7 @@ export function IsaPlanAmountSummary({ plan, totalAssets, today = seoulToday() }
   const { minTargetAmountManwon, maxTargetAmountManwon } = fromProductPlan(plan)
   const l = plan.minTargetAmountWon ?? (minTargetAmountManwon ? minTargetAmountManwon * 10_000 : null)
   const u = plan.maxTargetAmountWon ?? (maxTargetAmountManwon ? maxTargetAmountManwon * 10_000 : null)
-  const month = calculateCurrentMonthTargets(
-    plan.startDate,
-    today,
-    l,
-    u,
-    totalAssets ?? null,
-    isaText.manUnit,
-    isaText.noTarget,
-    isaText.needStartDate,
-    isaText.beforeStart,
-  )
-  const fmt = (man: number | null) => (man !== null ? isaText.amount(man) : isaText.noTarget)
+  const month = calculateCurrentMonthTargets(plan.startDate, today, l, u, totalAssets ?? null, isaText.manUnit, isaText.noTarget, isaText.needStartDate, isaText.beforeStart)
 
   return (
     <div data-testid="isa-amount-summary" className="space-y-3">
@@ -45,21 +42,21 @@ export function IsaPlanAmountSummary({ plan, totalAssets, today = seoulToday() }
       />
       {month ? (
         <div data-testid="isa-month-target-summary" className="space-y-2 rounded border border-primary-100 bg-white p-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 min-[769px]:flex-row min-[769px]:items-center min-[769px]:justify-between">
             <span className={typeScale.label}>{isaText.currentMonthTarget}</span>
-            <div className={`flex items-center gap-2 ${typeScale.caption}`}>
-              <span>{fmt(month.minTargetManwon)}</span>
-              <span>/</span>
-              <span>{fmt(month.midTargetManwon)}</span>
-              <span>/</span>
-              <span>{fmt(month.maxTargetManwon)}</span>
+            <div className={`flex flex-col gap-2 min-[769px]:flex-row min-[769px]:items-center min-[769px]:gap-2 ${typeScale.caption}`}>
+              <TargetPair label={isaText.targetMin} man={month.minTargetManwon} />
+              <span className="hidden min-[769px]:inline text-stone-300">/</span>
+              <TargetPair label={isaText.progressMidLabel} man={month.midTargetManwon} />
+              <span className="hidden min-[769px]:inline text-stone-300">/</span>
+              <TargetPair label={isaText.targetMax} man={month.maxTargetManwon} />
             </div>
           </div>
           {totalAssets !== null && totalAssets !== undefined ? (
             <div className={`space-y-1 border-t border-primary-50 pt-2 ${typeScale.caption}`}>
-              <div className="flex justify-between"><span>{isaText.diffMin}</span><span className="font-semibold">{month.minDiffText}</span></div>
-              <div className="flex justify-between"><span>{isaText.diffMid}</span><span className="font-semibold">{month.midDiffText}</span></div>
-              <div className="flex justify-between"><span>{isaText.diffMax}</span><span className="font-semibold">{month.maxDiffText}</span></div>
+              <div className="flex justify-between items-center"><span>{isaText.diffMin}</span><span className={typeScale.number}>{month.minDiffText}</span></div>
+              <div className="flex justify-between items-center"><span>{isaText.diffMid}</span><span className={typeScale.number}>{month.midDiffText}</span></div>
+              <div className="flex justify-between items-center"><span>{isaText.diffMax}</span><span className={typeScale.number}>{month.maxDiffText}</span></div>
             </div>
           ) : null}
         </div>

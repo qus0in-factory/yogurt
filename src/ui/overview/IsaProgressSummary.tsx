@@ -3,42 +3,38 @@ import { formatPercent } from '../../app/accounts/isa-progress-position'
 import { isaText } from '../glossary/isa'
 import { typeScale } from '../styles/type-scale'
 
-interface Props {
-  currentAssets: number
-  position: IsaPositionResult | null
+interface Props { currentAssets: number; position: IsaPositionResult | null }
+
+const splitPct = (v: string | null) => (v && v.endsWith('%') ? { n: v.slice(0, -1), u: '%' } : null)
+
+function Pct({ label, pct }: { label: string; pct: { n: string; u: string } }) {
+  return (
+    <span className="inline-flex items-baseline gap-1">
+      <span className={typeScale.caption}>{label}</span>
+      <span className={typeScale.number}>{pct.n}<span className={`${typeScale.caption} font-normal`}>{pct.u}</span></span>
+    </span>
+  )
 }
 
 export function IsaProgressSummary({ currentAssets, position }: Props) {
   const manwon = Math.round(currentAssets / 10_000)
-  const posText = position?.rangePosition !== null && position?.rangePosition !== undefined
-    ? formatPercent(position.rangePosition)
-    : null
-  const statusLabel = position?.status === 'below'
-    ? isaText.progressBelow
-    : position?.status === 'above'
-    ? isaText.progressAbove
-    : position?.status === 'within'
-    ? isaText.progressWithin
-    : null
+  const posPct = splitPct(position?.rangePosition !== null && position?.rangePosition !== undefined ? formatPercent(position.rangePosition) : null)
+  const statusLabel = position?.status === 'below' ? isaText.progressBelow : position?.status === 'above' ? isaText.progressAbove : position?.status === 'within' ? isaText.progressWithin : null
+  const minPct = splitPct(position?.minAchievement !== null && position?.minAchievement !== undefined ? formatPercent(position.minAchievement) : null)
+  const maxPct = splitPct(position?.maxAchievement !== null && position?.maxAchievement !== undefined ? formatPercent(position.maxAchievement) : null)
 
   return (
     <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-      <span className={typeScale.number}>{isaText.amount(manwon)}</span>
-      {posText && statusLabel ? (
-        <span className={typeScale.caption}>
-          {isaText.progressRangePosition} {posText} ({statusLabel})
+      <span className={typeScale.number}>{manwon.toLocaleString('ko-KR')}<span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span></span>
+      {posPct && statusLabel ? (
+        <span className="inline-flex items-baseline gap-1">
+          <span className={typeScale.caption}>{isaText.progressRangePosition}</span>
+          <span className={typeScale.number}>{posPct.n}<span className={`${typeScale.caption} font-normal`}>{posPct.u}</span></span>
+          <span className={typeScale.caption}>({statusLabel})</span>
         </span>
       ) : null}
-      {position?.minZero ? (
-        <span className={typeScale.caption}>{isaText.minTarget} {isaText.progressZeroTarget}</span>
-      ) : position?.minAchievement !== null && position?.minAchievement !== undefined ? (
-        <span className={typeScale.caption}>{isaText.minTarget} {formatPercent(position.minAchievement)}</span>
-      ) : null}
-      {position?.maxZero ? (
-        <span className={typeScale.caption}>{isaText.maxTarget} {isaText.progressZeroTarget}</span>
-      ) : position?.maxAchievement !== null && position?.maxAchievement !== undefined ? (
-        <span className={typeScale.caption}>{isaText.maxTarget} {formatPercent(position.maxAchievement)}</span>
-      ) : null}
+      {position?.minZero ? <span className={typeScale.caption}>{isaText.minTarget} {isaText.progressZeroTarget}</span> : minPct ? <Pct label={isaText.minTarget} pct={minPct} /> : null}
+      {position?.maxZero ? <span className={typeScale.caption}>{isaText.maxTarget} {isaText.progressZeroTarget}</span> : maxPct ? <Pct label={isaText.maxTarget} pct={maxPct} /> : null}
     </div>
   )
 }

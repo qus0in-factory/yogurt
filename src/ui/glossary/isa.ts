@@ -54,6 +54,8 @@ export const isaText = {
   beforeStart: '시작 전',
   progressMidLabel: '50%',
   progressTableToggle: '월별 목표 기준 표',
+  targetMin: '최소',
+  targetMax: '최대',
   manUnit: '만',
   monthUnit: '월',
   daysLeft: (days: number) => `D-${days}`,
