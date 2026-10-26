@@ -21,11 +21,14 @@
     "check": "tsc --noEmit",
     "secret:setup": "node src/infra/cli/secret-setup-cli.ts",
     "version:patch": "npm version patch --no-git-tag-version",
-    "version:minor": "npm version minor --no-git-tag-version"
+    "version:minor": "npm version minor --no-git-tag-version",
+    "e2e": "playwright test --config e2e/infra/playwright.config.ts",
+    "e2e:shots": "playwright test --config e2e/infra/playwright.config.ts --grep @shots"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.64.0",
     "@cloudflare/workers-types": "^5.20261023.1",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
