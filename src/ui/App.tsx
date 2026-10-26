@@ -7,6 +7,7 @@ import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
 import { AccountsPage } from './accounts/AccountsPage'
 import { OverviewPage } from './overview/OverviewPage'
+import { OperationsPage } from './operations/OperationsPage'
 import { useUiStore } from './state/ui-store'
 import { commonText } from './glossary'
 import { cn } from './lib/cn'
@@ -16,7 +17,7 @@ export function App() {
   const session = useSession()
   const logoutMutation = useLogout()
   const screen = useUiStore((state) => state.screen)
-  const active = screen === 'overview' ? 'overview' : 'accounts'
+  const active = screen === 'overview' || screen === 'operations' ? screen : 'accounts'
   const drawerOpen = useUiStore((state) => state.drawerOpen)
   const navigate = useUiStore((state) => state.navigate)
   const setDrawerOpen = useUiStore((state) => state.setDrawerOpen)
@@ -67,7 +68,7 @@ export function App() {
           </div>
         </header>
         <main className={cn('flex-1', spacing.page)}>
-          {active === 'overview' ? <OverviewPage /> : <AccountsPage />}
+          {active === 'overview' ? <OverviewPage /> : active === 'operations' ? <OperationsPage /> : <AccountsPage />}
         </main>
       </div>
     </div>

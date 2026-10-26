@@ -1,20 +1,20 @@
-import { ACCOUNT_PRODUCTS } from '../../domain/accounts/products'
 import { overviewText } from '../glossary/overview'
 import { useUiStore } from '../state/ui-store'
 import { productIcons } from './product-icons'
 import { typeScale } from '../styles/type-scale'
 import { ProductTab } from './ProductTab'
+import { OVERVIEW_TAB_ITEMS } from './overview-tabs'
 
 export function OverviewPage() {
   const tab = useUiStore((state) => state.overviewTab)
   const setTab = useUiStore((state) => state.setOverviewTab)
-  const activeProduct = ACCOUNT_PRODUCTS.find((p) => p.key === tab) ?? ACCOUNT_PRODUCTS[0]
+  const activeProduct = OVERVIEW_TAB_ITEMS.find((p) => p.key === tab) ?? OVERVIEW_TAB_ITEMS[0]
 
   return (
     <section>
       <h1 className={typeScale.pageTitle}>{overviewText.title}</h1>
       <div role="tablist" aria-label={overviewText.tabsLabel} className="mt-4 inline-flex rounded-lg bg-stone-100 p-1">
-        {ACCOUNT_PRODUCTS.map((product) => {
+        {OVERVIEW_TAB_ITEMS.map((product) => {
           const Icon = productIcons[product.key]
           const isSelected = product.key === activeProduct.key
           return (
