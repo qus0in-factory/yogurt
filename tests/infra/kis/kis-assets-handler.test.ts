@@ -9,7 +9,7 @@ const summary = { tot_asst_amt: '100', nass_tot_amt: '90', evlu_amt_smtl: '80',
   pchs_amt_smtl: '70', evlu_pfls_amt_smtl: '10', loan_amt_smtl: '10',
   dncl_amt: '20', tot_dncl_amt: '30', cma_evlu_amt: '40', frcr_evlu_tota: '50' }
 const request = vi.fn<KisAccountClient['request']>()
-const account = { accountNumber: '12345678', productCode: '29', request, ensureToken: vi.fn() }
+const account = { accountNumber: '12345678', productCode: '29', request, ensureToken: vi.fn(), hashkey: vi.fn(async () => 'h') }
 const forAccount = vi.fn(async (_id: string) => account as typeof account | null)
 const fetchFn = vi.fn<typeof fetch>()
 const get = (code = '29') => new Hono<{ Bindings: Env }>()

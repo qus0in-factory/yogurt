@@ -2,7 +2,8 @@ import { parseStockBalance } from '../../domain/kis/stock-balance.ts'
 
 export type KisAccountClient = {
   accountNumber: string
-  request: (path: string, options: { method: string; trId: string; query?: Record<string, string> }) => Promise<Response>
+  request: (path: string, options: { method: string; trId: string; query?: Record<string, string>; body?: unknown; headers?: Record<string, string>; retry?: boolean }) => Promise<Response>
+  hashkey?: (body: unknown) => Promise<string>
 }
 
 export class KisApiError extends Error {
@@ -14,8 +15,10 @@ export class KisApiError extends Error {
   }
 }
 
-const PATH = '/uapi/domestic-stock/v1/trading/inquire-balance'
-const TR_ID = 'TTTC8434R'
+export const BALANCE_PATH = '/uapi/domestic-stock/v1/trading/inquire-balance'
+export const BALANCE_TR_ID = 'TTTC8434R'
+const PATH = BALANCE_PATH
+const TR_ID = BALANCE_TR_ID
 const PAGE_QUERY = {
   AFHR_FLPR_YN: 'N', OFL_YN: '', INQR_DVSN: '02', UNPR_DVSN: '01',
   FUND_STTL_ICLD_YN: 'N', FNCG_AMT_AUTO_RDPT_YN: 'N', PRCS_DVSN: '00',

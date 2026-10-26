@@ -70,3 +70,6 @@ export function createStockRoutes(fetchFn: typeof fetch = fetch) {
 }
 
 export const stockRoutes = createStockRoutes()
+
+// worker 등록 한 줄 유지를 위한 재노출. 구현은 trading 모듈에 있다.
+export { orderRoutes } from '../trading/order-routes.ts'
