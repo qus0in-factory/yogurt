@@ -22,6 +22,11 @@ describe('last-page-storage valid & persistence', () => {
     expect(localStorage.getItem(LAST_PAGE_STORAGE_KEY)).toBe(
       JSON.stringify({ version: LAST_PAGE_STORAGE_VERSION, screen: 'accounts' }),
     )
+
+    writeLastPage('operations')
+    expect(localStorage.getItem(LAST_PAGE_STORAGE_KEY)).toBe(
+      JSON.stringify({ version: LAST_PAGE_STORAGE_VERSION, screen: 'operations' }),
+    )
   })
 
   it('유효한 JSON을 정상 복원한다', () => {
@@ -30,6 +35,14 @@ describe('last-page-storage valid & persistence', () => {
       JSON.stringify({ version: 1, screen: 'overview' }),
     )
     expect(readLastPage()).toBe('overview')
+  })
+
+  it('운용 화면도 복원한다', () => {
+    localStorage.setItem(
+      LAST_PAGE_STORAGE_KEY,
+      JSON.stringify({ version: 1, screen: 'operations' }),
+    )
+    expect(readLastPage()).toBe('operations')
   })
 
   it('키가 없으면 기본값 accounts를 반환한다', () => {

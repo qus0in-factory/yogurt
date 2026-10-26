@@ -14,7 +14,7 @@ export function readLastPage(): PageId {
     if (parsed.version !== LAST_PAGE_STORAGE_VERSION) {
       return DEFAULT_PAGE
     }
-    if (parsed.screen !== 'overview' && parsed.screen !== 'accounts') {
+    if (parsed.screen !== 'overview' && parsed.screen !== 'accounts' && parsed.screen !== 'operations') {
       return DEFAULT_PAGE
     }
     return parsed.screen

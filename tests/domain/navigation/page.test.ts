@@ -9,8 +9,10 @@ describe('page domain', () => {
   it('유효한 페이지 식별자를 유지한다', () => {
     expect(normalizePage('overview')).toBe('overview')
     expect(normalizePage('accounts')).toBe('accounts')
+    expect(normalizePage('operations')).toBe('operations')
     expect(isPageId('overview')).toBe(true)
     expect(isPageId('accounts')).toBe(true)
+    expect(isPageId('operations')).toBe(true)
   })
 
   it.each([
