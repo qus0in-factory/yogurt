@@ -28,4 +28,10 @@ describe('PortfolioItemRow', () => {
     fireEvent.change(screen.getByLabelText('종목코드'), { target: { value: '005930' } })
     expect(onChange).toHaveBeenCalledWith('stockCode', '005930')
   })
+
+  it('종목명 칸은 읽기 전용으로 표시되어 직접 입력할 수 없다', () => {
+    const item = { id: 's1', kind: 'security' as const, stockCode: '005930', stockName: '삼성전자', weightPercent: '50.00' }
+    render(<PortfolioItemRow item={item} onChange={vi.fn()} onRemove={vi.fn()} />)
+    expect(screen.getByLabelText('종목명')).toHaveAttribute('readonly')
+  })
 })

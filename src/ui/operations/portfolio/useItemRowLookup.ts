@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { portfolioText } from '../../glossary/portfolio'
 import type { EditorItem } from './portfolio-editor-types'
 import { useStockNameLookup } from './useStockNameLookup'
@@ -6,18 +6,22 @@ import { useStockNameLookup } from './useStockNameLookup'
 export function useItemRowLookup(
   item: EditorItem,
   onChange: (field: keyof EditorItem, val: string) => void,
+  onLoadingChange?: (loading: boolean) => void,
 ) {
-  const lastAutoFilledRef = useRef('')
+  const onLoadingChangeRef = useRef(onLoadingChange)
+  onLoadingChangeRef.current = onLoadingChange
+
+  const enabled = item.kind !== 'cash' && !item.stockName
   const { loading, error, trigger } = useStockNameLookup(
     item.stockCode,
-    item.kind !== 'cash',
-    (name) => {
-      if (!item.stockName || item.stockName === lastAutoFilledRef.current) {
-        lastAutoFilledRef.current = name
-        onChange('stockName', name)
-      }
-    },
+    enabled,
+    (name) => onChange('stockName', name),
   )
+
+  useEffect(() => {
+    onLoadingChangeRef.current?.(loading)
+    return () => onLoadingChangeRef.current?.(false)
+  }, [loading])
 
   const message = loading
     ? portfolioText.stockLookingUp

@@ -19,27 +19,18 @@ export function useStockNameLookup(
   const execute = useCallback(async (targetCode: string) => {
     const trimmed = targetCode.trim().toUpperCase()
     if (!enabled || !trimmed) {
-      setLoading(false)
-      setError(null)
-      return
+      setLoading(false); setError(null); return
     }
     if (!STOCK_CODE_PATTERN.test(trimmed)) {
-      setLoading(false)
-      setError('invalid_format')
-      setResult(null)
-      return
+      setLoading(false); setError('invalid_format'); setResult(null); return
     }
-    setLoading(true)
-    setError(null)
+    setLoading(true); setError(null)
     const res = await lookupStockName(trimmed)
     setLoading(false)
     if (res.status === 'success') {
-      setResult(res.name)
-      setError(null)
-      onSuccessRef.current?.(res.name)
+      setResult(res.name); setError(null); onSuccessRef.current?.(res.name)
     } else {
-      setResult(null)
-      setError(res.status)
+      setResult(null); setError(res.status)
     }
   }, [enabled])
 
@@ -52,16 +43,14 @@ export function useStockNameLookup(
     if (timerRef.current) clearTimeout(timerRef.current)
     const trimmed = code.trim().toUpperCase()
     if (!enabled || !trimmed) {
-      setLoading(false)
-      setError(null)
-      return
+      setLoading(false); setError(null); return
     }
-    timerRef.current = setTimeout(() => {
-      execute(trimmed)
-    }, 500)
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
+    if (!STOCK_CODE_PATTERN.test(trimmed)) {
+      setLoading(false); setError('invalid_format'); setResult(null); return
     }
+    setLoading(true); setError(null)
+    timerRef.current = setTimeout(() => { execute(trimmed) }, 500)
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [code, enabled, execute])
 
   return { loading, result, error, trigger }

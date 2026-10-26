@@ -1,12 +1,13 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import * as stockApi from '../../../../src/app/stocks/stock-lookup'
 import { PortfolioEditorDialog } from '../../../../src/ui/operations/portfolio/PortfolioEditorDialog'
 
 afterEach(cleanup)
 
 describe('PortfolioEditorDialog', () => {
-  it('기본 요소(이름, 추가 버튼, 닫기, 저장)를 렌더링하고 합계 100%가 아닐 때 저장을 비활성화한다', () => {
+  it('기본 요소를 렌더링하고 합계 100%가 아닐 때 저장을 비활성화한다', () => {
     render(<PortfolioEditorDialog open onClose={vi.fn()} onSubmit={vi.fn()} />)
     expect(screen.getByRole('heading', { name: '새 포트폴리오' })).toBeInTheDocument()
     expect(screen.getByLabelText('포트폴리오 이름')).toBeInTheDocument()
@@ -15,7 +16,8 @@ describe('PortfolioEditorDialog', () => {
     expect(screen.getByRole('button', { name: '저장' })).toBeDisabled()
   })
 
-  it('항목을 추가하고 100%를 맞추면 저장 버튼이 활성화되고 onSubmit이 호출된다', () => {
+  it('항목을 추가하고 조회를 통해 종목명이 채워진 뒤 100%를 맞추면 저장이 활성화된다', async () => {
+    vi.spyOn(stockApi, 'lookupStockName').mockResolvedValue({ status: 'success', code: '005930', name: '삼성전자' })
     const onSubmit = vi.fn()
     render(<PortfolioEditorDialog open onClose={vi.fn()} onSubmit={onSubmit} />)
 
@@ -24,7 +26,9 @@ describe('PortfolioEditorDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: '현금 추가' }))
 
     fireEvent.change(screen.getByLabelText('종목코드'), { target: { value: '005930' } })
-    fireEvent.change(screen.getByLabelText('종목명'), { target: { value: '삼성전자' } })
+    await act(async () => {
+      fireEvent.blur(screen.getByLabelText('종목코드'))
+    })
     const weightInputs = screen.getAllByLabelText('목표 비중 (%)')
     fireEvent.change(weightInputs[0], { target: { value: '70.00' } })
     fireEvent.change(weightInputs[1], { target: { value: '30.00' } })

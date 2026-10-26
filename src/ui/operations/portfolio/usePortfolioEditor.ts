@@ -1,4 +1,5 @@
-import { useId, useMemo, useState } from 'react'
+import { useCallback, useId, useMemo, useState } from 'react'
+import { MAX_PORTFOLIO_ITEMS } from '../../../domain/portfolio/limits'
 import { CASH_ITEM_NAME } from '../../../domain/portfolio/item'
 import { portfolioDraftSchema, type PortfolioDraft } from '../../../domain/portfolio/portfolio'
 import { parsePercentToBps } from '../../../domain/portfolio/weight'
@@ -21,21 +22,27 @@ export function usePortfolioEditor(initial?: PortfolioDraft) {
   const [nameError, setNameError] = useState<string>()
   const [rowErrors, setRowErrors] = useState<Record<string, RowErrors>>({})
   const [itemsError, setItemsError] = useState<string>()
+  const [loadingRows, setLoadingRows] = useState<Record<string, boolean>>({})
 
   const hasCash = items.some((it) => it.kind === 'cash')
-  const totalBps = useMemo(
-    () => items.reduce((sum, it) => sum + (parsePercentToBps(it.weightPercent) ?? 0), 0),
-    [items],
-  )
+  const isMaxItems = items.length >= MAX_PORTFOLIO_ITEMS
+  const totalBps = useMemo(() => items.reduce((sum, it) => sum + (parsePercentToBps(it.weightPercent) ?? 0), 0), [items])
 
-  const addSecurityRow = () => setItems((prev) => [...prev, { id: `${baseId}-${Date.now()}-${prev.length}`, kind: 'security', stockCode: '', stockName: '', weightPercent: '' }])
+  const addSecurityRow = () => setItems((prev) => (prev.length >= MAX_PORTFOLIO_ITEMS ? prev : [...prev, { id: `${baseId}-${Date.now()}-${prev.length}`, kind: 'security', stockCode: '', stockName: '', weightPercent: '' }]))
   const addCashRow = () => {
-    if (hasCash) return
-    setItems((prev) => [...prev, { id: `${baseId}-${Date.now()}-${prev.length}`, kind: 'cash', stockCode: '', stockName: CASH_ITEM_NAME, weightPercent: '' }])
+    if (hasCash || isMaxItems) return
+    setItems((prev) => (prev.length >= MAX_PORTFOLIO_ITEMS ? prev : [...prev, { id: `${baseId}-${Date.now()}-${prev.length}`, kind: 'cash', stockCode: '', stockName: CASH_ITEM_NAME, weightPercent: '' }]))
   }
-  const removeRow = (id: string) => setItems((prev) => prev.filter((it) => it.id !== id))
+  const removeRow = (id: string) => {
+    setItems((prev) => prev.filter((it) => it.id !== id))
+    setLoadingRows((prev) => { const next = { ...prev }; delete next[id]; return next })
+  }
+  const setRowLoading = useCallback((id: string, loading: boolean) => {
+    setLoadingRows((prev) => (Boolean(prev[id]) === Boolean(loading) ? prev : { ...prev, [id]: Boolean(loading) }))
+  }, [])
+
   const updateRow = (id: string, field: keyof EditorItem, val: string) =>
-    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, [field]: val } : it)))
+    setItems((prev) => prev.map((it) => (it.id !== id ? it : field === 'stockCode' && it.kind === 'security' ? { ...it, stockCode: val, stockName: '' } : { ...it, [field]: val })))
 
   const validate = (): PortfolioDraft | null => {
     setNameError(undefined); setRowErrors({}); setItemsError(undefined)
@@ -55,7 +62,7 @@ export function usePortfolioEditor(initial?: PortfolioDraft) {
         if (!id) return
         const field = iss.path[2]
         if (field === 'stockCode') nextRowErrors[id] = { ...nextRowErrors[id], stockCode: iss.message === 'DUPLICATE_STOCK' ? portfolioText.errors.duplicateStock : portfolioText.errors.stockCodeInvalid }
-        else if (field === 'stockName') nextRowErrors[id] = { ...nextRowErrors[id], stockName: portfolioText.errors.stockNameRequired }
+        else if (field === 'stockName') nextRowErrors[id] = { ...nextRowErrors[id], stockName: portfolioText.errors.stockNameUnconfirmed }
         else if (iss.message === 'DUPLICATE_CASH') nextRowErrors[id] = { ...nextRowErrors[id], weight: portfolioText.errors.duplicateCash }
       }
     })
@@ -63,6 +70,8 @@ export function usePortfolioEditor(initial?: PortfolioDraft) {
     return null
   }
 
-  const canSave = Boolean(name.trim()) && items.length > 0 && totalBps === 10000 && Object.keys(rowErrors).length === 0
-  return { name, setName, items, hasCash, totalBps, nameError, rowErrors, itemsError, canSave, addSecurityRow, addCashRow, removeRow, updateRow, validate }
+  const isLookingUp = Object.values(loadingRows).some(Boolean)
+  const hasIncompleteSecurity = items.some((it) => it.kind === 'security' && (!it.stockCode.trim() || !it.stockName.trim()))
+  const canSave = Boolean(name.trim()) && items.length > 0 && totalBps === 10000 && !hasIncompleteSecurity && !isLookingUp && Object.keys(rowErrors).length === 0
+  return { name, setName, items, hasCash, isMaxItems, totalBps, nameError, rowErrors, itemsError, canSave, isLookingUp, addSecurityRow, addCashRow, removeRow, updateRow, setRowLoading, validate }
 }

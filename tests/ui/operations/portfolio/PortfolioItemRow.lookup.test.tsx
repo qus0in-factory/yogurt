@@ -14,18 +14,18 @@ describe('PortfolioItemRow stock name lookup', () => {
     id: 's1', kind, stockCode: kind === 'cash' ? '' : '005930', stockName, weightPercent: '50.00',
   })
 
-  it('조회 성공 시 빈 이름을 채우고 수정한 이름은 보존한다', async () => {
-    vi.spyOn(stockApi, 'lookupStockName').mockResolvedValue({ status: 'success', code: '005930', name: '삼성전자' })
-    const onChange1 = vi.fn()
-    const { unmount } = render(<PortfolioItemRow item={makeItem('')} onChange={onChange1} onRemove={vi.fn()} />)
-    await act(async () => { vi.advanceTimersByTime(500) })
-    expect(onChange1).toHaveBeenCalledWith('stockName', '삼성전자')
-    unmount()
+  it('조회 중일 때는 종목명 확인 중 안내를 표시한다', () => {
+    vi.spyOn(stockApi, 'lookupStockName').mockReturnValue(new Promise(() => {}))
+    render(<PortfolioItemRow item={makeItem('')} onChange={vi.fn()} onRemove={vi.fn()} />)
+    expect(screen.getByText('종목명 확인 중')).toBeInTheDocument()
+  })
 
-    const onChange2 = vi.fn()
-    render(<PortfolioItemRow item={makeItem('삼전(수정)')} onChange={onChange2} onRemove={vi.fn()} />)
+  it('조회 성공 시 조회 결과 이름으로 stockName을 채운다', async () => {
+    vi.spyOn(stockApi, 'lookupStockName').mockResolvedValue({ status: 'success', code: '005930', name: '삼성전자' })
+    const onChange = vi.fn()
+    render(<PortfolioItemRow item={makeItem('')} onChange={onChange} onRemove={vi.fn()} />)
     await act(async () => { vi.advanceTimersByTime(500) })
-    expect(onChange2).not.toHaveBeenCalledWith('stockName', '삼성전자')
+    expect(onChange).toHaveBeenCalledWith('stockName', '삼성전자')
   })
 
   it('404 및 503 오류 시 안내 메시지를 표시한다', async () => {

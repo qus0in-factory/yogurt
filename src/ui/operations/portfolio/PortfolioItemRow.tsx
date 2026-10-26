@@ -12,12 +12,13 @@ type Props = {
   item: EditorItem
   errors?: RowErrors
   onChange: (field: keyof EditorItem, val: string) => void
+  onLoadingChange?: (loading: boolean) => void
   onRemove: () => void
 }
 
-export function PortfolioItemRow({ item, errors, onChange, onRemove }: Props) {
+export function PortfolioItemRow({ item, errors, onChange, onLoadingChange, onRemove }: Props) {
   const isCash = item.kind === 'cash'
-  const { message, trigger, isError } = useItemRowLookup(item, onChange)
+  const { message, trigger, isError } = useItemRowLookup(item, onChange, onLoadingChange)
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-stone-200 p-3 md:flex-row md:items-center">
@@ -28,7 +29,11 @@ export function PortfolioItemRow({ item, errors, onChange, onRemove }: Props) {
           <div className="w-full md:w-32">
             <TextField
               label={portfolioText.stockCodeLabel} name="stockCode" value={item.stockCode}
-              onChange={(val) => onChange('stockCode', val)} onBlur={() => trigger(item.stockCode)}
+              onChange={(val) => {
+                onChange('stockCode', val)
+                if (item.stockName) onChange('stockName', '')
+              }}
+              onBlur={() => trigger(item.stockCode)}
               error={errors?.stockCode} placeholder={portfolioText.stockCodePlaceholder} maxLength={20}
             />
             {message ? (
@@ -40,7 +45,7 @@ export function PortfolioItemRow({ item, errors, onChange, onRemove }: Props) {
           <div className="flex-1">
             <TextField
               label={portfolioText.stockNameLabel} name="stockName" value={item.stockName}
-              onChange={(val) => onChange('stockName', val)}
+              readOnly onChange={() => {}}
               error={errors?.stockName} placeholder={portfolioText.stockNamePlaceholder} maxLength={80}
             />
           </div>
