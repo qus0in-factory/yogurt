@@ -23,7 +23,7 @@ export function Sidebar(props: SidebarProps) {
     <aside className={cn('hidden md:flex md:w-60 md:flex-col border-r border-stone-200 bg-white', props.className)}>
       <div className="flex items-center gap-2 p-4">
         <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 shrink-0 rounded" />
-        <span className={typeScale.sectionTitle}>{layoutText.appName}</span>
+        <span className={typeScale.section}>{layoutText.appName}</span>
       </div>
       <nav aria-label={layoutText.mainMenu} className="flex flex-col gap-2 p-2">
         {MENU_ITEMS.map((item) => {

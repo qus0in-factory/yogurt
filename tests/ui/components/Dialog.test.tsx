@@ -15,7 +15,7 @@ describe('Dialog', () => {
   it('open이 true이면 dialog와 제목을 렌더링한다', () => {
     render(<Dialog open onClose={vi.fn()} title="제목">내용</Dialog>)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '제목' })).toHaveClass(...typeScale.sectionTitle.split(' '))
+    expect(screen.getByRole('heading', { name: '제목' })).toHaveClass(...typeScale.section.split(' '))
   })
 
   it('Escape 키를 누르면 onClose를 호출한다', () => {

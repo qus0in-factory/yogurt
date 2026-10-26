@@ -51,3 +51,18 @@ it('화면 확대로 세 항목이 한 페이지에 들어가면 인디케이터
   expect(screen.queryByRole('status')).not.toBeInTheDocument()
   expect(screen.queryAllByRole('button')).toHaveLength(0)
 })
+it('768px 폭에서는 한 페이지에 1개, 769px 이상에서는 3열 배치를 유지한다', () => {
+  const { container } = show(3)
+  expect(container.querySelector('.min-\\[769px\\]\\:grid-cols-3')).toBeInTheDocument()
+  expect(screen.getByText('계좌1')).toBeInTheDocument()
+  expect(screen.queryByText('계좌2')).not.toBeInTheDocument()
+  act(() => listeners.forEach(listener => listener({ matches: true } as MediaQueryListEvent)))
+  expect(screen.getByText('계좌2')).toBeInTheDocument()
+  expect(screen.getByText('계좌3')).toBeInTheDocument()
+})
+it('페이지 표시 칩은 줄바꿈 금지(whitespace-nowrap)와 최소 폭을 가지며 10페이지 이상도 한 줄로 유지된다', () => {
+  show(12)
+  const chip = screen.getByRole('status')
+  expect(chip).toHaveClass('whitespace-nowrap', 'min-w-16')
+  expect(chip).toHaveTextContent('1 / 12')
+})

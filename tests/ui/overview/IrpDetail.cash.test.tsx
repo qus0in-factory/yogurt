@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { getStockBalance } from '../../../src/app/kis/stock-balance-client'
@@ -34,6 +34,7 @@ it('표 맨 아래에 현금 행을 구분선과 배경으로 표시한다', asy
 it('모바일 카드 목록 맨 아래에도 현금 카드를 표시한다', async () => {
   show()
   await screen.findByText('삼성전자')
+  fireEvent.click(screen.getByRole('button', { name: '다음 보유 항목' }))
   const cash = screen.getByText('현금/예수금/RP').closest('li')!
   expect(cash).toHaveClass('border-t-2', 'bg-stone-50')
   expect(within(cash).getByText('1,000원')).toBeInTheDocument()

@@ -21,7 +21,7 @@ export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: numb
         </div>
         <p className={`mt-1 ${typeScale.number}`}>{text.won(0)}</p>
         <p className={`mt-1 ${typeScale.body}`}>{text.noLoan}</p>
-        <p className="mt-1 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">{text.newLoanAvailable}</p>
+        <p className={`mt-1 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 ${typeScale.label} text-emerald-600`}>{text.newLoanAvailable}</p>
       </section>
     )
   }
@@ -44,7 +44,7 @@ export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: numb
             <InfoTooltip label={text.collateralTooltipLabel}>{text.collateralTooltip(COLLATERAL_MIN_PERCENT)}</InfoTooltip>
           </dt>
           <dd className={`${typeScale.number} ${collateralClass}`}>{text.ratioPercent(ratios.collateralRatio ?? 0)}</dd>
-          {ratios.collateralOk ? null : <p className="mt-1 text-xs font-medium text-red-600">{text.collateralWarning(COLLATERAL_MIN_PERCENT)}</p>}
+          {ratios.collateralOk ? null : <p className={`mt-1 ${typeScale.label} text-red-600`}>{text.collateralWarning(COLLATERAL_MIN_PERCENT)}</p>}
         </div>
         <div>
           <dt className={`flex items-center gap-1 ${typeScale.label}`}>
@@ -52,7 +52,7 @@ export function PensionLoan({ loanAmount, collateralAmount }: { loanAmount: numb
             <InfoTooltip label={text.loanTooltipLabel}>{text.loanTooltip(NEW_LOAN_MAX_PERCENT)}</InfoTooltip>
           </dt>
           <dd className={typeScale.number}>{text.ratioPercent(ratios.loanRatio ?? 0)}</dd>
-          <p className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${ratios.newLoanAvailable ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-500'}`}>
+          <p className={`mt-1 inline-flex rounded-full px-2 py-0.5 ${typeScale.label} ${ratios.newLoanAvailable ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-500'}`}>
             {ratios.newLoanAvailable ? text.newLoanAvailable : text.newLoanUnavailable}
           </p>
         </div>

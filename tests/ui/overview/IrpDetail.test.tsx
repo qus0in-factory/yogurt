@@ -26,7 +26,7 @@ it('조회 성공 시 합계와 원화 형식의 종목 정보를 표시한다',
   show()
   expect(await screen.findByText('삼성전자')).toBeInTheDocument()
   expect(screen.getByText('13,000원')).toBeInTheDocument()
-  expect(screen.getAllByText('1,000원')).toHaveLength(2)
+  expect(screen.getByText('1,000원')).toBeInTheDocument()
   expect(screen.getByText('12,000원')).toBeInTheDocument()
 })
 it('보유 종목이 없으면 빈 상태를 표시한다', async () => {
@@ -70,7 +70,7 @@ it('화면이 md 이상이면 구분선이 있는 표로 전환하고 모바일�
   expect(columns).toBe(7)
   expect(rows.every((row) => row.cells.length === columns)).toBe(true)
   expect(rows.at(-1)?.cells[5]).toHaveClass('pr-4', 'text-right')
-  act(() => resize.forEach(listener => listener({ matches: false } as MediaQueryListEvent)))
+  act(() => { Object.defineProperty(window, 'innerWidth', { value: 768, configurable: true }); window.dispatchEvent(new Event('resize')) })
   expect(screen.queryByRole('table')).not.toBeInTheDocument()
   expect(screen.getAllByRole('listitem')).toHaveLength(2)
   view.unmount()

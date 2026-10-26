@@ -34,7 +34,7 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4">
-          <div className={cn('flex items-center gap-2', typeScale.sectionTitle)}>
+          <div className={cn('flex items-center gap-2', typeScale.section)}>
             <img src="/favicon.png" alt="" aria-hidden="true" className="h-6 w-6 rounded" />
             <span>{layoutText.appName}</span>
           </div>
