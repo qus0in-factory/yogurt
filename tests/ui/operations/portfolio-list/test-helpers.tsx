@@ -10,7 +10,16 @@ import type { Portfolio } from '../../../../src/domain/portfolio/portfolio'
 export const apiBase = `${window.location.origin}/api`
 export const server = setupServer()
 
-beforeAll(() => server.listen())
+beforeAll(() => {
+  Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true, writable: true })
+  window.matchMedia = (query: string): MediaQueryList => ({
+    matches: window.innerWidth >= 769, media: query, onchange: null,
+    addListener() {}, removeListener() {},
+    addEventListener() {}, removeEventListener() {},
+    dispatchEvent() { return false },
+  })
+  server.listen()
+})
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 

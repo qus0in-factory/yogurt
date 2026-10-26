@@ -68,12 +68,12 @@ describe('PortfolioSection 목록/상태/반응형', () => {
     window.innerWidth = 375
     window.dispatchEvent(new Event('resize'))
     renderWithQuery(<PortfolioSection />)
-    const grid = await screen.findByTestId('portfolio-card-grid')
-    expect(grid.className).toContain('grid-cols-1')
-    expect(screen.getByRole('button', { name: '새 포트폴리오' }).className).toContain('min-h-11')
+    const create = await screen.findByRole('button', { name: '새 포트폴리오' })
+    expect(create.className).toContain('min-h-11')
+    expect(create.closest('.overflow-x-hidden')).toBeTruthy()
 
     window.innerWidth = 769
     window.dispatchEvent(new Event('resize'))
-    await waitFor(() => expect(grid.className).toContain('grid-cols-2'))
+    await waitFor(() => expect(screen.getByTestId('portfolio-card-grid').className).toContain('grid-cols-2'))
   })
 })
