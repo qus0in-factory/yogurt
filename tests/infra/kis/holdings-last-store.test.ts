@@ -37,6 +37,12 @@ describe('holdings-last 저장소', () => {
     vi.spyOn(kv, 'get').mockRejectedValue(new Error('kv down'))
     expect(await readHoldingsLast(kv, 'a1', '29', new Date())).toBeNull()
   })
+  it('sellableQuantity를 저장 후 다시 읽어도 보존한다', async () => {
+    const kv = createFakeKv()
+    const value = { ...stored, holdings: [{ ...holding, sellableQuantity: 7 }] }
+    await writeHoldingsLast(kv, 'a1', '29', value)
+    expect(await readHoldingsLast(kv, 'a1', '29', new Date())).toEqual(value)
+  })
   it('빈 보유는 저장하지 않는다', async () => {
     const kv = createFakeKv()
     const put = vi.spyOn(kv, 'put')

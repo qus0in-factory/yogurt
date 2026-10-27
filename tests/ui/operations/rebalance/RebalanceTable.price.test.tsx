@@ -19,7 +19,7 @@ function show(prices: Record<string, number>) {
 it('헤더에 현재가 열이 종목 다음 순서로 있다', () => {
   show({ '005930': 10050 })
   const headers = screen.getAllByRole('columnheader').map((h) => h.textContent)
-  expect(headers).toEqual(['종목', '현재가', '현재 수량', '목표 수량', '주문 수량', '구분', '예상 금액', '매매'])
+  expect(headers).toEqual(['종목', '현재가', '현재 비중', '목표 비중', '현재 수량', '목표 수량', '주문 수량', '구분', '예상 금액', '매매'])
 })
 
 it('현재가 값이 prices 맵과 같고 천 단위 구분으로 표시된다', () => {

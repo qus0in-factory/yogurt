@@ -14,6 +14,8 @@ description: 사용자가 Herdr로 작업별 임시 워커 탭을 열어 작업�
 
 ## open → 계약 파일 전달 → await
 
+주문·리밸런싱 계약은 [yogurt-trading-rules](../yogurt-trading-rules/SKILL.md)를 먼저 읽고 해당 규칙을 계약에 적는다.
+
 1. 설치된 herdr 스킬과 `herdr --help`, `herdr agent`를 확인한다. bare `herdr`는 실행하지 않는다. `python3 .agents/skills/yogurt-herdr-team/scripts/app/worker.py --help`와 각 하위 명령의 `--help`로 실제 인자를 확인한다.
 2. `worker.py open`으로 선택한 프리셋의 **별도 탭**을 연다. 조정자 탭 내부 pane split은 금지한다. 저장소 루트 cwd와 no-focus를 유지한다. 이 사용자 지침이 herdr 스킬의 기본 동일 탭 split보다 우선한다.
 3. open은 상태 파일과 `herdr agent list`에서 같은 프리셋 워커를 확인한다. 이미 열려 있으면 새로 만들지 않고 오류 또는 기존 이름 안내로 끝낸다. 기존 탭에 새 작업을 얹지 말고 이전 작업 검증·close 후 새 탭을 연다.
@@ -21,6 +23,10 @@ description: 사용자가 Herdr로 작업별 임시 워커 탭을 열어 작업�
    scripts/app/check_contract.py로 계약을 검사한 뒤 보낸다.
 5. [작업 계약](references/task-contract.md)을 파일로 저장하고 `worker.py prompt`로 **계약 파일 경로**를 전달한다. 전문을 셸 인라인 문자열로 조립하지 않는다. 제출 성공만으로 시작·완료를 보고하지 않고 working 전환을 확인한다.
 6. `worker.py await`로 콜백을 우선 기다리고 fallback 파일을 감시한다. 각 대기는 60000ms 이하이며 전체 5분 경계를 지킨다. 관찰 중 독립 작업은 병행할 수 있다.
+
+## 5분 시간 제한
+`worker.py prompt`는 기본으로 `--timebox 300` 감시를 백그라운드에서 시작한다. 감시는 `app/timebox.py --pane <pane_id> --seconds 300`으로 동작하며, working이 300초를 넘으면 Escape 후 계약 보고 파일 작성과 `--status blocked` 콜백을 요청한다. `--timebox 0`으로 끌 수 있고, 이미 끝난 done/idle 워커는 건드리지 않는다.
+
 
 ## 조정자 검증 → close
 

@@ -30,9 +30,11 @@ export function useRebalanceInputs(target: TargetAccountOption | null) {
   const query = useInputsQuery(target?.accountId ?? '', target?.productCode ?? '')
   const input = query.data
   const data: RebalanceInputs | undefined = input ? {
-    holdings: input.holdings.map(({ code, name, quantity, currentPrice }) => ({
-      code, name, quantity, evaluationAmount: quantity * (input.prices[code] ?? currentPrice),
+    holdings: input.holdings.map(({ code, name, quantity, currentPrice, sellableQuantity }) => ({
+      code, name, quantity, sellableQuantity, evaluationAmount: quantity * (input.prices[code] ?? currentPrice),
     })),
+    cashAvailable: input.cashAvailable,
+    cashSettled: input.cashSettled,
     cash: input.cash,
     targets: input.targets.map((item): RebalanceTarget => item.kind === 'security'
       ? { kind: 'stock', code: item.code!, name: item.name, weightBps: item.weightBps }

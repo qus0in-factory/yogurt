@@ -18,6 +18,11 @@ def violations(path: Path, text: str) -> list[str]:
     return errors
 
 
+def width_violations(path: Path, text: str, limit: int) -> list[str]:
+    return [f'{path}:{number}: {len(line)} chars exceeds {limit}'
+            for number, line in enumerate(text.splitlines(), 1) if len(line) > limit]
+
+
 def typography_violations(path: Path, text: str) -> list[str]:
     if not (path.parts[:2] == ('src', 'ui') and path.suffix == '.tsx'):
         return []

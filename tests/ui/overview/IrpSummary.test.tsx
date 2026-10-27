@@ -14,10 +14,15 @@ describe('IrpSummary', () => {
     expect(total).toHaveClass(...typeScale.figure.split(' '))
     expect(total.closest('div')).toHaveClass('rounded-lg', 'bg-primary-50', 'p-4')
     expect(screen.getByText('총평가금액')).toHaveClass('text-xs', 'text-stone-500')
-    expect(screen.getByText('예수금')).toHaveClass('text-xs', 'text-stone-500')
+    expect(screen.getByText('예수금(D+2)')).toHaveClass('text-xs', 'text-stone-500')
     expect(screen.getByText('평가손익')).toHaveClass('text-xs', 'text-stone-500')
     expect(screen.getByText('수익률')).toHaveClass('text-xs', 'text-stone-500')
     expect(screen.getByText('1,000원')).toBeInTheDocument()
+  })
+
+  it('D+0 출금 가능 금액을 보조 표기하고 가리기 대상으로 둔다', () => {
+    render(<IrpSummary summary={{ ...summary, cashAvailable: 300 }} />)
+    expect(screen.getByText('출금 가능(D+0) 300원')).toBeInTheDocument()
   })
 
   it('양수 손익과 수익률은 + 부호와 빨간색이다', () => {

@@ -40,6 +40,7 @@ describe('parseCachedCash', () => {
   it('유효한 저장값만 인정한다', () => {
     expect(parseCachedCash(JSON.stringify(cached))).toEqual(cached)
     expect(parseCachedCash(JSON.stringify({ ...cached, source: 'user' }))).toEqual({ ...cached, source: 'user' })
+    expect(parseCachedCash(JSON.stringify({ ...cached, cashD2Won: 5000 }))).toEqual({ ...cached, cashD2Won: 5000 })
   })
   it.each([
     ['깨진 JSON', '{bad'],

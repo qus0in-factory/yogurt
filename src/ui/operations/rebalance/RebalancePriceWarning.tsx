@@ -1,7 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
 import type { RebalanceInputs } from '../../../app/rebalance/types'
 import { rebalanceText } from '../../glossary/rebalance'
-import { typeScale } from '../../styles/type-scale'
+import { StatusBadge } from './RebalanceFillChip'
 
 type Props = { inputs?: Pick<RebalanceInputs, 'priceFailed' | 'targets' | 'holdings'> }
 
@@ -14,9 +14,9 @@ export function RebalancePriceWarning({ inputs }: Props) {
     return name && name !== code ? rebalanceText.failedPriceStock(name, code) : code
   })
   return (
-    <p role="status" className={`${typeScale.caption} flex items-start gap-2 text-amber-800`}>
+    <StatusBadge label={rebalanceText.priceFailed(labels.join(', '))} tone="bg-amber-50 text-amber-800">
       <TriangleAlert aria-hidden="true" className="h-4 w-4 shrink-0" />
-      <span className="min-w-0 break-words">{rebalanceText.priceFailed(labels.join(', '))}</span>
-    </p>
+      <span>{rebalanceText.noticeShort.price}</span>
+    </StatusBadge>
   )
 }

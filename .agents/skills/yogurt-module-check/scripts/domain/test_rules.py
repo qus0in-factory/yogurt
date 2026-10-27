@@ -45,6 +45,14 @@ class ModuleRulesTest(unittest.TestCase):
         self.assertEqual(typography_violations(Path('src/ui/lib/utils.ts'), 'text-sm'), [])
         self.assertEqual(typography_violations(Path('src/app/page.tsx'), 'text-sm'), [])
 
+    def test_width_violations_reports_lines_over_limit(self):
+        from domain.rules import width_violations
+        path = Path('src/ui/card.tsx')
+        self.assertEqual(width_violations(path, 'x' * 120 + '\n', 120), [])
+        errors = width_violations(path, 'ok\n' + 'x' * 121 + '\n', 120)
+        self.assertEqual(len(errors), 1)
+        self.assertIn(':2', errors[0])
+
 
 if __name__ == '__main__':
     unittest.main()

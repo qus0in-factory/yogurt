@@ -12,7 +12,9 @@ export type TargetAccountOption = {
 
 export type RebalanceInputs = {
   holdings: RebalanceHolding[]
-  cash: number
+  cashAvailable: number
+  cashSettled: number | null
+  cash?: number | null
   targets: RebalanceTarget[]
   prices: Record<string, number>
   priceFailed: string[]

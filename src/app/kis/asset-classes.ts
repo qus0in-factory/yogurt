@@ -19,17 +19,20 @@ function hasValues(row: AssetRow) {
     row.creditLoan, row.netAssets, row.weight].some((value) => value !== 0)
 }
 
-export function classifyAssetRows(rows: AssetRow[], productCode = '22') {
+export function classifyAssetRows(rows: AssetRow[], productCode = '22', cashD2?: number) {
   const { items: rowsWithoutTotal, total } = splitTotalRow(rows)
-  const totalAmount = total?.evaluationAmount ?? 0
   const labels = labelsFor(productCode)
-  const items = rowsWithoutTotal.filter(hasValues).map((row) => ({
-    index: row.index,
-    label: labels[row.index] ?? null,
-    evaluationAmount: row.evaluationAmount,
+  const cashRow = rowsWithoutTotal.find((row) => labels[row.index] === 'cash')
+  const cashValue = cashD2 ?? cashRow?.evaluationAmount ?? 0
+  const totalAmount = total ? total.evaluationAmount - (cashRow?.evaluationAmount ?? 0) + cashValue : 0
+  const items = rowsWithoutTotal.map((row) => ({
+    ...row, label: labels[row.index] ?? null,
+    evaluationAmount: labels[row.index] === 'cash' ? cashValue : row.evaluationAmount,
+  })).filter(hasValues).map((row) => ({
+    index: row.index, label: row.label, evaluationAmount: row.evaluationAmount,
     weight: totalAmount === 0 ? 0 : Math.round(row.evaluationAmount / totalAmount * 10000) / 100,
   }))
-  return { items, total }
+  return { items, total: total && cashD2 !== undefined ? { ...total, evaluationAmount: totalAmount, weight: 100 } : total }
 }
 
 export function rpEvaluation(rows: AssetRow[], productCode = '22') {

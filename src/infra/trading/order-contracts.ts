@@ -1,7 +1,10 @@
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { portfolioProductCodeSchema } from '../../domain/portfolio/assignment.ts'
+import { ORDER_REJECTION } from '../../domain/trading/order-codes.ts'
 import { STOCK_CODE_PATTERN } from '../../domain/portfolio/item.ts'
+import { MARKET_HOLIDAYS } from '../../domain/market/holidays.ts'
+import { isMarketOpen } from '../../domain/market/session.ts'
 import { KisApiError, type KisAccountClient } from '../kis/kis-stock-balance.ts'
 import { kisClientFromEnv } from '../kis/kis-context.ts'
 import { checkBuyable, checkSellable } from '../kis/kis-order-check.ts'
@@ -30,7 +33,7 @@ const pricedFields = {
 
 export const checkSchema = z.object({
   requestId: z.string().min(1), code: z.string().regex(STOCK_CODE_PATTERN),
-  side: z.enum(['buy', 'sell']), ...pricedFields,
+  side: z.enum(['buy', 'sell']), quantity: z.number().int().positive(), ...pricedFields,
 }).strict().superRefine(priceCheck)
 
 export const orderSchema = z.object({
@@ -52,6 +55,18 @@ export async function checkedProduct(c: OrderCtx, bodyCode?: string) {
   const accountId = c.req.param('accountId') ?? ''
   if (!c.env.DB || !(await targetExists(c.env.DB, accountId, pathCode as '01' | '22'))) return null
   return pathCode as '01' | '22'
+}
+
+// KST(Asia/Seoul) 기준 일자(yyyymmdd). UTC 15:00 전후로 날짜가 바뀐다.
+export function kstDayString(nowMs: number): string {
+  return new Date(nowMs + 9 * 60 * 60 * 1000).toISOString().slice(0, 10).replaceAll('-', '')
+}
+
+// 서버 시각 기준. 닫혀 있으면 KIS 호출 없이 막는다.
+export function marketClosed() {
+  const status = isMarketOpen(new Date(), MARKET_HOLIDAYS)
+  if (status.open) return null
+  return { error: 'market closed', code: ORDER_REJECTION.MARKET_CLOSED, reason: status.reason, nextOpenAt: status.nextOpenAt }
 }
 
 export function logOrder(requestId: string, code: string, quantity: number, side: string, result: string) {

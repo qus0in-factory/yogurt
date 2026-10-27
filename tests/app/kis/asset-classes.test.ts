@@ -18,6 +18,15 @@ it('maps confirmed classes, excludes all-zero rows and computes weights from the
   expect(result.total).toEqual(rows[4])
 })
 
+it('cashD2가 있으면 현금 행과 총액·비중을 D+2로 계산한다', () => {
+  const rows = [row(0, 1000), row(8, 500), row(9, 1500)]
+  const result = classifyAssetRows(rows, '22', 1000)
+  expect(result.items.map(({ index, evaluationAmount, weight }) => [index, evaluationAmount, weight])).toEqual([
+    [0, 1000, 50], [8, 1000, 50],
+  ])
+  expect(result.total).toMatchObject({ evaluationAmount: 2000, weight: 100 })
+})
+
 it('keeps unknown class labels null and uses zero weight when total is zero', () => {
   const result = classifyAssetRows([row(3, 5), row(4, 0)])
   expect(result.items[0]).toMatchObject({ index: 3, label: null, evaluationAmount: 5, weight: 0 })

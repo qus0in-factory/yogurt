@@ -2,7 +2,8 @@ import { z } from 'zod'
 import { api } from '../http/http'
 
 const summarySchema = z.object({
-  cash: z.number(), stockEvaluation: z.number(), totalEvaluation: z.number(),
+  cash: z.number(), cashD2: z.number().optional(), cashD2Fallback: z.boolean().optional(),
+  stockEvaluation: z.number(), totalEvaluation: z.number(),
   netAssets: z.number(), purchaseAmount: z.number(), evaluationAmount: z.number(),
   profitLoss: z.number(), assetChange: z.number(), assetChangeRate: z.number(),
 })

@@ -17,18 +17,18 @@ function show(body: Parameters<typeof HttpResponse.json>[0], status = 200) {
   return renderHook(() => useRebalanceInputs(target), { wrapper })
 }
 it('서버 응답을 화면 계산 입력에 맞추고 현재가·평가액·연결 여부를 유지한다', async () => {
-  const { result } = show({ holdings: [{ code: '005930', name: '삼성전자', quantity: 2, currentPrice: 100 }], cash: 50,
+  const { result } = show({ holdings: [{ code: '005930', name: '삼성전자', quantity: 2, currentPrice: 100 }], cashAvailable: 50, cashSettled: 70,
     targets: [{ code: '005930', name: '삼성전자', weightBps: 6000, kind: 'security' },
       { code: null, name: '현금', weightBps: 4000, kind: 'cash' }], prices: { '005930': 100, '000660': 200 }, priceFailed: ['035420'], hasPortfolio: true })
   await waitFor(() => expect(result.current.isSuccess).toBe(true))
-  expect(result.current.data).toEqual({ holdings: [{ code: '005930', name: '삼성전자', quantity: 2, evaluationAmount: 200 }], cash: 50,
+  expect(result.current.data).toEqual({ holdings: [{ code: '005930', name: '삼성전자', quantity: 2, evaluationAmount: 200 }], cashAvailable: 50, cashSettled: 70,
     targets: [{ code: '005930', name: '삼성전자', weightBps: 6000, kind: 'stock' },
       { code: null, name: '현금', weightBps: 4000, kind: 'cash' }], prices: { '005930': 100, '000660': 200 }, priceFailed: ['035420'], hasPortfolio: true })
 })
 it('연결 없음과 빈 보유·목표를 그대로 보존한다', async () => {
-  const { result } = show({ holdings: [], cash: 0, targets: [], hasPortfolio: false })
+  const { result } = show({ holdings: [], cashAvailable: 0, cashSettled: 0, targets: [], hasPortfolio: false })
   await waitFor(() => expect(result.current.isSuccess).toBe(true))
-  expect(result.current.data).toEqual({ holdings: [], cash: 0, targets: [], prices: {}, priceFailed: [], hasPortfolio: false })
+  expect(result.current.data).toEqual({ holdings: [], cashAvailable: 0, cashSettled: 0, targets: [], prices: {}, priceFailed: [], hasPortfolio: false })
 })
 it('401을 빈 계좌 입력으로 바꾸지 않고 오류로 유지한다', async () => {
   const { result } = show({ error: 'unauthorized' }, 401)

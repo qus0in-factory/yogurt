@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { parseStockBalance } from '../../../src/domain/kis/stock-balance'
 
 const holding = {
@@ -13,13 +13,33 @@ const summaryRow = {
 const raw = { rt_cd: '0', msg_cd: 'OP0007109e-2', msg1: '조회 되었습니다', output1: [holding], output2: [summaryRow] }
 
 const expected = {
-  summary: { cash: 1900000, stockEvaluation: 800000, totalEvaluation: 2700000, netAssets: 2700000, purchaseAmount: 700000, evaluationAmount: 800000, profitLoss: 100000, assetChange: 100000, assetChangeRate: 3.84 },
+  summary: { cash: 1900000, cashD2Fallback: true, stockEvaluation: 800000, totalEvaluation: 2700000, netAssets: 2700000, purchaseAmount: 700000, evaluationAmount: 800000, profitLoss: 100000, assetChange: 100000, assetChangeRate: 3.84 },
   holdings: [{ code: '005930', name: '삼성전자', quantity: 10, averagePrice: 70000, purchaseAmount: 700000, currentPrice: 80000, evaluationAmount: 800000, profitLoss: 100000, profitLossRate: 14.28 }],
 }
 
 describe('parseStockBalance', () => {
   it('output1·output2를 정규화하고 쉼표는 제거한다', () => {
     expect(parseStockBalance(raw)).toEqual(expected)
+  })
+
+  it('D+2 예수금이 있으면 cashD2로 쓰고 진단 로그를 남기지 않는다', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const parsed = parseStockBalance({ ...raw, output2: [{ ...summaryRow, prvs_rcdl_excc_amt: '2,500,000' }] })
+    expect(parsed.summary.cash).toBe(1900000)
+    expect(parsed.summary.cashD2).toBe(2500000)
+    expect(parsed.summary.cashD2Fallback).toBe(false)
+    expect(info).not.toHaveBeenCalled()
+    info.mockRestore()
+  })
+
+  it('D+2 예수금이 없거나 숫자가 아니면 대체하지 않고 진단 로그를 남긴다', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    expect(parseStockBalance(raw).summary).toMatchObject({ cashD2Fallback: true })
+    expect(parseStockBalance(raw).summary.cashD2).toBeUndefined()
+    expect(parseStockBalance({ ...raw, output2: [{ ...summaryRow, prvs_rcdl_excc_amt: 'bad' }] }).summary.cashD2).toBeUndefined()
+    expect(info).toHaveBeenCalledWith(JSON.stringify({ kind: 'cash-diag', d2Present: false }))
+    expect(JSON.stringify(info.mock.calls)).not.toContain('1900000')
+    info.mockRestore()
   })
 
   it('보유 종목이 없으면 holdings는 빈 배열이다', () => {

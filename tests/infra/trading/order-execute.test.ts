@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { fresh, ok, orderCalls, setupRoutes } from './order-routes.test.ts'
+import { pinOpenMarket } from './market-time.ts';
 
 describe('주문 실행 라우트', () => {
+  pinOpenMarket()
   const buyOk = (url: string) => url.includes('inquire-psbl-order')
     ? ok({ rt_cd: '0', output: { ord_psbl_qty: '5', ord_psbl_amt: '50000' } })
     : url.includes('asking-price')
@@ -36,5 +38,14 @@ describe('주문 실행 라우트', () => {
     expect(replay.status).toBe(200)
     expect(await replay.json()).toMatchObject({ orderNo: '7' })
     expect(client.request).not.toHaveBeenCalled()
+  })
+
+  it('같은 요청 id라도 계좌가 다르면 별도 클레임으로 주문한다', async () => {
+    const { call, client } = setupRoutes(buyOk)
+    const first = await call('/api/accounts/a1/products/01/orders', { ...body, requestId: 'shared' })
+    const second = await call('/api/accounts/a2/products/01/orders', { ...body, requestId: 'shared' })
+    expect(first.status).toBe(200)
+    expect(second.status).toBe(200)
+    expect(orderCalls(client, 'order-cash')).toHaveLength(2)
   })
 })

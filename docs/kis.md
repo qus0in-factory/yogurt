@@ -12,7 +12,7 @@
 ## 주식잔고조회
 
 - `GET https://openapi.koreainvestment.com:9443/uapi/domestic-stock/v1/trading/inquire-balance`, TR `TTTC8434R`.
-- 쿼리: `CANO`(계좌번호), `ACNT_PRDT_CD`(상품코드). 지원 상품 코드는 IRP `29`뿐이다(`src/domain/accounts/products.ts`).
+- 쿼리: `CANO`(계좌번호), `ACNT_PRDT_CD`(상품코드). 조회 상품은 ISA `01`, 연금저축 `22`, IRP `29`다(`src/domain/accounts/products.ts:3-11`, `src/infra/kis/kis-balance-handler.ts:52-59`). IRP는 조회만 하며 거래하지 않는다. 거래 대상은 ISA `01`과 연금저축 `22`이며 주문·체결 조회 경로에서 제한한다(`src/domain/portfolio/assignment.ts:3`, `src/infra/trading/order-contracts.ts:51-57`).
 - 첫 페이지만 조회한다. `CTX_AREA_FK100`·`CTX_AREA_NK100`은 빈 값이며 연속조회를 하지 않는다.
 - 응답 `rt_cd`가 `0`이 아니면 `KisApiError`를 던지고 라우트는 502를 반환한다.
 - 파일: `src/infra/kis/kis-stock-balance.ts`, `src/domain/kis/stock-balance.ts`

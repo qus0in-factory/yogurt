@@ -32,7 +32,7 @@ PRESETS: dict[str, Preset] = {
         sandboxed=True,
     ),
     'gf': Preset(
-        name='gf', kind='agy', args=['--effort', 'medium'], sandboxed=False,
+        name='gf', kind='agy', args=['--effort', 'medium', '--model', 'gemini-3.8-flash-medium'], sandboxed=False,
     ),
     'ga': make_ga_preset(),
     'ds': Preset(

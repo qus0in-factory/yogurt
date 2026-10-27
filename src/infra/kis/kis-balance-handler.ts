@@ -24,7 +24,7 @@ export function kisBalanceHandler(c: AppContext, fetchFn: typeof fetch = fetch):
     const cachedCash = current ? null : await readCashLast(cache, accountId, code, now)
     const resolved = resolveCash(observed, cachedCash, asOf)
     if (current) {
-      await writeCashLast(cache, accountId, code, { cashWon: observed, asOf, source: 'kis' })
+      await writeCashLast(cache, accountId, code, { cashWon: observed, cashD2Won: balance.summary.cashD2, asOf, source: 'kis' })
     }
     const stockValue = Math.max(balance.summary.stockEvaluation, balance.summary.evaluationAmount)
     const missing = activeHoldings(balance.holdings).length === 0 && stockValue > 0
@@ -38,7 +38,8 @@ export function kisBalanceHandler(c: AppContext, fetchFn: typeof fetch = fetch):
     if (resolvedHoldings.holdingsSource === 'kis') {
       await writeHoldingStockNames(cache, resolvedHoldings.holdings, asOf)
     }
-    return { ...balance, ...resolvedHoldings, summary: { ...balance.summary, ...resolved } }
+    const cashD2 = balance.summary.cashD2Fallback ? cachedCash?.cashD2Won : balance.summary.cashD2
+    return { ...balance, ...resolvedHoldings, summary: { ...balance.summary, ...resolved, cashD2 } }
   })
 }
 

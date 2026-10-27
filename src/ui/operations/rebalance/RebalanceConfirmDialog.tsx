@@ -1,56 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
-import { checkPreOrder, executeOrder } from '../../../app/trading/orders-client'
-import type { PreOrderCheckOutput } from '../../../app/trading/orders-client'
+import { KIS_RATE_LIMIT_CODES } from '../../../domain/trading/kis-rate-limit'
 import type { RebalanceItem } from '../../../domain/rebalance/types'
 import { Button } from '../../components/Button'
 import { Dialog } from '../../components/Dialog'
 import { rebalanceText } from '../../glossary/rebalance'
 import { typeScale } from '../../styles/type-scale'
+import { useRebalanceDialog, type UseRebalanceDialogProps } from './useRebalanceDialog'
 
-type Props = {
-  item: RebalanceItem; accountId: string; productCode: string; price: number
-  onClose: () => void; onSuccess: (code: string, orderId: string) => void
-}
+export type RebalanceConfirmDialogProps = UseRebalanceDialogProps
 
-export function RebalanceConfirmDialog({ item, accountId, productCode, price, onClose, onSuccess }: Props) {
-  const [qty, setQty] = useState(item.orderQuantity)
-  const [check, setCheck] = useState<PreOrderCheckOutput | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [isExecuting, setIsExecuting] = useState(false)
-  const requestId = useRef(`req-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`)
-
-  useEffect(() => {
-    checkPreOrder({ accountId, productCode, code: item.code, side: item.side === 'sell' ? 'sell' : 'buy', quantity: item.orderQuantity, price })
-      .then(setCheck)
-      .catch(() => setError(rebalanceText.error.checkFailed))
-  }, [accountId, productCode, item, price])
-
-  const handleQtyChange = (val: number) => {
-    const clamped = Math.max(1, Math.min(item.orderQuantity, Math.floor(val) || 1))
-    setQty(clamped)
-  }
-
-  const handleExecute = async () => {
-    if (isExecuting || item.side === 'none') return
-    setIsExecuting(true)
-    setError(null)
-    const res = await executeOrder({
-      requestId: requestId.current, accountId, productCode,
-      code: item.code, side: item.side, quantity: qty, price,
-    }).catch(() => null)
-    setIsExecuting(false)
-    if (res?.success && res.orderId) {
-      toast.success(rebalanceText.orderCompleted(res.orderId))
-      onSuccess(item.code, res.orderId)
-      onClose()
-    } else {
-      setError(res?.message ?? rebalanceText.error.orderFailed)
-    }
-  }
+export function RebalanceConfirmDialog(props: RebalanceConfirmDialogProps) {
+  const { item, price } = props
+  const { qty, check, error, checkFailure, exceedAvailable, adjusted, isExecuting, isChecking, handleQtyChange, handleExecute, handleClose, retryCheck } = useRebalanceDialog(props)
 
   return (
-    <Dialog open onClose={onClose} title={rebalanceText.dialog.title}>
+    <Dialog open onClose={handleClose} title={rebalanceText.dialog.title}>
       <div className="flex flex-col gap-3">
         <p className={typeScale.body}>{item.name} ({item.code}) · <span className={item.side === 'buy' ? 'text-red-600' : 'text-blue-600'}>{rebalanceText.side[item.side]}</span></p>
         <div className="flex items-center justify-between rounded bg-stone-50 p-3">
@@ -62,14 +25,32 @@ export function RebalanceConfirmDialog({ item, accountId, productCode, price, on
           <input id="confirm-order-qty" type="number" min={1} max={item.orderQuantity} value={qty} onChange={(e) => handleQtyChange(Number(e.target.value))} className="w-24 rounded border border-stone-300 px-2 py-1 text-right" />
         </div>
         <p className={typeScale.caption}>{rebalanceText.dialog.quantityNotice}</p>
-        <div className="flex items-center justify-between">
-          <span className={typeScale.label}>{rebalanceText.dialog.estimatedAmount}</span>
-          <span className={typeScale.number}>{(qty * (check?.price ?? price)).toLocaleString('ko-KR')}원</span>
+        <div className="flex items-center justify-between text-xs text-stone-500">
+          <span>{rebalanceText.dialog.orderType}</span>
+          <span className="font-medium text-stone-700">{rebalanceText.dialog.orderTypeIoc}</span>
         </div>
-        {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
+        <div className="flex items-center justify-between text-xs text-stone-500">
+          <span>{rebalanceText.dialog.orderPrice}</span>
+          <span className="font-medium text-stone-700">{rebalanceText.dialog.estimatedPrice(check?.price ?? price)}</span>
+        </div>
+        <div className="flex items-center justify-between"><span className={typeScale.label}>{rebalanceText.dialog.estimatedAmount}</span><span className={typeScale.number}>{(qty * (check?.price ?? price)).toLocaleString('ko-KR')}원</span></div>
+        {isExecuting && <p role="status" className={typeScale.caption}>{rebalanceText.action.executing}</p>}
+        {isChecking && <p role="status" className={typeScale.caption}>{rebalanceText.action.checkRetrying}</p>}
+        {adjusted ? <p className="text-sm text-amber-700">{rebalanceText.error.quantityAdjusted(adjusted.available, adjusted.requested)}</p> : null}
+        {error ? (
+          <div role="alert" className="flex flex-col gap-1 text-sm text-red-600">
+            <p>{error}</p>
+            {checkFailure && rebalanceText.error.checkFailedDetail(checkFailure.stage, checkFailure.kisCode) ? (
+              <p>{rebalanceText.error.checkFailedDetail(checkFailure.stage, checkFailure.kisCode)}</p>
+            ) : null}
+            {checkFailure?.kisMessage ? <p>{checkFailure.kisMessage}</p> : null}
+            {checkFailure?.kisCode && KIS_RATE_LIMIT_CODES.has(checkFailure.kisCode) ? <p>{rebalanceText.error.checkFailedRateLimited}</p> : null}
+            <Button variant="outline" className="min-h-11 px-4 self-start" disabled={isExecuting || isChecking} onClick={retryCheck}>{rebalanceText.action.retry}</Button>
+          </div>
+        ) : null}
         <div className="mt-2 flex justify-end gap-2">
-          <Button variant="outline" className="min-h-11 px-4" onClick={onClose}>{rebalanceText.action.cancel}</Button>
-          <Button className="min-h-11 px-4" disabled={isExecuting || !check} onClick={handleExecute}>{isExecuting ? rebalanceText.action.executing : rebalanceText.action.execute}</Button>
+          <Button variant="outline" className="min-h-11 px-4" disabled={isExecuting} onClick={handleClose}>{rebalanceText.action.cancel}</Button>
+          <Button className="min-h-11 px-4" disabled={isExecuting || isChecking || !check} onClick={handleExecute}>{isExecuting ? rebalanceText.action.executing : rebalanceText.action.execute}</Button>
         </div>
       </div>
     </Dialog>

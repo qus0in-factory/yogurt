@@ -53,10 +53,10 @@ it('대출현황·자산군·예수금·주식을 구역별로 표시한다', as
   expect(fundTable.getByText('자산군 3')).toBeInTheDocument()
   expect(fundTable.getByText('현금/예수금')).toBeInTheDocument()
   expect(fundTable.getByText('합계')).toBeInTheDocument()
-  expect(fundTable.getByText('25.00%')).toBeInTheDocument()
-  expect(fundTable.getByText('50.00%')).toBeInTheDocument()
+  expect(fundTable.getAllByText('22.22%')).toHaveLength(2)
+  expect(fundTable.getByText('44.44%')).toBeInTheDocument()
   expect(fundTable.getAllByTestId('holding-weight')).toHaveLength(5)
-  expect(fundTable.getByText('4,000원')).toBeInTheDocument()
+  expect(fundTable.getByText('4,500원')).toBeInTheDocument()
   expect(fundTable.queryByText('자산군 4')).not.toBeInTheDocument()
 
   const holdings = within(screen.getByRole('region', { name: '예수금·주식' }))

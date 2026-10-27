@@ -27,7 +27,7 @@ class TestPresets(unittest.TestCase):
         p = get_preset('gf')
         self.assertEqual(p.kind, 'agy')
         self.assertFalse(p.sandboxed)
-        self.assertEqual(p.args, ['--effort', 'medium'])
+        self.assertEqual(p.args, ['--effort', 'medium', '--model', 'gemini-3.8-flash-medium'])
 
     def test_ga_preset(self):
         p = get_preset('ga')
