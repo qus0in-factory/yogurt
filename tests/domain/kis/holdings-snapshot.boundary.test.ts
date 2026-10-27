@@ -39,3 +39,12 @@ it('유효한 손실 종목과 요약 평가액 0은 허용한다', () => {
   const value = { ...stored, stockEvaluationWon: 0 }
   expect(parseStoredHoldings(JSON.stringify(value))).toEqual(value)
 })
+
+it('sellableQuantity를 캐시 왕복 후 보존한다', () => {
+  const value = { ...stored, holdings: [{ ...holding, sellableQuantity: 7 }] }
+  expect(parseStoredHoldings(JSON.stringify(value))).toEqual(value)
+})
+
+it('sellableQuantity가 없는 옛 캐시도 파싱한다', () => {
+  expect(parseStoredHoldings(JSON.stringify(stored))).toEqual(stored)
+})

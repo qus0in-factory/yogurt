@@ -36,6 +36,17 @@ describe('fetchStockBalance', () => {
     expect(request).toHaveBeenCalledTimes(1)
   })
 
+  it('output1 첫 행의 ord_psbl_qty 키 존재 여부만 진단 로그로 남긴다', async () => {
+    const spy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const first = making({ rt_cd: '0', output1: [holding], output2: [summaryRow] })
+    await fetchStockBalance(first.account, '29')
+    const withField = making({ rt_cd: '0', output1: [{ ...holding, ord_psbl_qty: '3' }], output2: [summaryRow] })
+    await fetchStockBalance(withField.account, '29')
+    const logs = spy.mock.calls.map(([line]) => JSON.parse(String(line)) as Record<string, unknown>).filter((log) => log.kind === 'balance-diag')
+    expect(logs).toEqual([{ kind: 'balance-diag', hasOrdPsblQty: false }, { kind: 'balance-diag', hasOrdPsblQty: true }])
+    spy.mockRestore()
+  })
+
   it('rt_cd가 0이 아니면 KisApiError(msg_cd·msg1)를 던진다', async () => {
     const { account } = making({ rt_cd: '1', msg_cd: 'MF99961011', msg1: '계좌 비밀번호 불일치', output1: [], output2: [] })
     try {

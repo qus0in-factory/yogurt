@@ -4,6 +4,7 @@ export type RebalanceHolding = {
   code: string
   name: string
   quantity: number
+  sellableQuantity?: number | null
   evaluationAmount: number
 }
 
@@ -48,11 +49,13 @@ export type RebalanceItem = {
   currentQuantity: number
   orderQuantity: number
   side: 'buy' | 'sell' | 'none'
+  sellableWarning?: 'missing' | 'zero'
 }
 
 export type RebalanceWarning = {
   code: string | null
-  reason: 'NOT_INVESTABLE' | 'NO_PRICE'
+  reason: 'KEEP_NOT_BELOW_TOTAL' | 'NO_PRICE' | 'NO_SELLABLE'
+  sellableQuantity?: number | null
 }
 
 export type RebalancePlan = {

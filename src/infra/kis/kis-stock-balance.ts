@@ -1,8 +1,9 @@
 import { parseStockBalance } from '../../domain/kis/stock-balance.ts'
+import type { KisQueuePriority } from './kis-request-queue.ts'
 
 export type KisAccountClient = {
   accountNumber: string
-  request: (path: string, options: { method: string; trId: string; query?: Record<string, string>; body?: unknown; headers?: Record<string, string>; retry?: boolean }) => Promise<Response>
+  request: (path: string, options: { method: string; trId: string; query?: Record<string, string>; body?: unknown; headers?: Record<string, string>; retry?: boolean; priority?: KisQueuePriority }) => Promise<Response>
   hashkey?: (body: unknown) => Promise<string>
 }
 
@@ -34,5 +35,7 @@ export async function fetchStockBalance(account: KisAccountClient, productCode: 
   })
   const raw = (await response.json()) as RawResponse & { output1?: unknown; output2?: unknown }
   if (raw.rt_cd !== '0') throw new KisApiError(raw.msg_cd ?? '', raw.msg1 ?? '')
+  const first = Array.isArray(raw.output1) ? raw.output1[0] : undefined
+  console.info(JSON.stringify({ kind: 'balance-diag', hasOrdPsblQty: typeof first === 'object' && first !== null && 'ord_psbl_qty' in first }))
   return parseStockBalance(raw)
 }

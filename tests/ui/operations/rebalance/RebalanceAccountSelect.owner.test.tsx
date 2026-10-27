@@ -18,7 +18,7 @@ afterEach(() => { cleanup(); useMaskStore.setState({ masked: false }) })
 function show(owner: string | null = '홍길동') {
   const onSelectKey = vi.fn()
   render(<RebalanceAccountSelect options={[{ ...option, owner: owner ?? undefined }, { ...option, accountId: 'b' }]}
-    selectedKey="a:01" onSelectKey={onSelectKey} keepAmount={0} onChangeKeepAmount={vi.fn()} />)
+    selectedKey="a:01" onSelectKey={onSelectKey} />)
   return onSelectKey
 }
 it('계좌 목록의 owner를 연결 옵션에 전달한다', () => {

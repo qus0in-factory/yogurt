@@ -16,6 +16,7 @@ def build_parser() -> argparse.ArgumentParser:
     pr = sub.add_parser('prompt')
     pr.add_argument('--name', required=True)
     pr.add_argument('--file', required=True)
+    pr.add_argument('--timebox', type=float, default=300.0)
 
     aw = sub.add_parser('await')
     aw.add_argument('--name', required=True)

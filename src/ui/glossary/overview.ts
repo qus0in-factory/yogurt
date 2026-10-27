@@ -1,12 +1,15 @@
 import { profitTone } from '../overview/profit-tone'
 import { withObjectParticle } from '../lib/josa'
-
 export const overviewText = {
   detail: '잔고 상세',
   unavailable: 'IRP 계좌를 조회할 수 없습니다',
   emptyHoldings: '보유 종목이 없습니다',
   totalEvaluation: '총평가금액',
   cash: '예수금',
+  cashD2: '예수금(D+2)',
+  cashAvailable: '출금 가능(D+0)',
+  cashAvailableValue: (value: string) => `출금 가능(D+0) ${value}`,
+  dPlus2: 'D+2',
   profitLoss: '평가손익',
   profitRate: '수익률',
   holdings: '보유 종목',

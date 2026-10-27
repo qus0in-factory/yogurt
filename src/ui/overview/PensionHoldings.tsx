@@ -14,11 +14,12 @@ export function PensionHoldings({ summary, holdings, wide, rp = 0, showHoldings 
   summary: ProductBalance['summary']; holdings: ProductBalance['holdings']; wide: boolean; rp?: number
   showHoldings?: boolean; showCash?: boolean
 }) {
-  const cash = summary.cash + rp
+  const cashD2 = summary.cashD2 ?? summary.cash
+  const cash = cashD2 + rp
   const { holdings: weighted, cashWeight } = withWeights(holdings, cash)
   if (!showHoldings && !showCash) return null
   const summaryProps = {
-    totalEvaluation: summary.totalEvaluation, cash: summary.cash,
+    totalEvaluation: summary.stockEvaluation + cashD2 + rp, cash: cashD2, cashAvailable: summary.cash,
     profitLoss: summary.profitLoss, purchaseAmount: summary.purchaseAmount,
   }
   return (    <section aria-label={text.depositStocks} className={`${spacing.section} max-[768px]:gap-4 max-[375px]:gap-3`}>
@@ -30,7 +31,7 @@ export function PensionHoldings({ summary, holdings, wide, rp = 0, showHoldings 
             <thead><tr>{holdingColumns(false).map((column) => <th key={column.id} scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 pr-4 ${column.align === 'left' ? 'text-left' : 'text-right'}`}>{column.label}</th>)}</tr></thead>
             <tbody className="divide-y divide-stone-100">
               {showHoldings ? weighted.map((holding) => <IrpHoldingRow key={holding.code} holding={holding} showRiskToggle={false} />) : null}
-              {showCash ? <IrpCashRow cash={cash} weight={cashWeight} showRiskColumn={false} /> : null}
+              {showCash ? <IrpCashRow cash={cash} cashAvailable={summary.cash} weight={cashWeight} showRiskColumn={false} /> : null}
             </tbody>
           </table>
         </div>
@@ -40,7 +41,7 @@ export function PensionHoldings({ summary, holdings, wide, rp = 0, showHoldings 
           labels={{ list: text.holdingsList, previous: text.previousHolding, next: text.nextHolding, goTo: text.holdingGoTo, position: text.holdingPosition }}
           renderItem={(item) => item.holding
             ? <IrpHoldingCard key={item.holding.code} holding={item.holding} showRiskToggle={false} />
-            : <IrpCashCard key="cash" cash={cash} weight={cashWeight} />}
+            : <IrpCashCard key="cash" cash={cash} cashAvailable={summary.cash} weight={cashWeight} />}
         />
       )}
     </section>

@@ -11,14 +11,14 @@ export function MaskToggle() {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant={masked ? 'default' : 'outline'}
       size="icon"
       aria-pressed={masked}
       aria-label={layoutText.maskMode}
       className="md:h-8 md:w-auto md:px-3"
       onClick={toggleMask}
     >
-      <Icon aria-hidden="true" className="h-5 w-5 md:hidden" />
+      <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />
       <span className="hidden md:inline">{layoutText.maskMode}</span>
     </Button>
   )

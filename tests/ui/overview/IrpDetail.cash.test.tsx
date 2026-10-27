@@ -41,6 +41,18 @@ it('모바일 카드 목록 맨 아래에도 현금 카드를 표시한다', asy
   expect(within(cash).getByText('7.69%')).toBeInTheDocument()
   expect(within(cash).queryByRole('button')).not.toBeInTheDocument()
 })
+it('D+2 예수금을 현금 행·비중에 쓰고 D+0 출금 가능을 보조 표기한다', async () => {
+  wide()
+  vi.mocked(getStockBalance).mockResolvedValue({ ...balance, summary: { ...balance.summary, cash: 1000, cashD2: 5000 } })
+  show()
+  const row = (await screen.findByText('현금/예수금/RP')).closest('tr')!
+  expect(row).toHaveTextContent('5,000원')
+  expect(row).toHaveTextContent('출금 가능(D+0) 1,000원')
+  expect(within(row).getByText('29.41%')).toBeInTheDocument()
+  expect(screen.getByText('예수금(D+2)')).toBeInTheDocument()
+  expect(screen.getByText('위험자산 비중 70.59% (예수금 포함)')).toBeInTheDocument()
+})
+
 it('예수금이 0이어도 현금 행을 0원·0.00%로 표시한다', async () => {
   wide()
   vi.mocked(getStockBalance).mockResolvedValue({ ...balance, summary: { ...balance.summary, cash: 0 } })

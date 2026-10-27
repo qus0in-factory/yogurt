@@ -8,8 +8,6 @@ import { useOperationsStore, type OperationsTab } from '../state/operations-stor
 import { useRecentVisitsStore, type RecentVisit } from '../state/recent-visits'
 import { useUiStore, type OverviewTab } from '../state/ui-store'
 import { queryClient } from '../state/query-client'
-import { typeScale } from '../styles/type-scale'
-import { cn } from '../lib/cn'
 import type { ScreenId } from './menu'
 
 type Props = { current: ScreenId; onNavigate: (id: ScreenId) => void; onClose?: () => void }
@@ -53,7 +51,8 @@ export function RecentVisits({ current, onNavigate, onClose }: Props) {
   }
   return (
     <div className="mt-1 flex flex-col gap-1">
-      <p className={cn(typeScale.caption, 'px-3')}>{layoutText.recentVisits}</p>
+      <hr aria-hidden="true" className="mx-3 border-t border-stone-200" />
+      <p className="px-3 text-sm leading-[22px] md:leading-5 text-stone-500">{layoutText.recentVisits}</p>
       <ul aria-label={layoutText.recentVisits} className="flex flex-col gap-1">
         {items.map(({ visit, account }) => {
           const detail = account && visit.screen !== 'accounts'
@@ -62,8 +61,11 @@ export function RecentVisits({ current, onNavigate, onClose }: Props) {
           const active = keyOf(visit) === currentKey
           return (
             <li key={keyOf(visit)}>
-              <Button variant={active ? 'default' : 'ghost'} className="min-h-11 w-full justify-start px-3 py-2 text-left" aria-current={active ? 'page' : undefined} onClick={() => go(visit)}>
-                {account ? <><Sensitive>{account.accountNumber}</Sensitive>{detail ? <>{' · '}<span>{detail}</span></> : null}</> : visit.label}
+              <Button variant={active ? 'default' : 'ghost'} aria-current={active ? 'page' : undefined} onClick={() => go(visit)}
+                className="min-h-11 w-full justify-start px-3 py-2 text-left text-xs leading-[18px] md:leading-4 truncate">
+                <span className="truncate min-w-0">
+                  {account ? <><Sensitive>{account.accountNumber}</Sensitive>{detail ? <>{' · '}<span>{detail}</span></> : null}</> : visit.label}
+                </span>
               </Button>
             </li>
           )

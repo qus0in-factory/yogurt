@@ -9,6 +9,9 @@ import { RebalanceSection } from '../../../../src/ui/operations/rebalance/Rebala
 
 vi.mock('../../../../src/app/trading/orders-client')
 vi.mock('../../../../src/app/rebalance/useRebalanceInputs')
+vi.mock('../../../../src/ui/operations/rebalance/useSavedKeepAmount', () => ({
+  useSavedKeepAmount: () => ({ keepAmount: 0, isLoading: false, isLoadError: false, isSaving: false, isError: false, saveKeepAmount: vi.fn() }),
+}))
 
 const mockOption = {
   accountId: 'acc-1', productCode: '01' as const, accountNumber: '12345678',
@@ -16,7 +19,7 @@ const mockOption = {
 }
 const mockInputs = {
   holdings: [{ code: '005930', name: '삼성전자', quantity: 10, evaluationAmount: 700000 }],
-  cash: 300000,
+  cash: 300000, cashSettled: 300000,
   targets: [{ kind: 'stock' as const, code: '005930', name: '삼성전자', weightBps: 10000 }],
   prices: { '005930': 70000 },
 }
@@ -24,7 +27,7 @@ const mockInputs = {
 describe('RebalanceSection', () => {
   beforeEach(() => {
     vi.mocked(hooks.useTargetAccounts).mockReturnValue([mockOption])
-    vi.mocked(hooks.useRebalanceInputs).mockReturnValue({ data: mockInputs, isLoading: false } as any)
+    vi.mocked(hooks.useRebalanceInputs).mockReturnValue({ data: mockInputs, isLoading: false, isFetching: false, isError: false, dataUpdatedAt: 1 } as any)
     vi.mocked(client.checkPreOrder).mockResolvedValue({
       code: '005930', side: 'buy', availableQuantity: 4, estimatedAmount: 280000, price: 70000,
     })
@@ -61,7 +64,7 @@ describe('RebalanceSection', () => {
     const execBtn = screen.getByRole('button', { name: '실행' })
     fireEvent.click(execBtn)
 
-    expect(await screen.findByText('완료')).toBeInTheDocument()
+    expect(await screen.findByRole('status', { name: '완료' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '삼성전자 매매' })).not.toBeInTheDocument()
   })
 

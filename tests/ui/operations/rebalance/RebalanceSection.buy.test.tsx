@@ -5,8 +5,12 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as hooks from '../../../../src/app/rebalance/useRebalanceInputs'
 import { RebalanceSection } from '../../../../src/ui/operations/rebalance/RebalanceSection'
+import { rebalanceText } from '../../../../src/ui/glossary/rebalance'
 
 vi.mock('../../../../src/app/rebalance/useRebalanceInputs')
+vi.mock('../../../../src/ui/operations/rebalance/useSavedKeepAmount', () => ({
+  useSavedKeepAmount: () => ({ keepAmount: 0, isLoading: false, isLoadError: false, isSaving: false, isError: false, saveKeepAmount: vi.fn() }),
+}))
 
 const mockOption = {
   accountId: 'acc-1', productCode: '01' as const, accountNumber: '12345678',
@@ -19,7 +23,7 @@ describe('RebalanceSection 매수 항목 및 시세 부재 검증', () => {
   it('신규 매수(현재 0) 및 추가 매수(주문=목표-현재) 행이 표에 표시된다', () => {
     const inputs = {
       holdings: [{ code: '005930', name: '삼성전자', quantity: 10, evaluationAmount: 700000 }],
-      cash: 1300000,
+      cash: 1300000, cashSettled: 1300000,
       targets: [
         { kind: 'stock' as const, code: '005930', name: '삼성전자', weightBps: 6000 },
         { kind: 'stock' as const, code: '000660', name: 'SK하이닉스', weightBps: 4000 },
@@ -41,10 +45,10 @@ describe('RebalanceSection 매수 항목 및 시세 부재 검증', () => {
     expect(screen.getByText('추가')).toBeInTheDocument()
   })
 
-  it('가격이 없는 매수 항목은 가격 없음으로 표시되고 실행 버튼이 비활성화된다', () => {
+  it('가격이 없는 매수 항목이 있으면 표와 주문 버튼 없이 차단한다', () => {
     const inputs = {
       holdings: [],
-      cash: 500000,
+      cash: 500000, cashSettled: 500000,
       targets: [{ kind: 'stock' as const, code: '035420', name: 'NAVER', weightBps: 10000 }],
       prices: {},
     }
@@ -54,8 +58,8 @@ describe('RebalanceSection 매수 항목 및 시세 부재 검증', () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
     render(<QueryClientProvider client={qc}><RebalanceSection /></QueryClientProvider>)
 
-    expect(screen.getByText('NAVER')).toBeInTheDocument()
-    const noPriceBtns = screen.getAllByRole('button', { name: 'NAVER 가격 없음' })
-    expect(noPriceBtns[0]).toBeDisabled()
+    expect(screen.getByRole('status', { name: rebalanceText.priceBlocked })).toBeInTheDocument()
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'NAVER 가격 없음' })).not.toBeInTheDocument()
   })
 })

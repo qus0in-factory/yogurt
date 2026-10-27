@@ -1,78 +1,80 @@
 import type { Context } from 'hono'
 import { KisApiError } from '../kis/kis-stock-balance.ts'
-import { checkBuyable, checkSellable } from '../kis/kis-order-check.ts'
-import { placeSingleOrder, toOrderFailure, type SingleOrderInput } from '../kis/kis-order.ts'
+import { checkBuyable, checkSellable, type CheckStage, CheckStageError } from '../kis/kis-order-check.ts'
+import { fetchBestQuotes } from '../kis/kis-quotes.ts'
+import { fetchDailyCcld, findOrderRow, type CcldRow } from '../kis/kis-order-status.ts'
+import { classifyFill } from '../../domain/trading/order-fill.ts'
 import type { KisAccountClient } from '../kis/kis-stock-balance.ts'
-import { expectedPrice, fetchBestQuotes } from '../kis/kis-quotes.ts'
-import { CHECK_FRESH_MS, checkedProduct, logOrder, orderSchema } from './order-contracts.ts'
-import { claimOrder, markSending, markSucceeded, markUnknown, releaseClaimed, releaseSettled } from './order-idempotency.ts'
+import { checkSchema, checkedProduct, kstDayString, marketClosed } from './order-contracts.ts'
+import { findClaimByOrder, releaseClaimed } from './order-idempotency.ts'
+import { ORDER_REJECTION } from '../../domain/trading/order-codes.ts'
 
-type Ctx = Context<{ Bindings: Env }>
+export type Ctx = Context<{ Bindings: Env }>
 export type Resolve = (c: Ctx, id: string) => Promise<KisAccountClient | null>
 
-// claimed → sending → succeeded | unknown. failed(KIS 거부 확정)는 해제 후 재시도 허용.
-// sending 이후에는 해제하지 않는다. TOCTOU(재조회-주문 사이 수량 변화)는 KIS 최종 검증에 맡긴다.
-export async function executeOrderRequest(c: Ctx, resolve: Resolve) {
-  const parsed = orderSchema.safeParse(await c.req.json())
-  const productCode = parsed.success ? await checkedProduct(c, parsed.data.productCode) : null
-  if (!parsed.success || !productCode) return c.json({ error: 'invalid request', code: 'INVALID_ORDER' }, 400)
-  if (!c.env.DB) return c.json({ error: 'order storage unavailable', code: 'ORDER_STORAGE_UNAVAILABLE' }, 503)
-  const { requestId, code, quantity, side, orderType, price, checkAt, checkQty } = parsed.data
-  if (checkQty < quantity) return c.json({ error: 'exceeds checked quantity', code: 'EXCEEDS_CHECKED_QTY' }, 400)
-  if (Date.now() - Date.parse(checkAt) > CHECK_FRESH_MS) return c.json({ error: 'stale check', code: 'STALE_CHECK' }, 400)
-  const claim = await claimOrder(c.env.DB, requestId)
-  if (claim.outcome === 'done') return c.json({ orderNo: claim.orderNo, acceptedAt: claim.acceptedAt }, 200)
-  if (claim.outcome === 'unknown') return c.json({ error: 'order status unknown', code: 'ORDER_UNKNOWN' }, 200)
-  if (claim.outcome === 'processing') return c.json({ error: 'duplicate request', code: 'DUPLICATE_REQUEST' }, 409)
+export async function checkOrderRequest(c: Ctx, resolve: Resolve) {
+  const parsed = checkSchema.safeParse(await c.req.json())
+  const productCode = parsed.success ? await checkedProduct(c) : null
+  if (!parsed.success || !productCode) {
+    // 어느 필드가 틀렸는지만 reason에 넣는다(코드·경로만, 값 제외).
+    const reason = !parsed.success ? parsed.error.issues.map((i) => `${i.code === 'custom' && /^[A-Z_]+$/.test(i.message) ? i.message : i.code}:${i.path.join('.') || 'body'}`).join(',') : 'INVALID_PRODUCT'
+    console.info(JSON.stringify({ kind: 'check-diag', stage: 'validate', status: null, kisCode: null, kisMessage: null, reason }))
+    return c.json({ error: 'invalid request', code: ORDER_REJECTION.INVALID_ORDER_CHECK, reason }, 400)
+  }
+  const closed = marketClosed()
+  if (closed) return c.json(closed, 400)
   const account = await resolve(c, c.req.param('accountId') ?? '')
-  if (!account) { await releaseClaimed(c.env.DB, requestId); return c.json({ error: 'account not found', code: 'ACCOUNT_NOT_FOUND' }, 404) }
-  const input: SingleOrderInput = { account, productCode, code, quantity, side, orderType, price }
-  // 재조회·호가 검증을 모두 통과한 뒤에만 sending으로 바꾼다. 그 전까지는 claimed 유지.
-  let expected: number | null
+  if (!account) return c.json({ error: 'account not found', code: ORDER_REJECTION.ACCOUNT_NOT_FOUND }, 404)
+  const { code, side, price, quantity } = parsed.data
   try {
-    const fresh = side === 'buy'
-      ? await checkBuyable(account, productCode, code, price ?? 0)
-      : await checkSellable(account, productCode, code)
-    if (fresh.availableQty < quantity) {
-      await releaseClaimed(c.env.DB, requestId)
-      return c.json({ error: 'exceeds available quantity', code: 'EXCEEDS_AVAILABLE_QTY' }, 400)
+    if (side === 'buy') {
+      const result = await checkBuyable(account, productCode, code, price ?? 0)
+      if (result.availableQty < quantity) {
+        return c.json({ error: 'exceeds available quantity', code: ORDER_REJECTION.ORDER_QUANTITY_EXCEEDED, availableQty: result.availableQty, requestedQty: quantity }, 400)
+      }
+      return c.json(result, 200)
     }
-    // 호가는 같은 단계에서 한 번만 조회한다. 없으면 주문하지 않고 해제한다.
-    expected = expectedPrice(side, await fetchBestQuotes(account, productCode, code))
-    if (expected === null) {
-      await releaseClaimed(c.env.DB, requestId)
-      return c.json({ error: 'no quote available', code: 'NO_QUOTE' }, 400)
+    // 매도 확인도 매수와 같은 계약({availableQty, availableWon})으로 맞춘다.
+    const sellable = await checkSellable(account, productCode, code)
+    if (sellable.availableQty < quantity) {
+      return c.json({ error: 'exceeds available quantity', code: ORDER_REJECTION.ORDER_QUANTITY_EXCEEDED, availableQty: sellable.availableQty, requestedQty: quantity }, 400)
     }
-  } catch {
-    await releaseClaimed(c.env.DB, requestId)
-    return c.json({ error: 'order check failed', code: 'ORDER_CHECK_FAILED' }, 502)
-  }
-  try {
-    if (!(await markSending(c.env.DB, requestId))) return c.json({ error: 'duplicate request', code: 'DUPLICATE_REQUEST' }, 409)
-  } catch {
-    return c.json({ error: 'order storage unavailable', code: 'ORDER_STORAGE_UNAVAILABLE' }, 503)
-  }
-  let result: { orderNo: string; acceptedAt: string }
-  try {
-    result = await placeSingleOrder(input)
+    const quotes = await fetchBestQuotes(account, productCode, code)
+    return c.json({ availableQty: sellable.availableQty, availableWon: sellable.availableQty * quotes.bid1 }, 200)
   } catch (error) {
-    const failure = toOrderFailure(error)
-    logOrder(requestId, code, quantity, side, failure)
-    if (failure === 'UNKNOWN') {
-      try { await markUnknown(c.env.DB, requestId) } catch { /* best effort */ }
-      return c.json({ error: 'order status unknown', code: 'ORDER_UNKNOWN' }, 502)
+    // 단계·상태·KIS 코드를 응답과 로그에 함께 남긴다. 값·토큰·계좌번호는 넣지 않는다.
+    const stage: CheckStage | 'quote' = error instanceof CheckStageError ? error.stage : 'quote'
+    if (error instanceof KisApiError) {
+      const status = error instanceof CheckStageError ? error.status : null
+      console.info(JSON.stringify({ kind: 'check-diag', stage, status, kisCode: error.code, kisMessage: error.message }))
+      return c.json({ error: 'order check failed', code: 'ORDER_CHECK_FAILED', stage, kisCode: error.code, kisMessage: error.message }, 502)
     }
-    await releaseSettled(c.env.DB, requestId)
-    return c.json({ error: 'order failed', code: failure }, failure === 'MARKET_CLOSED' ? 503 : 400)
+    throw error
   }
+}
+
+export async function checkOrderStatus(c: Ctx, resolve: Resolve) {
+  const productCode = await checkedProduct(c)
+  if (!productCode) return c.json({ error: 'invalid request', code: ORDER_REJECTION.INVALID_ORDER }, 400)
+  const account = await resolve(c, c.req.param('accountId') ?? '')
+  if (!account) return c.json({ error: 'account not found', code: ORDER_REJECTION.ACCOUNT_NOT_FOUND }, 404)
+  const accountId = c.req.param('accountId') ?? ''
+  const orderId = c.req.param('orderId') ?? ''
+  if (!c.env.DB) return c.json({ error: 'order storage unavailable', code: 'ORDER_STORAGE_UNAVAILABLE' }, 503)
+  const claim = await findClaimByOrder(c.env.DB, accountId, productCode, orderId)
+  if (!claim) return c.json({ error: 'order not found', code: ORDER_REJECTION.ORDER_NOT_FOUND }, 404)
+  const day = kstDayString(Date.now())
+  let rows: CcldRow[]
   try {
-    if (await markSucceeded(c.env.DB, requestId, result.orderNo, result.acceptedAt)) {
-      logOrder(requestId, code, quantity, side, 'accepted')
-      return c.json({ ...result, expectedPrice: expected }, 200)
-    }
-    await markUnknown(c.env.DB, requestId)
+    rows = await fetchDailyCcld(account, productCode, '', day, day)
   } catch {
-    try { await markUnknown(c.env.DB, requestId) } catch { /* best effort */ }
+    return c.json({ error: 'order status unavailable', code: 'ORDER_STATUS_UNAVAILABLE' }, 503)
   }
-  return c.json({ error: 'order status unknown', code: 'ORDER_UNKNOWN' }, 502)
+  const row = findOrderRow(rows, orderId)
+  const status = classifyFill(row ? { orderedQty: row.orderedQty, filledQty: row.filledQty, remainingQty: row.remainingQty, cancelled: row.cancelled } : null)
+  return c.json({
+    orderId, status,
+    orderedQty: row?.orderedQty ?? 0, filledQty: row?.filledQty ?? 0, remainingQty: row?.remainingQty ?? 0,
+    checkedAt: new Date().toISOString(),
+  }, 200)
 }

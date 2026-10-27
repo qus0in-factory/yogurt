@@ -19,8 +19,9 @@ export function PensionDetail({ accountId, productCode = '22', includeLoan = tru
     if (assets.isPending || balance.isPending) return <p role="status">{accountsText.loading}</p>
     if (assets.isError || balance.isError) return <p role="alert">{text.pensionUnavailable}</p>
   }
+  const cashD2 = balance.data?.summary.cashD2 ?? balance.data?.summary.cash ?? 0
   const fundAmount = assets.data ? fundEvaluation(assets.data.rows, productCode) : 0
-  const assetItems = assets.data ? classifyAssetRows(assets.data.rows, productCode).items : []
+  const assetItems = assets.data ? classifyAssetRows(assets.data.rows, productCode, cashD2).items : []
   const isPension = productCode === '22'
   const showStock = !isPension || (assetItems.find((row) => row.label === 'stock')?.evaluationAmount ?? 0) !== 0
   const showCash = !isPension || (assetItems.find((row) => row.label === 'cash')?.evaluationAmount ?? 0) !== 0
@@ -37,13 +38,13 @@ export function PensionDetail({ accountId, productCode = '22', includeLoan = tru
           {includeLoan && fundAmount > 0 ? <PensionLoan loanAmount={assets.data.summary.loanAmount} collateralAmount={fundAmount} /> : null}
           {wide ? (
             <>
-              <PensionAssets rows={assets.data.rows} productCode={productCode} showStock={showStock} showCash={showCash} />
+              <PensionAssets rows={assets.data.rows} productCode={productCode} showStock={showStock} showCash={showCash} cashD2={cashD2} />
               <PensionHoldings summary={balance.data.summary} holdings={balance.data.holdings} wide={wide} rp={rpEvaluation(assets.data.rows, productCode)} showHoldings={showStock} showCash={showCash} />
             </>
           ) : (
             <>
               <PensionHoldings summary={balance.data.summary} holdings={balance.data.holdings} wide={wide} rp={rpEvaluation(assets.data.rows, productCode)} showHoldings={showStock} showCash={showCash} />
-              <PensionAssets rows={assets.data.rows} productCode={productCode} showStock={showStock} showCash={showCash} />
+              <PensionAssets rows={assets.data.rows} productCode={productCode} showStock={showStock} showCash={showCash} cashD2={cashD2} />
             </>
           )}
         </>

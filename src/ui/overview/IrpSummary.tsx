@@ -6,7 +6,7 @@ import { Sensitive } from '../components/Sensitive'
 import { StatGrid } from '../components/StatGrid'
 import { typeScale } from '../styles/type-scale'
 
-type Summary = { totalEvaluation: number; cash: number; profitLoss: number; purchaseAmount: number }
+type Summary = { totalEvaluation: number; cash: number; cashAvailable?: number; profitLoss: number; purchaseAmount: number }
 type Risk = { ratio: number; exceeds: boolean }
 
 export function IrpSummary({ summary, risk, showCash = true }: { summary: Summary; risk?: Risk; showCash?: boolean }) {
@@ -21,7 +21,13 @@ export function IrpSummary({ summary, risk, showCash = true }: { summary: Summar
       <p className={typeScale.label}>{text.totalEvaluation}</p>
       <Sensitive as="p" className={typeScale.figure}>{text.won(summary.totalEvaluation)}</Sensitive>
       <StatGrid className="mt-3 grid grid-cols-2 gap-4 max-[768px]:gap-3 md:grid-cols-3" items={[
-        ...(showCash ? [{ label: <span className={typeScale.label}>{text.cash}</span>, value: <span className={typeScale.number}><Sensitive>{text.won(summary.cash)}</Sensitive></span> }] : []),
+        ...(showCash ? [{
+          label: <span className={typeScale.label}>{text.cashD2}</span>,
+          value: <span className={typeScale.number}>
+            <Sensitive>{text.won(summary.cash)}</Sensitive>
+            {summary.cashAvailable === undefined ? null : <span className={`mt-1 block ${typeScale.caption} text-stone-500`}><Sensitive>{text.cashAvailableValue(text.won(summary.cashAvailable))}</Sensitive></span>}
+          </span>,
+        }] : []),
         { label: <span className={typeScale.label}>{text.profitLoss}</span>, value: <Sensitive className={`${typeScale.number} ${loss.className}`}>{loss.sign}{text.won(Math.abs(summary.profitLoss))}</Sensitive> },
         { label: <span className={typeScale.label}>{text.profitRate}</span>, value: <span className={`${typeScale.number} ${returnTone.className}`}>{returnTone.sign}{text.percent(Math.abs(rate))}</span> },
       ]} />

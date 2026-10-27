@@ -28,9 +28,11 @@ export function IrpDetail({ accountId }: { accountId: string }) {
   const wide = width === 'desktop'
   if (isPending) return <p role="status">{accountsText.loading}</p>
   if (isError) return <p role="alert">{text.unavailable}</p>
-  const { holdings: weighted, cashWeight } = withWeights(data.holdings, data.summary.cash)
+  const cashD2 = data.summary.cashD2 ?? data.summary.cash
+  const { holdings: weighted, cashWeight } = withWeights(data.holdings, cashD2)
   const riskReady = !riskPending && !riskError
-  const risk = riskRatio(data.holdings, data.summary.cash, classes)
+  const risk = riskRatio(data.holdings, cashD2, classes)
+  const summary = { ...data.summary, cash: cashD2, cashAvailable: data.summary.cash, totalEvaluation: data.summary.stockEvaluation + cashD2 }
   const disabled = !riskReady || isSaving
   const classOf = (code: string) => classes[code] ?? 'risk'
   const toggleFor = (code: string) => toggle({ stockCode: code, riskClass: classOf(code) === 'safe' ? 'risk' : 'safe' })
@@ -39,7 +41,7 @@ export function IrpDetail({ accountId }: { accountId: string }) {
     : [{ holding: null, empty: true }, { holding: null }]
   return <section aria-label={text.detail} className={`${spacing.section} mb-8 rounded-lg border border-primary-200 bg-white p-4 max-[768px]:gap-4 max-[768px]:p-3 max-[375px]:gap-3`}>
     <h2 className={typeScale.section}>{text.detail}</h2>
-    <IrpSummary summary={data.summary} risk={riskReady ? risk : undefined} />
+    <IrpSummary summary={summary} risk={riskReady ? risk : undefined} />
     {riskPending ? <p role="status" className={typeScale.body}>{text.riskLoading}</p> : null}
     {riskError ? (
       <div role="alert" className={`flex items-center gap-2 ${typeScale.body} text-red-600`}>
@@ -57,7 +59,7 @@ export function IrpDetail({ accountId }: { accountId: string }) {
               <thead><tr>{holdingColumns(true).map((column) => <th key={column.id} scope="col" className={`${typeScale.label} border-b border-stone-200 py-3 pr-4 ${column.align === 'left' ? 'text-left' : 'text-right'}`}>{column.label}</th>)}</tr></thead>
               <tbody className="divide-y divide-stone-100">
                 {weighted.map((holding) => <IrpHoldingRow key={holding.code} holding={holding} riskClass={classOf(holding.code)} onToggle={() => toggleFor(holding.code)} disabled={disabled} />)}
-                <IrpCashRow cash={data.summary.cash} weight={cashWeight} />
+                <IrpCashRow cash={cashD2} cashAvailable={data.summary.cash} weight={cashWeight} />
               </tbody>
             </table>
           </div>
@@ -70,7 +72,7 @@ export function IrpDetail({ accountId }: { accountId: string }) {
             ? <EmptyState key="empty" icon={PackageOpen} title={text.emptyHoldings} className="py-8" />
             : item.holding
               ? <IrpHoldingCard key={item.holding.code} holding={item.holding} riskClass={classOf(item.holding.code)} onToggle={() => toggleFor(item.holding.code)} disabled={disabled} />
-              : <IrpCashCard key="cash" cash={data.summary.cash} weight={cashWeight} />}
+              : <IrpCashCard key="cash" cash={cashD2} cashAvailable={data.summary.cash} weight={cashWeight} />}
         />
       )}
     </div>

@@ -19,7 +19,7 @@ describe('RebalanceConfirmDialog', () => {
     })
     vi.mocked(client.executeOrder).mockResolvedValue({ success: true, orderId: 'ORD-12345' })
   })
-  afterEach(cleanup)
+  afterEach(() => { cleanup(); vi.useRealTimers() })
 
   it('확인 조회 후 가능 수량을 표시하고 주문 수량은 줄일 수만 있으며 블러되지 않는다', async () => {
     useMaskStore.setState({ masked: true })
@@ -36,6 +36,23 @@ describe('RebalanceConfirmDialog', () => {
     fireEvent.change(input, { target: { value: '3' } })
     expect(input.value).toBe('3')
     expect(screen.getByText('210,000원')).toBeInTheDocument()
+  })
+
+  it('EGW00215 제한은 재확인 로딩과 안내를 보여 주고 재확인 중 실행을 막는다', async () => {
+    vi.useFakeTimers()
+    vi.mocked(client.checkPreOrder).mockRejectedValue(Object.assign(new Error('rate'), {
+      data: { code: 'ORDER_CHECK_FAILED', stage: 'sellable', kisCode: 'EGW00215', kisMessage: '초당 거래건수 초과' },
+    }))
+    render(<RebalanceConfirmDialog item={item} accountId="acc" productCode="01" price={70000} onClose={vi.fn()} onSuccess={vi.fn()} />)
+
+    await act(async () => { await Promise.resolve() })
+    expect(screen.getByText('다시 확인 중…')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '실행' })).toBeDisabled()
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(3000) })
+    expect(screen.getByText('잠시 후 다시 시도하세요')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '다시 확인' })).toBeInTheDocument()
+    vi.useRealTimers()
   })
 
   it('실패 시 에러 메시지를 표시하고 재시도 시 같은 requestId를 재사용한다', async () => {

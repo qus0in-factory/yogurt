@@ -14,3 +14,6 @@ export const makeOrder = (
 
 export const heldQuantity = (holdings: RebalanceHolding[], code: string) =>
   holdings.find((holding) => holding.code === code)?.quantity ?? 0
+
+export const roundedDifference = (target: number, held: number): number =>
+  target >= held ? Math.floor(target - held) : -Math.min(held, Math.ceil(held - target))

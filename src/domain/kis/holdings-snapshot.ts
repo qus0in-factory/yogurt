@@ -4,6 +4,7 @@ export type Holding = {
   code: string
   name: string
   quantity: number
+  sellableQuantity?: number | null
   averagePrice: number
   purchaseAmount: number
   currentPrice: number
@@ -25,6 +26,7 @@ const holdingSchema = z.object({
   code: z.string(), name: z.string(), quantity: number, averagePrice: number,
   purchaseAmount: number, currentPrice: number, evaluationAmount: number,
   profitLoss: number, profitLossRate: number,
+  sellableQuantity: z.number().int().min(0).nullable().optional(),
 })
 const storedSchema = z.object({
   holdings: z.array(holdingSchema).min(1),

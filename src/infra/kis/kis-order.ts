@@ -1,5 +1,5 @@
 import { KisApiError, type KisAccountClient } from './kis-stock-balance.ts'
-import { IOC_ORDER_DVSN, mapKisFailure, splitAccount, type OrderFailureCode } from './kis-order-check.ts'
+import { EXCG_ID_DVSN_CD, IOC_ORDER_DVSN, mapKisFailure, splitAccount, type OrderFailureCode } from './kis-order-check.ts'
 
 // 확인 필요: 현금주문 경로·TR_ID·hashkey 필요 여부·응답 주문번호 필드는 테스트베드에서 확정
 export const ORDER_PATH = '/uapi/domestic-stock/v1/trading/order-cash'
@@ -28,21 +28,22 @@ export type SingleOrderInput = {
 }
 
 // 한 호출에 한 종목 한 주문만 보낸다. 배열 인자를 받지 않는다.
-// 매수·매도 모두 최유리 IOC. 지정가 가격 필드는 최유리 주문에서 0 (확인 필요).
+// 매수·매도 모두 최유리 IOC. 주문 본문의 가격은 항상 0 (확인 필요).
+// 예상 가격(ask1·bid1)은 화면 표시와 가능 수량 계산에만 쓰고 본문에는 넣지 않는다.
 export async function placeSingleOrder(input: SingleOrderInput): Promise<{ orderNo: string; acceptedAt: string }> {
   if (input.orderType !== 'ioc') {
     throw new KisOrderError('UNKNOWN')
   }
   const { cano, prdt } = splitAccount(input.account.accountNumber, input.productCode)
   const body = {
-    CANO: cano, ACNT_PRDT_CD: prdt, PDNO: input.code,
+    CANO: cano, ACNT_PRDT_CD: prdt, PDNO: input.code, EXCG_ID_DVSN_CD,
     ORD_DVSN: IOC_ORDER_DVSN,
-    ORD_QTY: String(input.quantity), ORD_UNPR: String(input.price ?? 0),
+    ORD_QTY: String(input.quantity), ORD_UNPR: '0',
   }
   const hash = await input.account.hashkey?.(body)
   // 주문 POST는 자동 재시도 금지. 401이면 토큰만 갱신되고 주문은 실패로 끝난다.
   const response = await input.account.request(ORDER_PATH, {
-    method: 'POST', trId: input.side === 'buy' ? BUY_ORDER_TR_ID : SELL_ORDER_TR_ID,
+    method: 'POST', trId: input.side === 'buy' ? BUY_ORDER_TR_ID : SELL_ORDER_TR_ID, priority: 'order',
     body, headers: hash ? { hashkey: hash } : {}, retry: false,
   })
   let raw: { rt_cd?: string; msg_cd?: string; msg1?: string; output?: Record<string, unknown> }
@@ -52,6 +53,7 @@ export async function placeSingleOrder(input: SingleOrderInput): Promise<{ order
     throw new KisOrderError('UNKNOWN')
   }
   if (raw.rt_cd !== '0') {
+    if (raw.msg_cd === 'EGW00201') console.info(JSON.stringify({ kind: 'rate-limited', msg_cd: raw.msg_cd, tr_id: input.side === 'buy' ? BUY_ORDER_TR_ID : SELL_ORDER_TR_ID }))
     throw new KisOrderError(mapKisFailure(raw.msg_cd ?? '', raw.msg1 ?? ''))
   }
   const orderNo = raw.output?.[ORDER_NO_FIELD]

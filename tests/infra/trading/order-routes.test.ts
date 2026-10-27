@@ -2,7 +2,8 @@ import { Hono } from 'hono'
 import { describe, expect, it, vi } from 'vitest'
 import { targetExists } from '../../../src/infra/portfolio/assignment-repository.ts'
 import { createOrderRoutes } from '../../../src/infra/trading/order-routes.ts'
-import { fakeClaimDb } from './order-idempotency.test.ts'
+import { fakeClaimDb } from './fake-claim-db.ts'
+import { pinOpenMarket } from './market-time.ts';
 
 vi.mock('../../../src/infra/portfolio/assignment-repository.ts', () => ({ targetExists: vi.fn() }))
 
@@ -36,6 +37,7 @@ export const orderCalls = (client: { request: { mock: { calls: unknown[][] } } }
   client.request.mock.calls.filter(([p]) => String(p).includes(part))
 
 describe('주문 확인 조회 라우트', () => {
+  pinOpenMarket()
   it('잘못된 본문·상품 코드 불일치·비활성 상품은 400이다', async () => {
     const { call } = setupRoutes(() => ok({}))
     expect((await call('/api/accounts/a1/products/01/orders/check', { code: '', side: 'buy' })).status).toBe(400)
@@ -48,9 +50,15 @@ describe('주문 확인 조회 라우트', () => {
 
   it('확인 조회는 KIS를 1회만 호출한다', async () => {
     const { call, client } = setupRoutes(() => ok({ rt_cd: '0', output: { ord_psbl_qty: '3', ord_psbl_amt: '30000' } }))
-    const res = await call('/api/accounts/a1/products/01/orders/check', { requestId: 'c1', code: '005930', side: 'buy', orderType: 'ioc', price: 10000 })
+    const res = await call('/api/accounts/a1/products/01/orders/check', { requestId: 'c1', code: '005930', side: 'buy', orderType: 'ioc', quantity: 2, price: 10000 })
     expect(res.status).toBe(200)
     expect(await res.json()).toEqual({ availableQty: 3, availableWon: 30000 })
     expect(client.request).toHaveBeenCalledTimes(1)
+  })
+
+  it('확인 요청에 수량이 있으면 400이 아니다', async () => {
+    const { call } = setupRoutes(() => ok({ rt_cd: '0', output: { ord_psbl_qty: '5', ord_psbl_amt: '50000' } }))
+    const res = await call('/api/accounts/a1/products/01/orders/check', { requestId: 'c2', code: '005930', side: 'buy', orderType: 'ioc', quantity: 5, price: 10000 })
+    expect(res.status).toBe(200)
   })
 })

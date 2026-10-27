@@ -5,7 +5,6 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { getAccountAssets, getProductBalance } from '../../../src/app/kis/account-assets-client'
 import { PensionDetail } from '../../../src/ui/overview/PensionDetail'
 import { balance } from './fixtures'
-
 vi.mock('../../../src/app/kis/account-assets-client', () => ({ getAccountAssets: vi.fn(), getProductBalance: vi.fn() }))
 vi.mock('../../../src/ui/accounts/useAccounts', () => ({ useAccounts: () => ({ data: [] }) }))
 
@@ -44,7 +43,7 @@ it('주식이 0이고 예수금이 있으면 주식 행과 보유 종목만 숨�
   expect(holdings).not.toBeNull()
   expect(holdings?.queryByText('삼성전자')).not.toBeInTheDocument()
   expect(holdings?.getByText('현금/예수금/RP')).toBeInTheDocument()
-  expect(holdings?.getByText('예수금')).toBeInTheDocument()
+  expect(holdings?.getByText('예수금(D+2)')).toBeInTheDocument()
 })
 
 it('예수금이 0이고 주식이 있으면 예수금 표시만 숨긴다', async () => {
@@ -56,11 +55,12 @@ it('예수금이 0이고 주식이 있으면 예수금 표시만 숨긴다', asy
   expect(asset.queryByText('현금/예수금')).not.toBeInTheDocument()
   expect(holdings?.getByText('삼성전자')).toBeInTheDocument()
   expect(holdings?.queryByText('현금/예수금/RP')).not.toBeInTheDocument()
-  expect(holdings?.queryByText('예수금')).not.toBeInTheDocument()
+  expect(holdings?.queryByText('예수금(D+2)')).not.toBeInTheDocument()
 })
 
 it('주식과 예수금이 모두 0이면 두 섹션을 모두 숨기고 펀드는 남긴다', async () => {
   vi.mocked(getAccountAssets).mockResolvedValue(assets(0, 0))
+  vi.mocked(getProductBalance).mockResolvedValue({ ...balance, summary: { ...balance.summary, cash: 0, cashD2: 0 } })
   show()
   const { asset, holdings } = await regions()
   expect(asset.queryByText('주식')).not.toBeInTheDocument()

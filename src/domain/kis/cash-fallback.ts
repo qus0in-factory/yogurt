@@ -2,6 +2,7 @@ export type CashSource = 'kis' | 'user'
 
 export type CachedCash = {
   cashWon: number
+  cashD2Won?: number
   asOf: string
   source: CashSource
 }
@@ -32,7 +33,9 @@ export function parseCachedCash(raw: string): CachedCash | null {
       && typeof value.asOf === 'string' && AS_OF.test(value.asOf)
       && (value.source === 'kis' || value.source === 'user')
     ) {
-      return { cashWon: value.cashWon, asOf: value.asOf, source: value.source }
+      const cashD2 = typeof value.cashD2Won === 'number' && Number.isSafeInteger(value.cashD2Won) && value.cashD2Won > 0
+        ? value.cashD2Won : undefined
+      return { cashWon: value.cashWon, ...(cashD2 === undefined ? {} : { cashD2Won: cashD2 }), asOf: value.asOf, source: value.source }
     }
   } catch {
     return null

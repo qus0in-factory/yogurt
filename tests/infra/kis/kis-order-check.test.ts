@@ -17,7 +17,7 @@ describe('주문 전 확인 조회', () => {
     const [path, options] = vi.mocked(account.request).mock.calls[0] as [string, { trId: string; query: Record<string, string> }]
     expect(path).toBe(BUY_CHECK_PATH)
     expect(options.trId).toBe(BUY_CHECK_TR_ID)
-    expect(options.query).toMatchObject({ CANO: '12345678', ACNT_PRDT_CD: '01', PDNO: '005930', ORD_DVSN: '15' })
+    expect(options.query).toMatchObject({ CANO: '12345678', ACNT_PRDT_CD: '01', PDNO: '005930', ORD_DVSN: '15', EXCG_ID_DVSN_CD: 'KRX' })
     expect(result).toEqual({ availableQty: 10, availableWon: 100000 })
   })
 
@@ -25,6 +25,8 @@ describe('주문 전 확인 조회', () => {
     const account = client(() => ok({ rt_cd: '0', output1: [{ pdno: '005930', ord_psbl_qty: '5' }] }))
     await expect(checkSellable(account, '01', '005930')).resolves.toEqual({ availableQty: 5 })
     expect(account.request).toHaveBeenCalledTimes(1)
+    const [, options] = vi.mocked(account.request).mock.calls[0] as [string, { query: Record<string, string> }]
+    expect(options.query).toMatchObject({ CANO: '12345678', ACNT_PRDT_CD: '01', EXCG_ID_DVSN_CD: 'KRX' })
   })
 
   it('없는 종목의 매도가능수량은 0이다', async () => {

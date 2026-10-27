@@ -15,10 +15,10 @@ export async function rebalanceInputsHandler(c: Context<{ Bindings: Env }>, fetc
   try {
     const response = await kisBalanceHandler(c, fetchFn)
     if (!response.ok) return response
-    const balance = await response.json() as { holdings: Holding[]; summary: { cash: number } }
+    const balance = await response.json() as { holdings: Holding[]; summary: { cash: number; cashD2?: number } }
     const assignment = (await listAssignments(c.env.DB)).find(a => a.accountId === accountId && a.productCode === code.data)
     const portfolio = assignment ? await getPortfolio(c.env.DB, assignment.portfolioId) : null
-    const holdings = balance.holdings.map(({ code, name, quantity, currentPrice }) => ({ code, name, quantity, currentPrice: Number.isFinite(currentPrice) && currentPrice > 0 ? currentPrice : 0 }))
+    const holdings = balance.holdings.map(({ code, name, quantity, currentPrice, sellableQuantity }) => ({ code, name, quantity, sellableQuantity, currentPrice: Number.isFinite(currentPrice) && currentPrice > 0 ? currentPrice : 0 }))
     const targets = portfolio?.items.map(item => ({ code: item.stockCode, name: item.stockName, weightBps: item.targetWeightBps, kind: item.kind })) ?? []
     let client: ReturnType<NonNullable<ReturnType<typeof kisClientFromEnv>>['forAccount']> | undefined
     const prices = await loadInputPrices(holdings, targets, c.env.CACHE, async stockCode => {
@@ -27,6 +27,8 @@ export async function rebalanceInputsHandler(c: Context<{ Bindings: Env }>, fetc
       if (!account) throw new QuoteError(503)
       return inquirePrice(account, stockCode)
     })
-    return c.json({ ...prices, holdings, cash: balance.summary.cash, targets, hasPortfolio: portfolio !== null })
+    const cashAvailable = balance.summary.cash
+    const cashSettled = balance.summary.cashD2 ?? null
+    return c.json({ ...prices, holdings, cashAvailable, cashSettled, cash: cashSettled, targets, hasPortfolio: portfolio !== null })
   } catch { return c.json({ code: 'REBALANCE_INPUTS_UNAVAILABLE' }, 503) }
 }

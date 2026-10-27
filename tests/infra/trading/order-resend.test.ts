@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { fresh, ok, orderCalls, setupRoutes } from './order-routes.test.ts'
+import { pinOpenMarket } from './market-time.ts';
 
 describe('주문 재시도와 가격 유형', () => {
+  pinOpenMarket()
   const buyOk = (url: string) => url.includes('inquire-psbl-order')
     ? ok({ rt_cd: '0', output: { ord_psbl_qty: '5', ord_psbl_amt: '50000' } })
     : url.includes('asking-price')
@@ -11,9 +13,9 @@ describe('주문 재시도와 가격 유형', () => {
   it('KIS 주문 성공 후 finish 저장이 실패해도 같은 id 재시도는 주문을 다시 보내지 않는다', async () => {
     const { call, client } = setupRoutes(buyOk, true, { failOn: "'succeeded'" })
     const id = { ...body, requestId: 'r5' }
-    expect((await call('/api/accounts/a1/products/01/orders', id)).status).toBe(502)
+    expect((await call('/api/accounts/a1/products/01/orders', id)).status).toBe(202)
     const replay = await call('/api/accounts/a1/products/01/orders', id)
-    expect(replay.status).toBe(200)
+    expect(replay.status).toBe(202)
     expect(await replay.json()).toMatchObject({ code: 'ORDER_UNKNOWN' })
     expect(orderCalls(client, 'order-cash')).toHaveLength(1)
   })
@@ -42,7 +44,7 @@ describe('주문 재시도와 가격 유형', () => {
     const zeroPrice = { ...noPrice, requestId: 'r8', price: 0 }
     expect((await call('/api/accounts/a1/products/01/orders', zeroPrice)).status).toBe(400)
     const bodies = orderCalls(client, 'order-cash').map(([, o]) => (o as { body: Record<string, string> }).body)
-    expect(bodies).toEqual([{ CANO: '12345678', ACNT_PRDT_CD: '01', PDNO: '005930', ORD_DVSN: '15', ORD_QTY: '1', ORD_UNPR: '0' }])
+    expect(bodies).toEqual([{ CANO: '12345678', ACNT_PRDT_CD: '01', PDNO: '005930', ORD_DVSN: '15', ORD_QTY: '1', ORD_UNPR: '0', EXCG_ID_DVSN_CD: 'KRX' }])
   })
   it('재조회 네트워크 실패 시 주문 0회·해제 후 같은 id 재시도가 주문 1회를 보낸다', async () => {
     let calls = 0

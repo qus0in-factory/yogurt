@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { fresh, ok, orderCalls, setupRoutes } from './order-routes.test.ts'
+import { pinOpenMarket } from './market-time.ts';
 
 const body = { requestId: 'r1', code: '005930', quantity: 1, side: 'buy', orderType: 'ioc', price: 10000, checkAt: fresh(), checkQty: 5 }
 const quotes = (ask: unknown, bid: unknown) => (url: string) => {
@@ -10,6 +11,7 @@ const quotes = (ask: unknown, bid: unknown) => (url: string) => {
 }
 
 describe('주문 시 호가 확인', () => {
+  pinOpenMarket()
   it('호가가 없으면 주문 0회·400 NO_QUOTE 후 같은 id 재시도가 막히지 않는다', async () => {
     const { call, client } = setupRoutes(quotes('0', '0'))
     expect((await call('/api/accounts/a1/products/01/orders', { ...body, requestId: 'q1' })).status).toBe(400)

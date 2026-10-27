@@ -21,6 +21,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 .agents/skills/yogurt-module-check/scripts/app
 - 성공은 종료 코드 0, 규칙 위반은 1, 실행·입력 오류는 2다. 실패한 파일과 이유를 출력한다.
 - Git ignore된 모듈은 검사되지 않는다. 준수 회피를 위해 ignore를 추가하지 않는다. 이 검사는 의존 방향·테스트 유무·TDD 과정·YAGNI/KISS/SOLID/DRY를 판정하지 않는다.
 - `--typography` 옵션을 주면 `src/ui/**/*.tsx`에서 `text-(xs|sm|base|lg|xl|2xl|3xl)` 직접 사용을 검출한다 (`src/ui/styles`와 `src/ui/components`는 허용). 기본값은 비활성이다.
+- `--max-width N` 옵션을 주면 N자를 넘는 물리 줄을 `경로:줄` 단위로 검출한다. 80줄 제한을 긴 줄 몰아쓰기로 맞추는 우회를 잡기 위한 것이다. 2026-10-27 기준 저장소 전체에 120자 초과 줄이 1258개 있어 기본값은 비활성(0)이다. 계약에서는 수정·신규 파일에 대해 `--max-width 120` 결과에 그 파일이 없어야 한다고 적는다.
 
 ## 검증기 자체 테스트
 
