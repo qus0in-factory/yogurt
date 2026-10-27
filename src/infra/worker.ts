@@ -18,9 +18,9 @@ import { kisStatusStream } from './kis/kis-status-stream.ts'
 import { getRiskClassesHandler, setRiskClassHandler } from './holdings/risk-class-handlers.ts'
 import { runIsaMonthlySnapshots } from './snapshots/run-isa-monthly-snapshots.ts'
 import { portfolioRoutes } from './portfolio/routes.ts'
-import { stockRoutes } from './stocks/stock-routes.ts'
+import { orderRoutes, stockRoutes } from './stocks/stock-routes.ts'
+import { quoteRoutes } from './quotes/routes.ts'
 const app = new Hono<{ Bindings: Env }>()
-
 const authMiddleware = createMiddleware(async (c, next) => {
   const path = new URL(c.req.url).pathname
   if (path === '/api/login' || path === '/api/health' || path === '/api/logout') return next()
@@ -30,7 +30,6 @@ const authMiddleware = createMiddleware(async (c, next) => {
   }
   await next()
 })
-
 const health = (c: Context<{ Bindings: Env }>) =>
   c.json({ service: 'yogurt', version: packageJson.version, environment: c.env.ENVIRONMENT, status: 'ok' })
 app.get('/health', health).get('/api/health', health)
@@ -70,7 +69,7 @@ app.get('/api/accounts/:id/products/:code/balance', (c) => kisBalanceHandler(c))
 app.get('/api/accounts/:id/products/:code/assets', (c) => kisAssetsHandler(c))
 app.get('/api/accounts/:id/products/:code/risk-classes', getRiskClassesHandler)
 app.put('/api/accounts/:id/products/:code/risk-classes/:stockCode', setRiskClassHandler)
-app.route('/api', portfolioRoutes).route('/api', stockRoutes)
+app.route('/api', portfolioRoutes).route('/api', stockRoutes).route('/api', quoteRoutes).route('/api', orderRoutes)
 app.all('/api/*', (c) => c.notFound())
 app.onError((error, c) => {
   if (error instanceof HTTPException && error.status === 400) return c.json({ error: 'invalid request' }, 400)

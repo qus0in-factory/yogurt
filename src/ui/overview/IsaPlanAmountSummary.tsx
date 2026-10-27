@@ -2,6 +2,7 @@ import { calculateCurrentMonthTargets } from '../../app/accounts/isa-progress-di
 import { fromProductPlan } from '../../app/accounts/isa-plan'
 import { seoulToday } from '../../app/accounts/isa-term'
 import type { ProductPlan } from '../../domain/accounts/product-plan'
+import { Sensitive } from '../components/Sensitive'
 import { StatGrid } from '../components/StatGrid'
 import { isaText } from '../glossary/isa'
 import { typeScale } from '../styles/type-scale'
@@ -12,7 +13,7 @@ const display = (m: number | null) => (m === null ? isaText.unset : isaText.amou
 
 function TargetVal({ man }: { man: number | null }) {
   if (man === null) return <span>{isaText.noTarget}</span>
-  return <span className="inline-flex items-baseline whitespace-nowrap"><span className={typeScale.number}>{man.toLocaleString('ko-KR')}</span><span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span></span>
+  return <span className="inline-flex items-baseline whitespace-nowrap"><Sensitive className={typeScale.number}>{man.toLocaleString('ko-KR')}</Sensitive><span className={`${typeScale.caption} font-normal`}>{isaText.amountUnit}</span></span>
 }
 
 function TargetPair({ label, man }: { label: string; man: number | null }) {
@@ -36,8 +37,8 @@ export function IsaPlanAmountSummary({ plan, totalAssets, today = seoulToday() }
       <StatGrid
         className="grid grid-cols-1 gap-4 md:grid-cols-2"
         items={[
-          { label: <span className={typeScale.label}>{isaText.minTarget}</span>, value: <span className={typeScale.number}>{display(minTargetAmountManwon)}</span> },
-          { label: <span className={typeScale.label}>{isaText.maxTarget}</span>, value: <span className={typeScale.number}>{display(maxTargetAmountManwon)}</span> },
+          { label: <span className={typeScale.label}>{isaText.minTarget}</span>, value: <Sensitive className={typeScale.number}>{display(minTargetAmountManwon)}</Sensitive> },
+          { label: <span className={typeScale.label}>{isaText.maxTarget}</span>, value: <Sensitive className={typeScale.number}>{display(maxTargetAmountManwon)}</Sensitive> },
         ]}
       />
       {month ? (
@@ -54,9 +55,9 @@ export function IsaPlanAmountSummary({ plan, totalAssets, today = seoulToday() }
           </div>
           {totalAssets !== null && totalAssets !== undefined ? (
             <div className={`space-y-1 border-t border-primary-50 pt-2 ${typeScale.caption}`}>
-              <div className="flex justify-between items-center"><span>{isaText.diffMin}</span><span className={typeScale.number}>{month.minDiffText}</span></div>
-              <div className="flex justify-between items-center"><span>{isaText.diffMid}</span><span className={typeScale.number}>{month.midDiffText}</span></div>
-              <div className="flex justify-between items-center"><span>{isaText.diffMax}</span><span className={typeScale.number}>{month.maxDiffText}</span></div>
+              <div className="flex justify-between items-center"><span>{isaText.diffMin}</span><Sensitive className={typeScale.number}>{month.minDiffText}</Sensitive></div>
+              <div className="flex justify-between items-center"><span>{isaText.diffMid}</span><Sensitive className={typeScale.number}>{month.midDiffText}</Sensitive></div>
+              <div className="flex justify-between items-center"><span>{isaText.diffMax}</span><Sensitive className={typeScale.number}>{month.maxDiffText}</Sensitive></div>
             </div>
           ) : null}
         </div>

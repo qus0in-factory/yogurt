@@ -5,6 +5,7 @@ import { useAccounts } from '../accounts/useAccounts'
 import { Button } from '../components/Button'
 import { EmptyState } from '../components/EmptyState'
 import { SectionHeading } from '../components/SectionHeading'
+import { Sensitive } from '../components/Sensitive'
 import { StatGrid } from '../components/StatGrid'
 import { isaText } from '../glossary/isa'
 import { spacing, typeScale } from '../styles/type-scale'
@@ -44,8 +45,8 @@ export function IsaTermSection({ accountId }: { accountId: string }) {
             <StatGrid
               className="grid grid-cols-1 gap-4 md:grid-cols-3"
               items={[
-                { label: <span className={typeScale.label}>{isaText.startDate}</span>, value: <span className={typeScale.number}>{isaText.date(plan.startDate)}</span> },
-                { label: <span className={typeScale.label}>{isaText.maturity}</span>, value: <span className={typeScale.number}>{isaText.date(term.expiry)}</span> },
+                { label: <span className={typeScale.label}>{isaText.startDate}</span>, value: <Sensitive className={typeScale.number}>{isaText.date(plan.startDate)}</Sensitive> },
+                { label: <span className={typeScale.label}>{isaText.maturity}</span>, value: <Sensitive className={typeScale.number}>{isaText.date(term.expiry)}</Sensitive> },
                 {
                   label: <span className={typeScale.label}>{isaText.remaining}</span>,
                   value: (

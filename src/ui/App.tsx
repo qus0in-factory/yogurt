@@ -3,8 +3,10 @@ import { toast } from 'sonner'
 import { useLogout, useSession } from './auth/useSession'
 import { LoginForm } from './auth/LoginForm'
 import { Button } from './components/Button'
+import { MaskToggle } from './layout/MaskToggle'
 import { MobileMenu } from './layout/MobileMenu'
 import { Sidebar } from './layout/Sidebar'
+import { RecentVisitTracker } from './layout/RecentVisitTracker'
 import { AccountsPage } from './accounts/AccountsPage'
 import { OverviewPage } from './overview/OverviewPage'
 import { OperationsPage } from './operations/OperationsPage'
@@ -16,15 +18,13 @@ import { spacing, typeScale } from './styles/type-scale'
 export function App() {
   const session = useSession()
   const logoutMutation = useLogout()
-  const screen = useUiStore((state) => state.screen)
+  const screen = useUiStore((s) => s.screen)
+  const drawerOpen = useUiStore((s) => s.drawerOpen)
+  const navigate = useUiStore((s) => s.navigate)
+  const setDrawerOpen = useUiStore((s) => s.setDrawerOpen)
   const active = screen === 'overview' || screen === 'operations' ? screen : 'accounts'
-  const drawerOpen = useUiStore((state) => state.drawerOpen)
-  const navigate = useUiStore((state) => state.navigate)
-  const setDrawerOpen = useUiStore((state) => state.setDrawerOpen)
 
-  if (session.isPending) {
-    return <p className={cn(spacing.page, typeScale.body)}>{commonText.checking}</p>
-  }
+  if (session.isPending) return <p className={cn(spacing.page, typeScale.body)}>{commonText.checking}</p>
 
   if (session.isError) {
     return (
@@ -37,12 +37,11 @@ export function App() {
     )
   }
 
-  if (!session.data) {
-    return <LoginForm onLoginSuccess={() => {}} />
-  }
+  if (!session.data) return <LoginForm onLoginSuccess={() => {}} />
 
   return (
     <div className="flex min-h-screen bg-primary-50 break-keep">
+      <RecentVisitTracker />
       <Sidebar current={active} onNavigate={navigate} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 bg-white p-4">
@@ -54,7 +53,8 @@ export function App() {
               onNavigate={navigate}
             />
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <MaskToggle />
             <Button
               variant="outline"
               size="icon"

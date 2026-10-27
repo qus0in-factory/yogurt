@@ -1,6 +1,7 @@
 import type { AccountAssets } from '../../app/kis/account-assets-client'
 import { classifyAssetRows } from '../../app/kis/asset-classes'
 import { overviewText as text } from '../glossary/overview'
+import { Sensitive } from '../components/Sensitive'
 import { typeScale } from '../styles/type-scale'
 import { WeightBar } from '../components/WeightBar'
 import { SectionHeading } from '../components/SectionHeading'
@@ -24,13 +25,13 @@ export function PensionAssets({ rows, productCode = '22', showStock = true, show
             {visible.map((row) => (
               <tr key={row.index}>
                 <th scope="row" className={`py-3 pr-4 text-left font-medium ${typeScale.body}`}>{row.label ? text.assetClass[row.label] : text.assetGroup(row.index)}</th>
-                <td className={`py-3 pr-4 text-right ${typeScale.number}`}>{text.won(row.evaluationAmount)}</td>
+                <td className={`py-3 pr-4 text-right ${typeScale.number}`}><Sensitive>{text.won(row.evaluationAmount)}</Sensitive></td>
                 <td className="py-3 pr-4 text-right"><WeightBar weight={row.weight} /></td>
               </tr>
             ))}
             {total ? <tr className="border-t-2 border-stone-300">
               <th scope="row" className={`py-3 pr-4 text-left font-medium ${typeScale.body}`}>{text.assetClass.total}</th>
-              <td className={`py-3 pr-4 text-right ${typeScale.number}`}>{text.won(total.evaluationAmount)}</td>
+              <td className={`py-3 pr-4 text-right ${typeScale.number}`}><Sensitive>{text.won(total.evaluationAmount)}</Sensitive></td>
               <td className="py-3 pr-4 text-right"><WeightBar weight={total.weight} /></td>
             </tr> : null}
           </tbody>

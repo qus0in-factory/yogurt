@@ -50,7 +50,7 @@ describe('운용 화면', () => {
     await screen.findByRole('heading', { name: '계좌' })
     fireEvent.click(screen.getByRole('button', { name: '리밸런싱' }))
     expect(await screen.findByRole('heading', { name: '운용' })).toBeInTheDocument()
-    expect(screen.getByText('포트폴리오 기반 리밸런싱 기능을 준비하고 있습니다')).toBeInTheDocument()
+    expect(await screen.findByText('선택 가능한 연결 포트폴리오가 없습니다.')).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: '리밸런싱' })).toHaveAttribute('aria-selected', 'true')
   })
 })

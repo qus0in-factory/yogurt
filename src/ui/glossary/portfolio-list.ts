@@ -3,6 +3,11 @@ const accountLabel = (number: string, alias: string) => `${number}${alias ? `(${
 export const portfolioListText = {
   heading: '목표 포트폴리오',
   description: '목표 비중 포트폴리오를 만들고 계좌별 상품에 연결하세요',
+  listLabel: '포트폴리오 목록',
+  previous: '이전 포트폴리오',
+  next: '다음 포트폴리오',
+  goTo: (number: number) => `${number}번째 페이지로 이동`,
+  position: (index: number, total: number) => `${index} / ${total}`,
   createButton: '새 포트폴리오',
   loading: '포트폴리오를 불러오는 중...',
   loadError: '포트폴리오를 불러오지 못했습니다',

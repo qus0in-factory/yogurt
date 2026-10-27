@@ -12,7 +12,7 @@ import { useAdaptiveWidth } from '../../lib/useAdaptiveWidth'
 import { typeScale } from '../../styles/type-scale'
 import { PortfolioEditorDialog } from '../portfolio/PortfolioEditorDialog'
 import { DeletePortfolioDialog } from './DeletePortfolioDialog'
-import { PortfolioCard } from './PortfolioCard'
+import { PortfolioCardList } from './PortfolioCardList'
 import { buildActiveProductTargets } from './portfolio-list-model'
 import { usePortfolioEditorController } from './usePortfolioEditorController'
 
@@ -51,11 +51,14 @@ export function PortfolioSection({ onCreate, onEdit }: PortfolioSectionProps) {
       ) : portfolios.length === 0 ? (
         <EmptyState icon={PieChart} title={portfolioListText.emptyTitle} description={portfolioListText.emptyDescription} action={<Button className="min-h-11" onClick={editor.openCreate}>{portfolioListText.createButton}</Button>} />
       ) : (
-        <div data-testid="portfolio-card-grid" className={cn('grid gap-4', width === 'desktop' ? 'grid-cols-2' : 'grid-cols-1')}>
-          {portfolios.map((item) => (
-            <PortfolioCard key={item.id} portfolio={item} assignedCount={assignments.filter((a) => a.portfolioId === item.id).length} onDuplicate={editor.openDuplicate} onEdit={editor.openEdit} onDelete={setDeleting} />
-          ))}
-        </div>
+        <PortfolioCardList
+          width={width}
+          portfolios={portfolios}
+          assignments={assignments}
+          onDuplicate={editor.openDuplicate}
+          onEdit={editor.openEdit}
+          onDelete={setDeleting}
+        />
       )}
       {editor.open ? (
         <PortfolioEditorDialog key={editor.editorKey} open onClose={editor.closeEditor} onSubmit={editor.submitEditor} initialValue={editor.initialValue} assignedCount={editor.assignedCount} serverError={editor.serverError} />

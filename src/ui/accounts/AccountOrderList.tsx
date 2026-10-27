@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import type { Account } from '../../domain/accounts/account'
 import { Button } from '../components/Button'
+import { Sensitive } from '../components/Sensitive'
 import { accountsText } from '../glossary/accounts'
 import { spacing, typeScale } from '../styles/type-scale'
 
@@ -14,7 +15,7 @@ function SortableAccount({ account, onMove }: { account: Account; onMove: (id: s
     <button type="button" aria-label={accountsText.reorderHandle(account.alias)} className="touch-none cursor-grab rounded p-2" {...attributes} {...listeners} onKeyDown={(event) => {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); onMove(account.id, event.key === 'ArrowDown' ? 1 : -1) }
     }}><GripVertical aria-hidden="true" className="h-5 w-5" /></button>
-    <div className={spacing.stack}><span className={typeScale.caption}>{account.owner}</span><span className={typeScale.title}>{account.alias}</span><span className={typeScale.number}>{account.accountNumber}</span></div>
+    <div className={spacing.stack}><Sensitive className={typeScale.caption}>{account.owner}</Sensitive><span className={typeScale.title}>{account.alias}</span><Sensitive className={typeScale.number}>{account.accountNumber}</Sensitive></div>
   </li>
 }
 

@@ -8,6 +8,7 @@ import { layoutText } from '../glossary/layout'
 import { typeScale } from '../styles/type-scale'
 import { cn } from '../lib/cn'
 import { SubNav } from './SubNav'
+import { RecentVisits } from './RecentVisits'
 import { OVERVIEW_TAB_ITEMS } from '../overview/overview-tabs'
 import { OPERATIONS_SUB_ITEMS } from '../operations/OperationsNav'
 import { useUiStore, type OverviewTab } from '../state/ui-store'
@@ -54,6 +55,7 @@ export function MenuDrawer({ open, current, onNavigate, onClose }: MenuDrawerPro
                 <SubNav items={OPERATIONS_SUB_ITEMS} currentKey={operationsTab} isParentActive={current === 'operations'}
                   onSelect={(k) => { setOperationsTab(k as OperationsTab); onNavigate('operations'); onClose() }} />
               )}
+              {item.id === 'accounts' && <RecentVisits current={current} onNavigate={onNavigate} onClose={onClose} />}
             </div>
           ))}
         </nav>
